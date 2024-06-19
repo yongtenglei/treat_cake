@@ -17,7 +17,6 @@ class Algorithm:
     min_agents: int
     max_agents: int
     short_description: str
-    link: str
 
 
 @dataclass
@@ -53,7 +52,6 @@ algorithms: Dict[str, Algorithm] = {
         min_agents=2,
         max_agents=2,
         short_description="A simple method for envy-free division between two people. One cuts, the other chooses.",
-        link="/learn/7",
     ),
     AlgoName.selfridge_conway: Algorithm(
         key="selfridgeConway",
@@ -62,6 +60,5 @@ algorithms: Dict[str, Algorithm] = {
         min_agents=3,
         max_agents=3,
         short_description="A method for envy-free division between three people. Maximum of five cuts.",
-        link="/learn/13",
     ),
 }

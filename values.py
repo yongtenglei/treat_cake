@@ -138,3 +138,18 @@ def get_value_at_point(segments: List[Segment], point: int) -> float:
         else:
             slope = (seg.end_value - seg.start_value) / (seg.end - seg.start)
             return seg.start_value + slope * (point - seg.start)
+
+
+def get_values_for_cuts(
+    preference: List[Segment], cuts: List[float], cake_size: float
+) -> List[float]:
+    slice_values = []
+
+    start = 0
+    for end in cuts:
+        value = get_value_for_interval(preference, start, end)
+        slice_values.append(value)
+        start = end
+    # Last piece
+    slice_values.append(get_value_for_interval(preference, cuts[-1], cake_size))
+    return slice_values

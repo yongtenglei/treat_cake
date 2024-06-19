@@ -19,13 +19,10 @@ def test_splits_uniform_flat_value_graph_evenly_in_half():
     ]  # Represents a flat segment with value 10 over the length 0 to 100
     person2 = [gen_flat_seg(0, 100, 10)]
 
-    # Calling the function to test
     result = cut_and_choose([person1, person2], CAKE_SIZE)["solution"]
 
-    # Checking the length of the result
     assert len(result) == 2, "The result should have exactly two segments."
 
-    # Expected results for split, mimicking the object structure in Python
     expected_segment_1 = AssignedSlice(
         owner=1, start=0, end=50, values=[500, 500], id=1
     )
@@ -36,7 +33,6 @@ def test_splits_uniform_flat_value_graph_evenly_in_half():
     assert result[0] == expected_segment_1, "First segment does not match expected"
     assert result[1] == expected_segment_2, "Second segment does not match expected"
 
-    # Test if the allocation is envy-free
     check_if_envy_free(2, result)
 
 
