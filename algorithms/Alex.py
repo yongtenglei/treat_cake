@@ -1,4 +1,4 @@
-from ..types import Segment
+from ..base_types import Segment
 
 from typing import List
 

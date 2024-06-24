@@ -1,12 +1,33 @@
+import math
+from typing import List
 
-def v_prime(v, epsilon, a, b,):
+from treat_cake.base_types import Segment
+from treat_cake.values_bak import get_value_for_interval
+
+
+def _v(segments: List[Segment], start: float, end: float) -> float:
+    v = get_value_for_interval(segments, start, end)
+    print(f"v={v}")
+    return v
+
+
+def _v_prime(
+    segments: List[Segment],
+    epsilon: float,
+    a: float,
+    b: float,
+):
     # v is the original valuation function
     # v_prime = base_value / 2 + perturbation
-    return v(a, b)/2 + epsilon*abs(b-a)
+    v = _v(segments, a, b) / 2 + epsilon * abs(b - a)
+    print(f"v_prime={v}")
+    return v
 
 
+def v_double_prime_for_interval(
+    segments: List[Segment], delta: float, a: float, b: float
+) -> float:
 
-def v_double_prime(v_prime, delta, a, b):
     # Letting delta := epsilon, so,
     # any epsilon-envy-free allocation for (v_double_prime) is 5*epsilon-envy-free for (v_prime) for each agent.
 
@@ -15,74 +36,124 @@ def v_double_prime(v_prime, delta, a, b):
     a_overline = overline(a, delta)
     b_underline = underline(b, delta)
     b_overline = overline(b, delta)
+    print(f"\n{a_underline=}")
+    print(f"{a_overline=}")
+    print(f"{b_underline=}")
+    print(f"{b_overline=}")
+    assert a_underline <= a <= a_overline, "Wrong grid points"
+    assert b_underline <= b <= b_overline, "Wrong grid points"
 
-    # Check if a equals b, and interpolate accordingly
-    if a != b:
-        # Interpolation when a and b are different
-        return ((a - a_underline) * (b - b_underline) / delta**2) * v_prime(a_overline, b_overline) \
-               + ((a_overline - a) * (b_overline - b) / delta**2) * v_prime(a_underline, b_underline) \
-               + ((a_overline - a) * (b - b_underline) / delta**2) * v_prime(a_underline, b_overline) \
-               + ((a - a_underline) * (b_overline - b) / delta**2) * v_prime(a_overline, b_underline)
+    v_prime_a_under_b_over = _v_prime(segments, delta, a_underline, b_overline)
+    v_prime_a_over_b_under = _v_prime(segments, delta, a_overline, b_underline)
+    print(f"{v_prime_a_under_b_over=}")
+    print(f"{v_prime_a_over_b_under=}")
+
+    if a_overline - a >= b - b_underline:
+        v_prime_a_under_b_under = _v_prime(segments, delta, a_underline, b_underline)
+        print(f"{v_prime_a_under_b_under=}")
+        return (
+            ((a_overline - a) - (b - b_underline)) / delta * v_prime_a_under_b_under
+            + (b - b_underline) / delta * v_prime_a_under_b_over
+            + (a - a_underline) / delta * v_prime_a_over_b_under
+        )
+    elif a_overline - a <= b - b_underline:
+        v_prime_a_over_b_over = _v_prime(segments, delta, a_overline, b_overline)
+        print(f"{v_prime_a_over_b_over=}")
+        return (
+            ((b - b_underline) - (a_overline - a)) / delta * v_prime_a_over_b_over
+            + (a_overline - a) / delta * v_prime_a_under_b_over
+            + (b_overline - b) / delta * v_prime_a_over_b_under
+        )
+
+
+def overline(x, delta, epsilon=1e-10):
+    assert 0 <= x <= 1
+
+    if x < delta:
+        return delta
+
+    if x == 0 or x == 1:
+        return x
+
+    v = math.ceil(x / delta) * delta
+
+    # If x is exactly a multiple of delta, step up to the next multiple
+    # considering floating point precision issues
+    if abs(x % delta) < epsilon or abs(delta - (x % delta)) < epsilon:
+        v += delta
+
+    return min(v, 1)
+
+
+def underline(x, delta, epsilon=1e-10):
+    assert 0 <= x <= 1
+
+    if x < delta:
+        return 0
+
+    if x == 0 or x == 1:
+        return x
+
+    # Check if x is an exact multiple of delta,
+    # considering floating point precision issues
+    if abs(x % delta) < epsilon or abs(delta - (x % delta)) < epsilon:
+        v = (math.floor(x / delta) - 1) * delta
     else:
-        # Special case when a equals b
-        return ((b_overline - b) / delta) * v_prime(a, b_underline) \
-               + ((b - b_underline) / delta) * v_prime(a, b_overline)
+        v = math.floor(x / delta) * delta
+
+    return max(v, 0)
 
 
+# def underline(x, delta):
+#     assert 0 <= x <= 1
+#     if x < delta:
+#         return 0
+#
+#     if x == 0 or x == 1:
+#         return x
+#
+#     v = (
+#         (math.floor(x / delta) - 1) * delta
+#         if x % delta == 0
+#         else math.floor(x / delta) * delta
+#     )
+#
+#     return v if v >= 0 else 0
 
 
-
-def overline(x, delta):
-    # Calculates the smallest multiple of delta greater than or equal to x
-    return -(-x // delta) * delta
-
-def underline(x, delta):
-    # Calculates the largest multiple of delta less than or equal to x
-    return (x // delta) * delta
-
-def equipartition(v, cake_start, cake_end):
-    """
-    根据Agent1的价值函数将蛋糕均分成四个部分。
-
-    :param v: Agent1的价值函数，接受两个参数（a, b）并返回a和b之间的价值
-    :param cake_start: 蛋糕的起始点
-    :param cake_end: 蛋糕的结束点
-    :return: 四个分割点的列表
-    """
-    total_value = v(cake_start, cake_end)
-    part_value = total_value / 4
-    cut_points = [cake_start]
-
-    current_value = 0
-    current_start = cake_start
-
-    for i in range(3):  # 需要找到三个分割点
-        low = current_start
-        high = cake_end
-
-        # 二分法找到合适的分割点，使得每部分的价值接近于part_value
-        while high - low > 1e-5:  # 假设精度为1e-5
-            mid = (low + high) / 2
-            value = v(current_start, mid)
-
-            if value < part_value:
-                low = mid
-            else:
-                high = mid
-
-        cut_point = (low + high) / 2
-        cut_points.append(cut_point)
-        current_start = cut_point
-
-    cut_points.append(cake_end)
-    return cut_points
-
-# 示例价值函数
-def v(a, b):
-    return b - a
-
-# 调用equipartition函数
-cake_start = 0
-cake_end = 1
-cut_points = equipartition(v, cake_start, cake_end)
-print(cut_points)  # 输出：[0, 0.25, 0.5, 0.75, 1]
+# def equipartition(v, cake_start, cake_end):
+#     """
+#     根据Agent1的价值函数将蛋糕均分成四个部分。
+#
+#     :param v: Agent1的价值函数，接受两个参数（a, b）并返回a和b之间的价值
+#     :param cake_start: 蛋糕的起始点
+#     :param cake_end: 蛋糕的结束点
+#     :return: 四个分割点的列表
+#     """
+#     total_value = v(cake_start, cake_end)
+#     part_value = total_value / 4
+#     cut_points = [cake_start]
+#
+#     current_value = 0
+#     current_start = cake_start
+#
+#     for i in range(3):  # 需要找到三个分割点
+#         low = current_start
+#         high = cake_end
+#
+#         # 二分法找到合适的分割点，使得每部分的价值接近于part_value
+#         while high - low > 1e-5:  # 假设精度为1e-5
+#             mid = (low + high) / 2
+#             value = v(current_start, mid)
+#
+#             if value < part_value:
+#                 low = mid
+#             else:
+#                 high = mid
+#
+#         cut_point = (low + high) / 2
+#         cut_points.append(cut_point)
+#         current_start = cut_point
+#
+#     cut_points.append(cake_end)
+#     return cut_points

@@ -1,4 +1,4 @@
-from ..types import Portion, Slice, AssignedSlice, FrozenUnassignedSlice
+from ..base_types import Portion, Slice, AssignedSlice, FrozenUnassignedSlice
 from typing import List, Tuple, Optional, Dict
 from dataclasses import dataclass
 

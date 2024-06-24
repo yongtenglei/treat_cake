@@ -1,8 +1,8 @@
 from typing import Dict, Any
 
-from .types import Step, make_step
+from .algorithm_types import Step, make_step
 from ..cut import cut_slice
-from ..types import AssignedSlice, FrozenUnassignedSlice
+from ..base_types import AssignedSlice, FrozenUnassignedSlice
 from ..utils import make_percentage
 from ..values import find_cut_line_by_percent, get_total_value
 

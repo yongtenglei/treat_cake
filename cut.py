@@ -1,6 +1,6 @@
 from typing import List
 
-from treat_cake.types import Preferences, FrozenUnassignedSlice, Slice
+from treat_cake.base_types import Preferences, FrozenUnassignedSlice, Slice
 from treat_cake.values import get_value_for_interval
 
 

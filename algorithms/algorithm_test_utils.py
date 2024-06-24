@@ -1,4 +1,4 @@
-from ..types import Segment, AssignedSlice
+from ..base_types import Segment, AssignedSlice
 from typing import List
 import random
 

@@ -7,7 +7,7 @@ from treat_cake.algorithms.algorithm_test_utils import (
     halfway_point_of_triangle_area,
     gen_random_segs,
 )
-from treat_cake.types import AssignedSlice
+from treat_cake.base_types import AssignedSlice
 
 CAKE_SIZE = 100
 
