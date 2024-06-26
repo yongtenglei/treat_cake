@@ -2,7 +2,7 @@ import pytest
 from treat_cake.algorithms.cut_and_choose import cut_and_choose
 from treat_cake.algorithms.algorithm_test_utils import (
     gen_flat_seg,
-    check_if_envy_free,
+    check_if_envy_free_allocation_origin,
     gen_sloped_seg,
     halfway_point_of_triangle_area,
     gen_random_segs,
@@ -33,7 +33,7 @@ def test_splits_uniform_flat_value_graph_evenly_in_half():
     assert result[0] == expected_segment_1, "First segment does not match expected"
     assert result[1] == expected_segment_2, "Second segment does not match expected"
 
-    check_if_envy_free(2, result)
+    check_if_envy_free_allocation_origin(2, result)
 
 
 def test_splits_seesaw_like_graph():
@@ -62,7 +62,7 @@ def test_splits_seesaw_like_graph():
         and result[1].end == expected_segment_2.end
     ), "Second segment does not match expected"
 
-    check_if_envy_free(2, result)
+    check_if_envy_free_allocation_origin(2, result)
 
 
 def test_splits_seesaw_like_sloped_graph():
@@ -81,7 +81,7 @@ def test_splits_seesaw_like_sloped_graph():
     ), "First segment does not match expected"
     assert result[1].owner == 1, "Second segment does not match expected"
 
-    check_if_envy_free(2, result)
+    check_if_envy_free_allocation_origin(2, result)
 
 
 def test_splits_tricky_case():
@@ -103,7 +103,7 @@ def test_splits_tricky_case():
     result = cut_and_choose([person1, person2], CAKE_SIZE)["solution"]
     assert len(result) == 2, "The result should have exactly two segments."
 
-    check_if_envy_free(2, result)
+    check_if_envy_free_allocation_origin(2, result)
 
 
 def test_splits_tricky_sloped_case():
@@ -113,14 +113,14 @@ def test_splits_tricky_sloped_case():
     result = cut_and_choose([person1, person2], CAKE_SIZE)["solution"]
     assert len(result) == 2, "The result should have exactly two segments."
 
-    check_if_envy_free(2, result)
+    check_if_envy_free_allocation_origin(2, result)
 
 
 def test_splits_randomly_generated_preferences_fairly():
     segs = [gen_random_segs(CAKE_SIZE), gen_random_segs(CAKE_SIZE)]
 
     result = cut_and_choose(segs, CAKE_SIZE)["solution"]
-    check_if_envy_free(2, result)
+    check_if_envy_free_allocation_origin(2, result)
 
 
 def test_splits_randomly_generated_preferences_fairly_on_smaller_cake_size():
@@ -128,4 +128,4 @@ def test_splits_randomly_generated_preferences_fairly_on_smaller_cake_size():
     segs = [gen_random_segs(small_cake), gen_random_segs(small_cake)]
 
     result = cut_and_choose(segs, small_cake)["solution"]
-    check_if_envy_free(2, result)
+    check_if_envy_free_allocation_origin(2, result)

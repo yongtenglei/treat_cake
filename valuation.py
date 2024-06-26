@@ -102,21 +102,30 @@ def _v_double_prime(segments: List[Segment], delta: float, a: float, b: float) -
     print(f"{v_prime_a_over_b_under=}({a_overline=}, {b_underline=})")
 
     if a_overline - a >= b - b_underline:
+        print("Case 1")
         v_prime_a_under_b_under = _v_prime(segments, delta, a_underline, b_underline)
         print(f"{v_prime_a_under_b_under=}({a_underline=}, {b_underline=})")
-        return (
+        v_double_prime = (
             ((a_overline - a) - (b - b_underline)) / delta * v_prime_a_under_b_under
             + (b - b_underline) / delta * v_prime_a_under_b_over
             + (a - a_underline) / delta * v_prime_a_over_b_under
         )
+        print(f"v_double_prime={v_double_prime}({a=}, {b=})")
+        print("====end====")
+        return v_double_prime
     elif a_overline - a <= b - b_underline:
+        print("Case 2")
         v_prime_a_over_b_over = _v_prime(segments, delta, a_overline, b_overline)
         print(f"{v_prime_a_over_b_over=}({a_overline=}, {b_overline=})")
-        return (
+        v_double_prime = (
             ((b - b_underline) - (a_overline - a)) / delta * v_prime_a_over_b_over
             + (a_overline - a) / delta * v_prime_a_under_b_over
             + (b_overline - b) / delta * v_prime_a_over_b_under
         )
+        print(f"v_double_prime={v_double_prime}({a=}, {b=})")
+        print("====end====")
+
+        return v_double_prime
 
 
 def overline(x, delta, epsilon=1e-10):

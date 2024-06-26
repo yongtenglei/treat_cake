@@ -1,7 +1,10 @@
-from ..base_types import Segment, AssignedSlice
+from itertools import permutations
+
+from ..base_types import Segment, AssignedSlice, Preferences
 from typing import List
 import random
 
+from ..cut import cut_slice, cut_slice_origin
 
 halfway_point_of_triangle_area = 70.710678
 
@@ -61,7 +64,7 @@ def gen_random_segs(cake_size: int) -> List[Segment]:
     return segs
 
 
-def check_if_envy_free(num_people: int, result: List[AssignedSlice]):
+def check_if_envy_free_allocation_origin(num_people: int, result: List[AssignedSlice]):
     for a in range(num_people):
         total_values = [0] * num_people
         for slice in result:
@@ -73,3 +76,102 @@ def check_if_envy_free(num_people: int, result: List[AssignedSlice]):
             assert (
                 value - fudge_factor <= obtained_value
             ), f"Person {a} envies another person's slices"
+
+
+def generate_all_possible_allocations(cuts: List[float], num_agents: int):
+    slices = list(range(len(cuts) + 1))
+    assert len(slices) == num_agents
+
+    for perm in permutations(slices, num_agents):
+        allocation = [[] for _ in range(num_agents)]
+        for i, slice_index in enumerate(perm):
+            allocation[i % num_agents].append(slice_index)
+        yield allocation
+
+
+def check_if_envy_free(num_agents: int, allocation: List[AssignedSlice]) -> bool:
+    total_values = [0] * num_agents
+    for slice in allocation:
+        for agent_id in range(num_agents):
+            total_values[agent_id] += slice.values[agent_id]
+
+    for a in range(num_agents):
+        obtained_value = total_values[a]
+        fudge_factor = 1e-12
+        for value in total_values:
+            if value - fudge_factor > obtained_value:
+                return False
+    return True
+
+
+# def check_if_envy_free(
+#     num_agents: int, allocation: List[List[int]], preferences: Preferences
+# ) -> bool:
+#     total_values = [0] * num_agents
+#     for agent_id, slices in enumerate(allocation):
+#         for slice_id in slices:
+#             total_values[agent_id] += preferences[agent_id][slice_id]
+#
+#     for a in range(num_agents):
+#         obtained_value = total_values[a]
+#         for value in total_values:
+#             if value > obtained_value:
+#                 return False
+#     return True
+
+
+def find_envy_free_allocation(
+    cuts: List[float],
+    num_agents: int,
+    cake_size: int,
+    preferences: Preferences,
+    epsilon,
+) -> List[AssignedSlice]:
+    for allocation in generate_all_possible_allocations(cuts, num_agents):
+        envy_free_allocation = []
+        for agent_id, slices in enumerate(allocation):
+            for slice_index in slices:
+                if slice_index == 0:
+                    start = 0
+                else:
+                    start = cuts[slice_index - 1]
+                if slice_index == len(cuts):
+                    # TODO:be careful
+                    end = cake_size
+                else:
+                    end = cuts[slice_index]
+                unassigned_slice = cut_slice(
+                    preferences, epsilon, start, end, slice_index
+                )
+                envy_free_allocation.append(unassigned_slice.assign(agent_id))
+        if check_if_envy_free(num_agents, envy_free_allocation):
+            return envy_free_allocation
+    return None
+
+
+def find_envy_free_allocation_using_original_evaluation_func(
+    cuts: List[float],
+    num_agents: int,
+    cake_size: int,
+    preferences: Preferences,
+) -> List[AssignedSlice]:
+    """TESTING ONLY"""
+    for allocation in generate_all_possible_allocations(cuts, num_agents):
+        envy_free_allocation = []
+        for agent_id, slices in enumerate(allocation):
+            for slice_index in slices:
+                if slice_index == 0:
+                    start = 0
+                else:
+                    start = cuts[slice_index - 1]
+                if slice_index == len(cuts):
+                    end = cake_size
+                else:
+                    end = cuts[slice_index]
+                unassigned_slice = cut_slice_origin(
+                    preferences, start, end, slice_index
+                )
+                envy_free_allocation.append(unassigned_slice.assign(agent_id))
+        if check_if_envy_free(num_agents, envy_free_allocation):
+            return envy_free_allocation
+    return None

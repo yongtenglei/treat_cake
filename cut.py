@@ -1,10 +1,11 @@
 from typing import List
 
 from treat_cake.base_types import Preferences, FrozenUnassignedSlice, Slice
+from treat_cake.valuation import get_double_prime_for_interval
 from treat_cake.values import get_value_for_interval
 
 
-def cut_slice(
+def cut_slice_origin(
     preferences: Preferences, start: int, end: int, id: int, note=None
 ) -> FrozenUnassignedSlice:
     if start > end:
@@ -13,6 +14,22 @@ def cut_slice(
         )
 
     values = [get_value_for_interval(segments, start, end) for segments in preferences]
+
+    return FrozenUnassignedSlice(start, end, values, id, note)
+
+
+def cut_slice(
+    preferences: Preferences, epsilon: float, start: int, end: int, id: int, note=None
+) -> FrozenUnassignedSlice:
+    if start > end:
+        raise ValueError(
+            f"Start cannot be before end. Start {start}, end {end}, preferences {str(preferences)}"
+        )
+
+    values = [
+        get_double_prime_for_interval(segments, epsilon, start, end)
+        for segments in preferences
+    ]
 
     return FrozenUnassignedSlice(start, end, values, id, note)
 

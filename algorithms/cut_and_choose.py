@@ -1,7 +1,7 @@
 from typing import Dict, Any
 
 from .algorithm_types import Step, make_step
-from ..cut import cut_slice
+from ..cut import cut_slice_origin
 from ..base_types import AssignedSlice, FrozenUnassignedSlice
 from ..utils import make_percentage
 from ..values import find_cut_line_by_percent, get_total_value
@@ -16,8 +16,8 @@ def cut_and_choose(preferences, cake_size: int) -> Dict[str, Any]:
     percent_cut = make_percentage(cut_point / cake_size, 3)
     steps.append(make_step(0, f"judges the middle of the resource to be {percent_cut}"))
 
-    slice1 = cut_slice(preferences, 0, cut_point, 1)
-    slice2 = cut_slice(preferences, cut_point, cake_size, 2)
+    slice1 = cut_slice_origin(preferences, 0, cut_point, 1)
+    slice2 = cut_slice_origin(preferences, cut_point, cake_size, 2)
     steps.append(
         make_step(
             0, f"cut the resource into two pieces at {percent_cut}", [slice1, slice2]
