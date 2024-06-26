@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from treat_cake.base_types import Segment
+from treat_cake.valuation import get_double_prime_for_interval
 
 
 @dataclass
@@ -140,7 +141,7 @@ def get_value_at_point(segments: List[Segment], point: int) -> float:
             return seg.start_value + slope * (point - seg.start)
 
 
-def get_values_for_cuts(
+def get_values_for_cuts_origin(
     preference: List[Segment], cuts: List[float], cake_size: float
 ) -> List[float]:
     slice_values = []
@@ -148,6 +149,21 @@ def get_values_for_cuts(
     start = 0
     for end in cuts:
         value = get_value_for_interval(preference, start, end)
+        slice_values.append(value)
+        start = end
+    # Last piece
+    slice_values.append(get_value_for_interval(preference, cuts[-1], cake_size))
+    return slice_values
+
+
+def get_values_for_cuts(
+    preference: List[Segment], cuts: List[float], cake_size: float, epsilon: float
+) -> List[float]:
+    slice_values = []
+
+    start = 0
+    for end in cuts:
+        value = get_double_prime_for_interval(preference, epsilon, start, end)
         slice_values.append(value)
         start = end
     # Last piece

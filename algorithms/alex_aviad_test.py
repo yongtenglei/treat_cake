@@ -7,7 +7,7 @@ from treat_cake.algorithms.alex_aviad import (
 )
 from treat_cake.algorithms.algorithm_test_utils import gen_flat_seg, gen_sloped_seg
 from treat_cake.valuation import get_double_prime_for_interval
-from treat_cake.values import get_values_for_cuts
+from treat_cake.values import get_values_for_cuts_origin
 
 CAKE_SIZE = 100
 TOLERANCE = 1e-6
@@ -21,7 +21,7 @@ def test_equipartition_one_piece():
     ]
 
     cuts = equipartition(preference)
-    slice_values = get_values_for_cuts(
+    slice_values = get_values_for_cuts_origin(
         preference=preference, cuts=cuts, cake_size=CAKE_SIZE
     )
     assert len(slice_values) == 4
@@ -45,7 +45,7 @@ def test_equipartition_seesaw_like_graph():
     ]
 
     cuts = equipartition(preference)
-    slice_values = get_values_for_cuts(
+    slice_values = get_values_for_cuts_origin(
         preference=preference, cuts=cuts, cake_size=CAKE_SIZE
     )
     assert len(slice_values) == 4
@@ -70,7 +70,7 @@ def test_equipartition_seesaw_sloped_graph():
 
     cuts = equipartition(preference)
 
-    slice_values = get_values_for_cuts(preference, cuts, CAKE_SIZE)
+    slice_values = get_values_for_cuts_origin(preference, cuts, CAKE_SIZE)
 
     assert len(slice_values) == 4, "The number of slices should be exactly four."
 
