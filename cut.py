@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import List
 
 from treat_cake.base_types import Preferences, FrozenUnassignedSlice, Slice
@@ -6,7 +7,7 @@ from treat_cake.values import get_value_for_interval
 
 
 def cut_slice_origin(
-    preferences: Preferences, start: int, end: int, id: int, note=None
+    preferences: Preferences, start: Decimal, end: Decimal, id: int, note=None
 ) -> FrozenUnassignedSlice:
     if start > end:
         raise ValueError(
@@ -15,11 +16,16 @@ def cut_slice_origin(
 
     values = [get_value_for_interval(segments, start, end) for segments in preferences]
 
-    return FrozenUnassignedSlice(start, end, values, id, note)
+    return FrozenUnassignedSlice(Decimal(start), Decimal(end), values, id, note)
 
 
 def cut_slice(
-    preferences: Preferences, epsilon: float, start: int, end: int, id: int, note=None
+    preferences: Preferences,
+    epsilon: Decimal,
+    start: Decimal,
+    end: Decimal,
+    id: int,
+    note=None,
 ) -> FrozenUnassignedSlice:
     if start > end:
         raise ValueError(

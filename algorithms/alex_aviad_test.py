@@ -119,7 +119,7 @@ def test_alex_aviad_using_original_evaluation_func():
 
 def test_alex_aviad_same_evaluations_case():
     cake_size = 1
-    epsilon = 0.1
+    epsilon = 1e-6
 
     preferences = [
         [gen_flat_seg(0, cake_size, 10)],
@@ -148,7 +148,7 @@ def test_alex_aviad_same_evaluations_case():
 def test_alex_aviad_generic_case_should_fail():
     """SHOULD FAIL"""
     cake_size = 1
-    epsilon = 0.1
+    epsilon = 1e-6
 
     preferences = [
         [gen_flat_seg(0, cake_size, 2.5)],

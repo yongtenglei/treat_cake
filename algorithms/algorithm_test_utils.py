@@ -1,3 +1,4 @@
+from decimal import Decimal
 from itertools import permutations
 
 from ..base_types import Segment, AssignedSlice, Preferences
@@ -71,7 +72,7 @@ def check_if_envy_free_allocation_origin(num_people: int, result: List[AssignedS
             total_values[slice.owner] += slice.values[a]
 
         obtained_value = total_values[a]
-        fudge_factor = 1e-12
+        fudge_factor = Decimal("1e-12")
         for value in total_values:
             assert (
                 value - fudge_factor <= obtained_value

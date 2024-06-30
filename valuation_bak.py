@@ -1,71 +1,85 @@
-from decimal import Decimal, getcontext
+import math
 from typing import List
 
 from treat_cake.base_types import Segment
 from treat_cake.values import get_value_for_interval
 
-# 设置全局浮点数精度
-getcontext().prec = 50
 
-
-def _v(segments: List[Segment], a: Decimal, b: Decimal) -> Decimal:
-    v = get_value_for_interval(segments, float(a), float(b))
+def _v(segments: List[Segment], a: float, b: float) -> float:
+    v = get_value_for_interval(segments, a, b)
     print(f"v={v}({a=}, {b=})")
-    return Decimal(v)
+    return v
 
 
 def _v_prime(
     segments: List[Segment],
-    epsilon: Decimal,
-    a: Decimal,
-    b: Decimal,
-) -> Decimal:
+    epsilon: float,
+    a: float,
+    b: float,
+):
+    # v is the original valuation function
+    # v_prime = base_value / 2 + perturbation
     v = _v(segments, a, b) / 2 + epsilon * abs(b - a)
     print(f"v_prime={v}({a=}, {b=})")
     return v
 
 
-def get_double_prime_for_interval(
-    segments: List[Segment], epsilon: Decimal, start: Decimal, end: Decimal
-) -> Decimal:
+# def get_double_prime_for_interval(
+#     segments: List[Segment], epsilon: float, start: float, end: float
+# ) -> float:
+#     """
+#     Returns the total double prime value of an interval,
+#     even if covers several segments or splits segments in half.
+#     """
+#     total = 0
+#     for seg in segments:
+#         if seg.end <= start or seg.start >= end:
+#             # this segment not relevant
+#             continue
+#
+#         total += _v_double_prime(seg, epsilon, start, end)
+#     return total
 
+
+def get_double_prime_for_interval(
+    segments: List[Segment], epsilon: float, start: float, end: float
+) -> float:
+    """
+    Returns the total double prime value of an interval,
+    even if covers several segments or splits segments in half.
+    """
     assert 0 <= start <= end, "start or end out of range"
+
+    total = 0
+
+    start_int = int(start)
+    end_int = int(end)
 
     # Only one segment
     if end <= 1:
         return _v_double_prime(segments, epsilon, start, end)
-
-    # Multi-segments
-    total = Decimal(0)
-
-    start_int = int(start)
-    end_int = int(end)
 
     if start == start_int and end == end_int:
         return _v_double_prime(segments, epsilon, start, end)
 
     # Start segments
     if start != start_int:
-        first_segment_end = Decimal(start_int + 1)
+        first_segment_end = start_int + 1
         total += _v_double_prime(segments, epsilon, start, first_segment_end)
 
     # Intermedia segments
     if start_int + 1 < end_int:
-        total += _v_double_prime(
-            segments, epsilon, Decimal(start_int + 1), Decimal(end_int)
-        )
+        total += _v_double_prime(segments, epsilon, start_int + 1, end_int)
 
     # Last segments
     if end != end_int:
-        last_segment_start = Decimal(end_int)
+        last_segment_start = end_int
         total += _v_double_prime(segments, epsilon, last_segment_start, end)
 
     return total
 
 
-def _v_double_prime(
-    segments: List[Segment], delta: Decimal, a: Decimal, b: Decimal
-) -> Decimal:
+def _v_double_prime(segments: List[Segment], delta: float, a: float, b: float) -> float:
 
     # Letting delta := epsilon, so,
     # any epsilon-envy-free allocation for (v_double_prime) is 5*epsilon-envy-free for (v_prime) for each agent.
@@ -116,9 +130,7 @@ def _v_double_prime(
         return v_double_prime
 
 
-def overline(x, delta, epsilon=Decimal("1e-10")):
-    x = Decimal(x)
-    delta = Decimal(delta)
+def overline(x, delta, epsilon=1e-10):
     assert 0 <= x <= 1
 
     if x < delta or x == 0:
@@ -127,23 +139,21 @@ def overline(x, delta, epsilon=Decimal("1e-10")):
     if x == 1:
         return x
 
-    v = (x / delta).to_integral_value(rounding="ROUND_CEILING") * delta
+    v = math.ceil(x / delta) * delta
 
     # If x is exactly a multiple of delta, step up to the next multiple
     # considering floating point precision issues
     if abs(x % delta) < epsilon or abs(delta - (x % delta)) < epsilon:
         v += delta
 
-    return min(v, Decimal(1))
+    return min(v, 1)
 
 
-def underline(x, delta, epsilon=Decimal("1e-10")):
-    x = Decimal(x)
-    delta = Decimal(delta)
+def underline(x, delta, epsilon=1e-10):
     assert 0 <= x <= 1
 
     if x < delta or x == 0:
-        return Decimal(0)
+        return 0
 
     if x == 1:
         return x - delta
@@ -151,23 +161,8 @@ def underline(x, delta, epsilon=Decimal("1e-10")):
     # Check if x is an exact multiple of delta,
     # considering floating point precision issues
     if abs(x % delta) < epsilon or abs(delta - (x % delta)) < epsilon:
-        v = (x / delta - 1).to_integral_value(rounding="ROUND_FLOOR") * delta
+        v = (math.floor(x / delta) - 1) * delta
     else:
-        v = (x / delta).to_integral_value(rounding="ROUND_FLOOR") * delta
+        v = math.floor(x / delta) * delta
 
-    return max(v, Decimal(0))
-
-
-def get_values_for_cuts(
-    preference: List[Segment], cuts: List[float], cake_size: float, epsilon: float
-) -> List[float]:
-    slice_values = []
-
-    start = 0
-    for end in cuts:
-        value = get_double_prime_for_interval(preference, epsilon, start, end)
-        slice_values.append(value)
-        start = end
-    # Last piece
-    slice_values.append(get_value_for_interval(preference, cuts[-1], cake_size))
-    return slice_values
+    return max(v, 0)

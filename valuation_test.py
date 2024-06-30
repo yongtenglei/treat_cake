@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 
 from treat_cake.algorithms.algorithm_test_utils import gen_flat_seg, gen_sloped_seg
@@ -10,7 +12,7 @@ from treat_cake.valuation import (
     get_double_prime_for_interval,
 )
 
-EPSILON = 1e-1
+EPSILON = 1e-10
 TOLERANCE = 1e-6
 
 
@@ -76,13 +78,27 @@ def test_v_prime_seesaw_like_gragh():
 
 def test_v_double_prime_one_seg():
     segs = [gen_flat_seg(0, 1, 10)]
-    v = _v_double_prime(segs, EPSILON, 0, 1)
-    assert v == pytest.approx(5.1, abs=TOLERANCE)
+    v = _v_double_prime(segs, Decimal(EPSILON), Decimal(0), Decimal(1))
+    assert v == pytest.approx(5, abs=TOLERANCE)
 
 
 def test_v_double_prime_one_seg_by_interval():
     segs = [gen_flat_seg(0, 1, 10)]
     v = get_double_prime_for_interval(segs, EPSILON, 0, 1)
+    assert v == pytest.approx(5, abs=TOLERANCE)
+
+
+def test_v_double_prime_one_seg_by_interval_2():
+    segs = [gen_flat_seg(0, 1, 10)]
+    v = get_double_prime_for_interval(segs, EPSILON, 0.25, 0.625)
+    assert v == pytest.approx(5.1, abs=TOLERANCE)
+
+
+def test_v_double_prime_one_seg_by_interval():
+    segs = [gen_flat_seg(0, 1, 10)]
+    v = get_double_prime_for_interval(
+        segs, EPSILON, 0.25000000002910383, 0.6250000000145519
+    )
     assert v == pytest.approx(5.1, abs=TOLERANCE)
 
 

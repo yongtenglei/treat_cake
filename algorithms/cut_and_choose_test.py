@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from treat_cake.algorithms.cut_and_choose import cut_and_choose
 from treat_cake.algorithms.algorithm_test_utils import (
@@ -24,10 +26,18 @@ def test_splits_uniform_flat_value_graph_evenly_in_half():
     assert len(result) == 2, "The result should have exactly two segments."
 
     expected_segment_1 = AssignedSlice(
-        owner=1, start=0, end=50, values=[500, 500], id=1
+        owner=1,
+        start=Decimal(0),
+        end=Decimal(50),
+        values=[Decimal(500), Decimal(500)],
+        id=1,
     )
     expected_segment_2 = AssignedSlice(
-        owner=0, start=50, end=100, values=[500, 500], id=2
+        owner=0,
+        start=Decimal(50),
+        end=Decimal(100),
+        values=[Decimal(500), Decimal(500)],
+        id=2,
     )
     print("{result[0}=}")
     assert result[0] == expected_segment_1, "First segment does not match expected"
@@ -76,8 +86,9 @@ def test_splits_seesaw_like_sloped_graph():
 
     assert (
         result[0].owner == 0
-        and result[0].end == pytest.approx(100 - halfway_point_of_triangle_area, 0.01)
-        and result[0].values[0] == pytest.approx(250, 0.01)
+        and result[0].end
+        == pytest.approx(Decimal(100 - halfway_point_of_triangle_area), Decimal(0.01))
+        and result[0].values[0] == pytest.approx(Decimal(250), Decimal(0.01))
     ), "First segment does not match expected"
     assert result[1].owner == 1, "Second segment does not match expected"
 

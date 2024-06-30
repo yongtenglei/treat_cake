@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import List, Optional, Tuple
 
 
@@ -10,10 +11,10 @@ class Segment:
     """
 
     id: int
-    start: int
-    end: int
-    start_value: float
-    end_value: float
+    start: Decimal
+    end: Decimal
+    start_value: Decimal
+    end_value: Decimal
 
 
 @dataclass
@@ -23,10 +24,10 @@ class DrawnSegment:
     """
 
     id: int
-    x1: float
-    x2: float
-    y1: float
-    y2: float
+    x1: Decimal
+    x2: Decimal
+    y1: Decimal
+    y2: Decimal
     currently_drawing: Optional[bool] = None
 
 
@@ -49,9 +50,9 @@ class Slice:
     These should only be used internally in algorithm code
     """
 
-    start: int
-    end: int
-    values: List[float]
+    start: Decimal
+    end: Decimal
+    values: List[Decimal]
     id: int
     note: Optional[str] = None
 
@@ -64,18 +65,11 @@ class Slice:
 
 @dataclass(frozen=True)
 class FrozenUnassignedSlice:
-    start: int
-    end: int
-    values: List[float]
+    start: Decimal
+    end: Decimal
+    values: List[Decimal]
     id: int
     note: Optional[str] = None
-
-    # def __init__(self, start, end, values, note, id):
-    #     self.start = start
-    #     self.end = end
-    #     self.values = values
-    #     self.note = note
-    #     self.id = id
 
     def assign(self, agent, note_override=None):
         return AssignedSlice(
@@ -90,9 +84,9 @@ class FrozenUnassignedSlice:
 
 @dataclass(frozen=True)
 class AssignedSlice:
-    start: int
-    end: int
-    values: List[float]
+    start: Decimal
+    end: Decimal
+    values: List[Decimal]
     id: int
     owner: int
     note: Optional[str] = None
