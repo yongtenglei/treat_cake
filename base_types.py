@@ -1,6 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import List, Optional, Tuple
+
+from treat_cake.type_helper import to_decimal
 
 
 @dataclass
@@ -11,10 +13,16 @@ class Segment:
     """
 
     id: int
-    start: Decimal
-    end: Decimal
-    start_value: Decimal
-    end_value: Decimal
+    start: Decimal = field(default_factory=Decimal)
+    end: Decimal = field(default_factory=Decimal)
+    start_value: Decimal = field(default_factory=Decimal)
+    end_value: Decimal = field(default_factory=Decimal)
+
+    def __post_init__(self):
+        self.start = to_decimal(self.start)
+        self.end = to_decimal(self.end)
+        self.start_value = to_decimal(self.start_value)
+        self.end_value = to_decimal(self.end_value)
 
 
 @dataclass
@@ -24,11 +32,17 @@ class DrawnSegment:
     """
 
     id: int
-    x1: Decimal
-    x2: Decimal
-    y1: Decimal
-    y2: Decimal
+    x1: Decimal = field(default_factory=Decimal)
+    x2: Decimal = field(default_factory=Decimal)
+    y1: Decimal = field(default_factory=Decimal)
+    y2: Decimal = field(default_factory=Decimal)
     currently_drawing: Optional[bool] = None
+
+    def __post_init__(self):
+        self.x1 = to_decimal(self.x1)
+        self.x2 = to_decimal(self.x2)
+        self.y1 = to_decimal(self.y1)
+        self.y2 = to_decimal(self.y2)
 
 
 Preferences = List[List[Segment]]
@@ -50,46 +64,66 @@ class Slice:
     These should only be used internally in algorithm code
     """
 
-    start: Decimal
-    end: Decimal
-    values: List[Decimal]
     id: int
     note: Optional[str] = None
+    start: Decimal = field(default_factory=Decimal)
+    end: Decimal = field(default_factory=Decimal)
+    values: List[Decimal] = field(default_factory=list)
+
+    def __post_init__(self):
+        self.start = to_decimal(self.start)
+        self.end = to_decimal(self.end)
+        self.values = [to_decimal(v) for v in self.values]
 
     def assign(self, agent: int) -> "AssignedSlice":
         """Allocate a slice to a specific agent and create an immutable copy as AssignedSlice."""
         return AssignedSlice(
-            self.start, self.end, self.values, self.id, agent, self.note
+            start=self.start,
+            end=self.end,
+            values=self.values,
+            id=self.id,
+            owner=agent,
+            note=self.note,
         )
 
 
 @dataclass(frozen=True)
 class FrozenUnassignedSlice:
-    start: Decimal
-    end: Decimal
-    values: List[Decimal]
     id: int
     note: Optional[str] = None
+    start: Decimal = field(default_factory=Decimal)
+    end: Decimal = field(default_factory=Decimal)
+    values: List[Decimal] = field(default_factory=list)
+
+    def __post_init__(self):
+        object.__setattr__(self, "start", to_decimal(self.start))
+        object.__setattr__(self, "end", to_decimal(self.end))
+        object.__setattr__(self, "values", [to_decimal(v) for v in self.values])
 
     def assign(self, agent, note_override=None):
         return AssignedSlice(
-            self.start,
-            self.end,
-            self.values,
-            self.id,
-            agent,
-            note_override or self.note,
+            start=self.start,
+            end=self.end,
+            values=self.values,
+            id=self.id,
+            owner=agent,
+            note=note_override or self.note,
         )
 
 
 @dataclass(frozen=True)
 class AssignedSlice:
-    start: Decimal
-    end: Decimal
-    values: List[Decimal]
     id: int
     owner: int
     note: Optional[str] = None
+    start: Decimal = field(default_factory=Decimal)
+    end: Decimal = field(default_factory=Decimal)
+    values: List[Decimal] = field(default_factory=list)
+
+    def __post_init__(self):
+        object.__setattr__(self, "start", to_decimal(self.start))
+        object.__setattr__(self, "end", to_decimal(self.end))
+        object.__setattr__(self, "values", [to_decimal(v) for v in self.values])
 
 
 @dataclass

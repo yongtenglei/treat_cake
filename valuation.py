@@ -2,16 +2,16 @@ from decimal import Decimal, getcontext
 from typing import List
 
 from treat_cake.base_types import Segment
+from treat_cake.type_helper import to_decimal
 from treat_cake.values import get_value_for_interval
 
-# 设置全局浮点数精度
-getcontext().prec = 50
+getcontext().prec = 15
 
 
 def _v(segments: List[Segment], a: Decimal, b: Decimal) -> Decimal:
-    v = get_value_for_interval(segments, float(a), float(b))
+    v = get_value_for_interval(segments, a, b)
     print(f"v={v}({a=}, {b=})")
-    return Decimal(v)
+    return v
 
 
 def _v_prime(
@@ -31,12 +31,17 @@ def get_double_prime_for_interval(
 
     assert 0 <= start <= end, "start or end out of range"
 
+    # Make sure using Decimal
+    epsilon = to_decimal(epsilon)
+    start = to_decimal(start)
+    end = to_decimal(end)
+
     # Only one segment
     if end <= 1:
         return _v_double_prime(segments, epsilon, start, end)
 
     # Multi-segments
-    total = Decimal(0)
+    total = to_decimal(0)
 
     start_int = int(start)
     end_int = int(end)
@@ -46,18 +51,18 @@ def get_double_prime_for_interval(
 
     # Start segments
     if start != start_int:
-        first_segment_end = Decimal(start_int + 1)
+        first_segment_end = to_decimal(start_int + 1)
         total += _v_double_prime(segments, epsilon, start, first_segment_end)
 
     # Intermedia segments
     if start_int + 1 < end_int:
         total += _v_double_prime(
-            segments, epsilon, Decimal(start_int + 1), Decimal(end_int)
+            segments, epsilon, to_decimal(start_int + 1), to_decimal(end_int)
         )
 
     # Last segments
     if end != end_int:
-        last_segment_start = Decimal(end_int)
+        last_segment_start = to_decimal(end_int)
         total += _v_double_prime(segments, epsilon, last_segment_start, end)
 
     return total
@@ -71,6 +76,10 @@ def _v_double_prime(
     # any epsilon-envy-free allocation for (v_double_prime) is 5*epsilon-envy-free for (v_prime) for each agent.
 
     print(f"{a=}, {b=}")
+
+    delta = to_decimal(delta)
+    a = to_decimal(a)
+    b = to_decimal(b)
 
     # Get the grid points around a and b
     a_underline = underline(a, delta)
@@ -98,6 +107,13 @@ def _v_double_prime(
             + (b - b_underline) / delta * v_prime_a_under_b_over
             + (a - a_underline) / delta * v_prime_a_over_b_under
         )
+
+        # If start from 0, need to compensate the last term
+        print(
+            f"Start from 0, compensate the last term: {v_double_prime} + {v_prime_a_over_b_under}"
+        )
+        if a == 0 and (a - a_underline) / delta * v_prime_a_over_b_under == 0:
+            v_double_prime += v_prime_a_over_b_under
         print(f"v_double_prime={v_double_prime}({a=}, {b=})")
         print("====end====")
         return v_double_prime
@@ -116,10 +132,11 @@ def _v_double_prime(
         return v_double_prime
 
 
-def overline(x, delta, epsilon=Decimal("1e-10")):
-    x = Decimal(x)
-    delta = Decimal(delta)
+def overline(x, delta, epsilon=Decimal("1e-10")) -> Decimal:
     assert 0 <= x <= 1
+
+    x = to_decimal(x)
+    delta = to_decimal(delta)
 
     if x < delta or x == 0:
         return delta
@@ -134,16 +151,17 @@ def overline(x, delta, epsilon=Decimal("1e-10")):
     if abs(x % delta) < epsilon or abs(delta - (x % delta)) < epsilon:
         v += delta
 
-    return min(v, Decimal(1))
+    return min(v, to_decimal(1))
 
 
-def underline(x, delta, epsilon=Decimal("1e-10")):
-    x = Decimal(x)
-    delta = Decimal(delta)
+def underline(x, delta, epsilon=Decimal("1e-10")) -> Decimal:
     assert 0 <= x <= 1
 
+    x = to_decimal(x)
+    delta = to_decimal(delta)
+
     if x < delta or x == 0:
-        return Decimal(0)
+        return to_decimal(0)
 
     if x == 1:
         return x - delta
@@ -155,7 +173,7 @@ def underline(x, delta, epsilon=Decimal("1e-10")):
     else:
         v = (x / delta).to_integral_value(rounding="ROUND_FLOOR") * delta
 
-    return max(v, Decimal(0))
+    return max(v, to_decimal(0))
 
 
 def get_values_for_cuts(

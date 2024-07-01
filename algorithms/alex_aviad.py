@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Dict, Any
 from typing import List
 
@@ -16,7 +17,7 @@ from ..values import find_cut_line_by_percent
 from ..valuation import get_double_prime_for_interval
 
 
-def equipartition(preference: List[Segment]) -> List[float]:
+def equipartition(preference: List[Segment]) -> List[Decimal]:
     # Finding cuts at 1/4, 1/2, and 3/4 of the cake
     first_cut = find_cut_line_by_percent(preference, 0.25)
     second_cut = find_cut_line_by_percent(preference, 0.50)
@@ -26,7 +27,7 @@ def equipartition(preference: List[Segment]) -> List[float]:
 
 
 def alex_aviad(
-    preferences: Preferences, cake_size: int, epsilon: float = 0.1
+    preferences: Preferences, cake_size: int, epsilon: Decimal = 0.1
 ) -> Dict[str, Any]:
     assert len(preferences) == 4, "Need 4 agents here"
 

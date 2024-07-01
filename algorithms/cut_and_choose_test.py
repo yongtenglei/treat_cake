@@ -59,8 +59,8 @@ def test_splits_seesaw_like_graph():
     result = cut_and_choose([person1, person2], CAKE_SIZE)["solution"]
     assert len(result) == 2, "The result should have exactly two segments."
 
-    expected_segment_1 = AssignedSlice(owner=0, start=0, end=37.5, id=1, values=None)
-    expected_segment_2 = AssignedSlice(owner=1, start=37.5, end=100, id=2, values=None)
+    expected_segment_1 = AssignedSlice(owner=0, start=0, end=37.5, id=1, values=[])
+    expected_segment_2 = AssignedSlice(owner=1, start=37.5, end=100, id=2, values=[])
     assert (
         result[0].owner == expected_segment_1.owner
         and result[0].start == expected_segment_1.start

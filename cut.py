@@ -16,7 +16,9 @@ def cut_slice_origin(
 
     values = [get_value_for_interval(segments, start, end) for segments in preferences]
 
-    return FrozenUnassignedSlice(Decimal(start), Decimal(end), values, id, note)
+    return FrozenUnassignedSlice(
+        start=Decimal(start), end=Decimal(end), values=values, id=id, note=note
+    )
 
 
 def cut_slice(
@@ -37,7 +39,7 @@ def cut_slice(
         for segments in preferences
     ]
 
-    return FrozenUnassignedSlice(start, end, values, id, note)
+    return FrozenUnassignedSlice(start=start, end=end, values=values, id=id, note=note)
 
 
 def sort_slices_descending(agent: int, slices: List[Slice]):

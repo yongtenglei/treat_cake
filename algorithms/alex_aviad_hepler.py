@@ -1,15 +1,17 @@
+from decimal import Decimal
 from typing import List
 
 from treat_cake.base_types import Segment, AssignedSlice
+from treat_cake.type_helper import to_decimal
 from treat_cake.valuation import get_double_prime_for_interval, get_values_for_cuts
 
 
 def check_condition_a(
-    alpha: float,
+    alpha: Decimal,
     preference: List[Segment],
-    current_cuts: List[float],
+    current_cuts: List[Decimal],
     cake_size: int,
-    epsilon: float,
+    epsilon: Decimal,
 ) -> bool:
     k = _find_k(preference, current_cuts, cake_size, epsilon)
 
@@ -17,7 +19,7 @@ def check_condition_a(
 
 
 def _find_k(
-    preference: List[Segment], cuts: List[float], cake_size: int, epsilon: float
+    preference: List[Segment], cuts: List[Decimal], cake_size: int, epsilon: Decimal
 ) -> int:
 
     values = get_values_for_cuts(preference, cuts, cake_size, epsilon)
@@ -30,13 +32,13 @@ def _find_k(
 
 
 def _find_cuts_for_condition_a(
-    alpha: float,
+    alpha: Decimal,
     preference: List[Segment],
     cake_size: int,
-    epsilon: float,
-    start: float,
-    end: float,
-    tolerant: float = 1e-3,
+    epsilon: Decimal,
+    start: Decimal,
+    end: Decimal,
+    tolerant: Decimal = 1e-3,
 ):
     # if k == 0
     # [0, l] | [l, m] | [m, r] | [r, cake_size]
@@ -62,11 +64,11 @@ def find_allocation_on_condition_a() -> List[AssignedSlice]:
 
 
 def check_condition_b(
-    alpha: float,
+    alpha: Decimal,
     preference: List[Segment],
-    current_cuts: List[float],
+    current_cuts: List[Decimal],
     cake_size: int,
-    epsilon: float,
+    epsilon: Decimal,
 ) -> bool:
     k = _find_k(preference, current_cuts, cake_size, epsilon)
 
@@ -79,18 +81,18 @@ def find_allocation_on_condition_b() -> List[AssignedSlice]:
 
 def _binary_search_left_to_right(
     preference: List[Segment],
-    epsilon: float,
-    start: float,
-    end: float,
-    target: float,
-    tolerant: float = 1e-10,
+    epsilon: Decimal,
+    start: Decimal,
+    end: Decimal,
+    target: Decimal,
+    tolerant: Decimal = 1e-10,
     max_iterations: int = 1000,
-) -> float:
+) -> Decimal:
     original_start = start
     iteration = 0
 
     while end - start > tolerant and iteration < max_iterations:
-        mid = (start + end) / 2
+        mid = to_decimal((start + end) / 2)
         searched_value = get_double_prime_for_interval(
             preference, epsilon, original_start, mid
         )
@@ -107,23 +109,23 @@ def _binary_search_left_to_right(
             end = mid
 
         iteration = iteration + 1
-    return (start + end) / 2
+    return to_decimal((start + end) / 2)
 
 
 def _binary_search_right_to_left(
     preference: List[Segment],
-    epsilon: float,
-    start: float,
-    end: float,
-    target: float,
-    tolerant: float = 1e-10,
+    epsilon: Decimal,
+    start: Decimal,
+    end: Decimal,
+    target: Decimal,
+    tolerant: Decimal = 1e-10,
     max_iterations: int = 1000,
-) -> float:
+) -> Decimal:
     original_end = end
     iteration = 0
 
     while end - start > tolerant and iteration < max_iterations:
-        mid = (start + end) / 2
+        mid = to_decimal((start + end) / 2)
         searched_value = get_double_prime_for_interval(
             preference, epsilon, mid, original_end
         )
@@ -140,4 +142,4 @@ def _binary_search_right_to_left(
             start = mid
 
         iteration = iteration + 1
-    return (start + end) / 2
+    return to_decimal((start + end) / 2)

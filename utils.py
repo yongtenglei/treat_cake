@@ -1,13 +1,16 @@
-from math import isfinite
+from decimal import Decimal, InvalidOperation
 
 
-def make_percentage(num: float, precision: int = 8) -> str:
-    return f"{format_number(num * 100, precision)}%"
+def make_percentage(num: Decimal, precision: int = 8) -> str:
+    return f"{format_number(num * Decimal(100), precision)}%"
 
 
-def format_number(num: float, precision: int = 8) -> str:
-    if not (isinstance(num, float) or isinstance(num, int)) or not isfinite(num):
-        num = 0
+def format_number(num: Decimal, precision: int = 8) -> str:
+    try:
+        num = Decimal(num)
+    except (InvalidOperation, TypeError):
+        num = Decimal(0)
+
     num_str = f"{num:.{precision}f}"
     num_length = len(num_str.replace(".", ""))
     if num_length < precision:
