@@ -108,11 +108,12 @@ def _v_double_prime(
             + (a - a_underline) / delta * v_prime_a_over_b_under
         )
 
-        # If start from 0, need to compensate the last term
-        print(
-            f"Start from 0, compensate the last term: {v_double_prime} + {v_prime_a_over_b_under}"
-        )
         if a == 0 and (a - a_underline) / delta * v_prime_a_over_b_under == 0:
+            # If start from 0, need to compensate the last term
+            print(
+                f"Start from 0, compensate the last term: {v_double_prime} + {v_prime_a_over_b_under}"
+            )
+
             v_double_prime += v_prime_a_over_b_under
         print(f"v_double_prime={v_double_prime}({a=}, {b=})")
         print("====end====")
@@ -177,8 +178,8 @@ def underline(x, delta, epsilon=Decimal("1e-10")) -> Decimal:
 
 
 def get_values_for_cuts(
-    preference: List[Segment], cuts: List[float], cake_size: float, epsilon: float
-) -> List[float]:
+    preference: List[Segment], cuts: List[Decimal], cake_size: Decimal, epsilon: Decimal
+) -> List[Decimal]:
     slice_values = []
 
     start = 0

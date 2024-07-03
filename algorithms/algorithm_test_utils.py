@@ -97,7 +97,7 @@ def check_if_envy_free_allocation_origin(num_people: int, result: List[AssignedS
             ), f"Person {a} envies another person's slices"
 
 
-def generate_all_possible_allocations(cuts: List[float], num_agents: int):
+def generate_all_possible_allocations(cuts: List[Decimal], num_agents: int):
     slices = list(range(len(cuts) + 1))
     assert len(slices) == num_agents
 
@@ -125,12 +125,15 @@ def check_if_envy_free(num_agents: int, allocation: List[AssignedSlice]) -> bool
 
 
 def find_envy_free_allocation(
-    cuts: List[float],
+    cuts: List[Decimal],
     num_agents: int,
     cake_size: int,
     preferences: Preferences,
     epsilon,
 ) -> List[AssignedSlice]:
+
+    cake_size = to_decimal(cake_size)
+
     for allocation in generate_all_possible_allocations(cuts, num_agents):
         envy_free_allocation = []
         for agent_id, slices in enumerate(allocation):
@@ -146,34 +149,6 @@ def find_envy_free_allocation(
                     end = cuts[slice_index]
                 unassigned_slice = cut_slice(
                     preferences, epsilon, start, end, slice_index
-                )
-                envy_free_allocation.append(unassigned_slice.assign(agent_id))
-        if check_if_envy_free(num_agents, envy_free_allocation):
-            return envy_free_allocation
-    return None
-
-
-def find_envy_free_allocation_using_original_evaluation_func(
-    cuts: List[float],
-    num_agents: int,
-    cake_size: int,
-    preferences: Preferences,
-) -> List[AssignedSlice]:
-    """TESTING ONLY"""
-    for allocation in generate_all_possible_allocations(cuts, num_agents):
-        envy_free_allocation = []
-        for agent_id, slices in enumerate(allocation):
-            for slice_index in slices:
-                if slice_index == 0:
-                    start = 0
-                else:
-                    start = cuts[slice_index - 1]
-                if slice_index == len(cuts):
-                    end = cake_size
-                else:
-                    end = cuts[slice_index]
-                unassigned_slice = cut_slice_origin(
-                    preferences, start, end, slice_index
                 )
                 envy_free_allocation.append(unassigned_slice.assign(agent_id))
         if check_if_envy_free(num_agents, envy_free_allocation):
