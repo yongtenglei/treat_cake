@@ -28,24 +28,10 @@ def check_condition_a(
         tolerance=tolerance,
     )
 
-    l, m, r = results["cuts"]
+    cuts = results["cuts"]
     k = results["k"]
 
-    start_k: Decimal = to_decimal(-1)
-    end_k: Decimal = to_decimal(-1)
-
-    if k == 0:
-        start_k = to_decimal(0)
-        end_k = to_decimal(l)
-    elif k == 1:
-        start_k = to_decimal(l)
-        end_k = to_decimal(m)
-    elif k == 2:
-        start_k = to_decimal(m)
-        end_k = to_decimal(r)
-    elif k == 3:
-        start_k = to_decimal(r)
-        end_k = to_decimal(cake_size)
+    start_k, end_k = get_range_by_cuts(cuts=cuts, k=k, cake_size=to_decimal(cake_size))
 
     weak_preference = [False for _ in range(len(preferences))]
     assert len(weak_preference) == 4
@@ -251,20 +237,20 @@ def _find_cuts_and_k_for_condition_a(
         raise ValueError("Cannot find a valid cuts, CHECK IMPLEMENTATION")
 
 
-def _check_if_weakly_prefer_piece_k(
-    preference: List[Segment],
-    epsilon: Decimal,
-    start: Decimal,
-    end: Decimal,
-    alpha: Decimal,
-) -> bool:
-    return alpha <= get_double_prime_for_interval(
-        segments=preference, epsilon=epsilon, start=start, end=end
-    )
-
-
 def find_allocation_on_condition_a() -> List[AssignedSlice]:
     return []
+
+
+POSSIBLE_K_AND_K_PRIME_COMBINATION_ON_CONDITION_B = [
+    (0, 1, [2, 3]),
+    (0, 2, [1, 3]),
+    (0, 3, [1, 2]),
+    (1, 2, [0, 3]),
+    (1, 3, [0, 2]),
+    (2, 3, [0, 1]),
+]
+
+POSSIBLE_PIECE_NUMBER = [0, 1, 2, 3]
 
 
 def check_condition_b(
@@ -278,86 +264,320 @@ def check_condition_b(
     epsilon = to_decimal(epsilon)
     tolerance = to_decimal(tolerance)
 
+    preference_1 = preferences[0]
+
+    # PERF: May accelerate this process by using "notebook", cache double values
     for i in range(1, len(preferences)):
-        preference = preferences[i]
+        preference_i = preferences[i]
         results = _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
             alpha=alpha,
             cake_size=cake_size,
-            preference=preference,
+            preference_1=preference_1,
+            preference_i=preference_i,
             epsilon=epsilon,
             tolerance=tolerance,
         )
+        for result in results:
+            cuts = result["cuts"]
+            k = result["k"]
+            k_prime = result["k_prime"]
+            other_1, other_2 = result["others"]
+            assert len(cuts) == 3, "Should have 3 cut points"
+            assert (
+                (k in POSSIBLE_PIECE_NUMBER)
+                and (k_prime in POSSIBLE_PIECE_NUMBER)
+                and (other_1 in POSSIBLE_PIECE_NUMBER)
+                and (other_2 in POSSIBLE_PIECE_NUMBER)
+                and (k != k_prime)
+                and (k != other_1)
+                and (k != other_2)
+                and (k_prime != other_1)
+                and (k_prime != other_2)
+                and (other_1 != other_2)
+            ), "Invalid k"
 
-        l, m, r = results["cuts"]
-        k = results["k"]
+            start_k, end_k = get_range_by_cuts(
+                cuts=cuts, k=k, cake_size=to_decimal(cake_size)
+            )
 
-        start_k: Decimal = to_decimal(-1)
-        end_k: Decimal = to_decimal(-1)
+            start_k_prime, end_k_prime = get_range_by_cuts(
+                cuts=cuts, k=k_prime, cake_size=to_decimal(cake_size)
+            )
 
-        if k == 0:
-            start_k = to_decimal(0)
-            end_k = to_decimal(l)
-        elif k == 1:
-            start_k = to_decimal(l)
-            end_k = to_decimal(m)
-        elif k == 2:
-            start_k = to_decimal(m)
-            end_k = to_decimal(r)
-        elif k == 3:
-            start_k = to_decimal(r)
-            end_k = to_decimal(cake_size)
+            start_other_1, end_other_1 = get_range_by_cuts(
+                cuts=cuts, k=other_1, cake_size=to_decimal(cake_size)
+            )
+            start_other_2, end_other_2 = get_range_by_cuts(
+                cuts=cuts, k=other_2, cake_size=to_decimal(cake_size)
+            )
 
-        weak_preference = [False for _ in range(len(preferences))]
-        assert len(weak_preference) == 4
+            # Check condition, if Ok, return.
+            # Otherwise, continue exploring.
 
-        weak_preference_idx = []
-        # check if at least two of the other agents weakly prefer piece k
-        # i. v_1(P_k) <= α and v_1(P_k′) <= α, and
-        # ii. (v_i(P_k′) =)v_i(P_k) >= max_t v_i(P_t), and
-        # iii. there exists i′ ∈ {2, 3, 4} ∖ {i} such that v_i′(P_k) ≥ max_t v_i′(P_t), and
-        # iv. there exists i′ ∈ {2, 3, 4} ∖ {i} with v_i′(P_k′) ≥ max_t v_i′(P_t).
-        for i in range(1, len(preferences)):
-            weak_preference[i] = _check_if_weakly_prefer_piece_k(
-                preference=preferences[i],
+            # ii. (v_i(P_k′) =)v_i(P_k) >= max_t v_i(P_t), and
+            k_value_i = get_double_prime_for_interval(
+                segments=preference_i, epsilon=epsilon, start=start_k, end=end_k
+            )
+            k_prime_value_i = get_double_prime_for_interval(
+                segments=preference_i,
                 epsilon=epsilon,
-                start=start_k,
-                end=end_k,
-                alpha=alpha,
+                start=start_k_prime,
+                end=end_k_prime,
             )
-            if weak_preference[i]:
-                weak_preference_idx.append(i)
-
-        # TODO: NEED to IMPLEMENT
-        if sum(weak_preference) >= 2:
-            print(
-                f"Test A successful, {k=}, other agents (i and i') are {weak_preference_idx}"
+            if k_value_i != k_prime_value_i:
+                continue
+            other_1_value_i = get_double_prime_for_interval(
+                segments=preference_i,
+                epsilon=epsilon,
+                start=start_other_1,
+                end=end_other_1,
             )
-            return True
-        else:
-            return False
+            other_2_value_i = get_double_prime_for_interval(
+                segments=preference_i,
+                epsilon=epsilon,
+                start=start_other_2,
+                end=end_other_2,
+            )
+            others_max_value_i = max(other_1_value_i, other_2_value_i)
+            if not (
+                k_value_i >= others_max_value_i
+                and k_prime_value_i >= others_max_value_i
+            ):
+                continue
 
+            # i. v_1(P_k) <= α and v_1(P_k′) <= α, and
+            k_value_1 = get_double_prime_for_interval(
+                segments=preference_1, epsilon=epsilon, start=start_k, end=end_k
+            )
+            k_prime_value_1 = get_double_prime_for_interval(
+                segments=preference_1,
+                epsilon=epsilon,
+                start=start_k_prime,
+                end=end_k_prime,
+            )
+            if not (k_value_1 <= alpha and k_prime_value_1 <= alpha):
+                continue
+
+            # iii. there exists i′ ∈ {2, 3, 4} ∖ {i} such that v_i′(P_k) ≥ max_t v_i′(P_t), and
+            # iv. there exists i′ ∈ {2, 3, 4} ∖ {i} with v_i′(P_k′) ≥ max_t v_i′(P_t).
+            for j in range(1, len(preferences)):
+                if j == i:
+                    continue
+                preference_j = preferences[j]
+                other_1_value_j = get_double_prime_for_interval(
+                    segments=preference_j,
+                    epsilon=epsilon,
+                    start=start_other_1,
+                    end=end_other_1,
+                )
+                other_2_value_j = get_double_prime_for_interval(
+                    segments=preference_j,
+                    epsilon=epsilon,
+                    start=start_other_2,
+                    end=end_other_2,
+                )
+                others_max_value_j = max(other_1_value_j, other_2_value_j)
+
+                k_value_j = get_double_prime_for_interval(
+                    segments=preference_j, epsilon=epsilon, start=start_k, end=end_k
+                )
+                k_prime_value_j = get_double_prime_for_interval(
+                    segments=preference_j,
+                    epsilon=epsilon,
+                    start=start_k_prime,
+                    end=end_k_prime,
+                )
+                if (
+                    k_value_j >= others_max_value_j
+                    and k_prime_value_j >= others_max_value_j
+                ):
+                    return True
     return False
 
 
-POSSIBLE_PIECES_ON_CONDITION_B = [
-    (0, 1),
-    (0, 2),
-    (0, 3),
-    (1, 2),
-    (1, 3),
-    (2, 3),
-]
+def _handle_adjacent(
+    k: int,
+    k_prime: int,
+    alpha: Decimal,
+    preference_1: List[Segment],
+    preference_i: List[Segment],
+    epsilon: Decimal,
+    cake_size: Decimal,
+    tolerance: Decimal,
+) -> List[Decimal]:
+    # if k, k' = (0, 1)
+    #    0        1        2            3
+    # [0, l] | [l, m] | [m, r] | [r, cake_size]
+    #   (3      3)         2          1
+    if k == 0 and k_prime == 1:
+        r = _binary_search_right_to_left(
+            preference=preference_1,
+            epsilon=epsilon,
+            start=to_decimal(0),
+            end=cake_size,
+            target=alpha,
+            tolerance=tolerance,
+        )
+
+        m = _binary_search_right_to_left(
+            preference=preference_1,
+            epsilon=epsilon,
+            start=to_decimal(0),
+            end=r,
+            target=alpha,
+            tolerance=tolerance,
+        )
+
+        remained_value = get_double_prime_for_interval(
+            segments=preference_i, epsilon=epsilon, start=to_decimal(0), end=m
+        )
+
+        desired_half_value = remained_value / 2
+
+        l = _binary_search_left_to_right(
+            preference=preference_i,
+            epsilon=epsilon,
+            start=to_decimal(0),
+            end=m,
+            target=desired_half_value,
+            tolerance=tolerance,
+        )
+
+        # NOTE: For testing
+        first_half_value = get_double_prime_for_interval(
+            segments=preference_i, epsilon=epsilon, start=to_decimal(0), end=l
+        )
+        second_half_value = get_double_prime_for_interval(
+            segments=preference_i, epsilon=epsilon, start=l, end=m
+        )
+        assert almost_equal(
+            first_half_value, second_half_value, tolerance=tolerance
+        ), "Should have almost the same value under the view of agent i"
+
+        return [l, m, r]
+    # if k, k' = (1, 2)
+    #    0        1        2            3
+    # [0, l] | [l, m] | [m, r] | [r, cake_size]
+    #    1      (3         3)          2
+    elif k == 1 and k_prime == 2:
+        l = _binary_search_left_to_right(
+            preference=preference_1,
+            epsilon=epsilon,
+            start=to_decimal(0),
+            end=cake_size,
+            target=alpha,
+            tolerance=tolerance,
+        )
+
+        r = _binary_search_right_to_left(
+            preference=preference_1,
+            epsilon=epsilon,
+            start=l,
+            end=cake_size,
+            target=alpha,
+            tolerance=tolerance,
+        )
+
+        remained_value = get_double_prime_for_interval(
+            segments=preference_i, epsilon=epsilon, start=l, end=r
+        )
+
+        desired_half_value = remained_value / 2
+
+        m = _binary_search_left_to_right(
+            preference=preference_i,
+            epsilon=epsilon,
+            start=l,
+            end=r,
+            target=desired_half_value,
+            tolerance=tolerance,
+        )
+
+        # NOTE: For testing
+        first_half_value = get_double_prime_for_interval(
+            segments=preference_i, epsilon=epsilon, start=l, end=m
+        )
+        second_half_value = get_double_prime_for_interval(
+            segments=preference_i, epsilon=epsilon, start=m, end=r
+        )
+        assert almost_equal(
+            first_half_value, second_half_value, tolerance=tolerance
+        ), "Should have almost the same value under the view of agent i"
+
+        return [l, m, r]
+    # if k, k' = (2, 3)
+    #    0        1        2            3
+    # [0, l] | [l, m] | [m, r] | [r, cake_size]
+    #    1      2         (3          3)
+    elif k == 2 and k_prime == 3:
+        l = _binary_search_left_to_right(
+            preference=preference_1,
+            epsilon=epsilon,
+            start=to_decimal(0),
+            end=cake_size,
+            target=alpha,
+            tolerance=tolerance,
+        )
+
+        m = _binary_search_left_to_right(
+            preference=preference_i,
+            epsilon=epsilon,
+            start=l,
+            end=cake_size,
+            target=alpha,
+            tolerance=tolerance,
+        )
+
+        remained_value = get_double_prime_for_interval(
+            segments=preference_i, epsilon=epsilon, start=m, end=cake_size
+        )
+
+        desired_half_value = remained_value / 2
+
+        r = _binary_search_left_to_right(
+            preference=preference_i,
+            epsilon=epsilon,
+            start=m,
+            end=cake_size,
+            target=desired_half_value,
+            tolerance=tolerance,
+        )
+
+        # NOTE: For testing
+        first_half_value = get_double_prime_for_interval(
+            segments=preference_i, epsilon=epsilon, start=m, end=r
+        )
+        second_half_value = get_double_prime_for_interval(
+            segments=preference_i, epsilon=epsilon, start=r, end=cake_size
+        )
+        assert almost_equal(
+            first_half_value, second_half_value, tolerance=tolerance
+        ), "Should have almost the same value under the view of agent i"
 
 
-def _handle_adjacent(k: int, k_prime: int) -> Dict[str, Any]:
-    print(f"Handling adjacent: ({k}, {k_prime})")
-
-
-def _handle_one_between(k: int, k_prime: int) -> Dict[str, Any]:
+def _handle_one_between(
+    k: int,
+    k_prime: int,
+    alpha: Decimal,
+    preference_1: List[Segment],
+    preference_i: List[Segment],
+    epsilon: Decimal,
+    cake_size: Decimal,
+    tolerance: Decimal,
+) -> List[Decimal]:
     print(f"Handling one piece between: ({k}, {k_prime})")
 
 
-def _handle_leftmost_rightmost(k: int, k_prime: int) -> Dict[str, Any]:
+def _handle_leftmost_rightmost(
+    k: int,
+    k_prime: int,
+    alpha: Decimal,
+    preference_1: List[Segment],
+    preference_i: List[Segment],
+    epsilon: Decimal,
+    cake_size: Decimal,
+    tolerance: Decimal,
+) -> List[Decimal]:
     print(f"Handling leftmost and rightmost: ({k}, {k_prime})")
 
 
@@ -374,22 +594,33 @@ CODITION_B_Handlers = {
 def _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
     alpha: Decimal,
     cake_size: int,
-    preference: List[Segment],
+    preference_1: List[Segment],
+    preference_i: List[Segment],
     epsilon: Decimal,
     tolerance: Decimal = 1e-3,
 ) -> Dict[str, Any]:
-    """Could simplify code, but lost readability."""
 
     alpha = to_decimal(alpha)
     start = to_decimal(0)
     end = to_decimal(cake_size)
 
-    for k, k_prime in POSSIBLE_PIECES_ON_CONDITION_B:
+    for k, k_prime, others in POSSIBLE_K_AND_K_PRIME_COMBINATION_ON_CONDITION_B:
         handler = CODITION_B_Handlers.get((k, k_prime))
         if handler:
-            handler(k, k_prime)
+            cuts = handler(
+                k=k,
+                k_prime=k_prime,
+                alpha=alpha,
+                preference_1=preference_1,
+                preference_i=preference_i,
+                epsilon=epsilon,
+                cake_size=to_decimal(cake_size),
+                tolerance=tolerance,
+            )
+
+            yield {"cuts": cuts, "k": k, "k_prime": k_prime, "others": others}
         else:
-            print(f"No handler for combination: ({k}, {k_prime})")
+            raise ValueError(f"No handler for combination: ({k}, {k_prime})")
 
 
 def find_allocation_on_condition_b() -> List[AssignedSlice]:
@@ -498,3 +729,41 @@ def equipartition(
     )
 
     return [first_cut, second_cut, third_cut]
+
+
+def get_range_by_cuts(
+    cuts: List[Decimal], k: int, cake_size: Decimal
+) -> (Decimal, Decimal):
+    assert len(cuts) == 3, "Should have 3 cut points"
+
+    l, m, r = cuts
+
+    start: Decimal = to_decimal(-1)
+    end: Decimal = to_decimal(-1)
+
+    if k == 0:
+        start = to_decimal(0)
+        end = to_decimal(l)
+    elif k == 1:
+        start = to_decimal(l)
+        end = to_decimal(m)
+    elif k == 2:
+        start = to_decimal(m)
+        end = to_decimal(r)
+    elif k == 3:
+        start = to_decimal(r)
+        end = to_decimal(cake_size)
+
+    return start, end
+
+
+def _check_if_weakly_prefer_piece_k(
+    preference: List[Segment],
+    epsilon: Decimal,
+    start: Decimal,
+    end: Decimal,
+    alpha: Decimal,
+) -> bool:
+    return alpha <= get_double_prime_for_interval(
+        segments=preference, epsilon=epsilon, start=start, end=end
+    )
