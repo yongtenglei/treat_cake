@@ -1,8 +1,8 @@
 from decimal import Decimal
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from treat_cake.base_types import Segment, AssignedSlice, Preferences
-from treat_cake.type_helper import to_decimal, almost_equal
+from treat_cake.base_types import AssignedSlice, Preferences, Segment
+from treat_cake.type_helper import almost_equal, to_decimal
 from treat_cake.valuation import get_double_prime_for_interval, get_values_for_cuts
 
 
@@ -63,7 +63,7 @@ def _find_cuts_and_k_for_condition_a(
     cake_size: int,
     preference: List[Segment],
     epsilon: Decimal,
-    tolerance: Decimal = 1e-3,
+    tolerance: Decimal = to_decimal(1e-3),
 ) -> Dict[str, Any]:
     """Could simplify code, but lost readability."""
 
@@ -565,7 +565,250 @@ def _handle_one_between(
     cake_size: Decimal,
     tolerance: Decimal,
 ) -> List[Decimal]:
-    print(f"Handling one piece between: ({k}, {k_prime})")
+    # if k, k' = (0, 2)
+    #    0        1        2            3
+    # [0, l] | [l, m] | [m, r] | [r, cake_size]
+    #                                   1
+    # give l, find m(l), where v_1([l, m(l)]) = alpha (second piece)
+    # keep move l, making v_i([0, l]) = v_i([m(l), r])
+    if k == 0 and k_prime == 2:
+
+        def find_m_given_l(
+            l: Decimal,
+            r: Decimal,
+            alpha: Decimal,
+            preference_1: List[Segment],
+            epsilon: Decimal,
+        ) -> Decimal:
+            """find m given l: m(l), so that v_1(l, m(l)) = alpha (second piece)"""
+            return _binary_search_left_to_right(
+                preference=preference_1,
+                epsilon=epsilon,
+                start=to_decimal(l),
+                end=to_decimal(r),
+                target=alpha,
+                tolerance=tolerance,
+            )
+
+        def _binary_search_case_0_2(
+            preference_1: List[Segment],
+            preference_i: List[Segment],
+            epsilon: Decimal,
+            l_start: Decimal,
+            l_end: Decimal,
+            alpha: Decimal,
+            cake_size: Decimal,
+            tolerance: Decimal = to_decimal(1e-10),
+            max_iterations: int = 1000,
+        ) -> Decimal:
+            original_l_end = to_decimal(l_end)  # namely r
+            iteration = 0
+
+            while l_end - l_start > tolerance and iteration < max_iterations:
+                l = (l_start + l_end) / 2
+                m_for_l = find_m_given_l(
+                    l=l,
+                    r=original_l_end,
+                    alpha=alpha,
+                    preference_1=preference_1,
+                    epsilon=epsilon,
+                )
+                # TODO: DELETE LATER FOR TESTING
+                # give l, find m(l), where v_1([l, m(l)]) = alpha (second piece) = v_1([r, cake_size])
+                assert almost_equal(
+                    a=get_double_prime_for_interval(
+                        segments=preference_1,
+                        epsilon=epsilon,
+                        start=l,
+                        end=m_for_l,
+                    ),
+                    b=get_double_prime_for_interval(
+                        segments=preference_1,
+                        epsilon=epsilon,
+                        start=original_l_end,
+                        end=to_decimal(cake_size),
+                    ),
+                    tolerance=tolerance,
+                )
+
+                searched_value = get_double_prime_for_interval(
+                    segments=preference_i, epsilon=epsilon, start=to_decimal(0), end=l
+                )
+                print("***********")
+                print("Handle_one_between: binary search")
+                print(f"{l=}, {searched_value=}, {l=}, {m_for_l=}")
+                print("***********")
+
+                # Want v_i[(0, l)]= v_i[(m(l), r)]
+                desired_value = get_double_prime_for_interval(
+                    segments=preference_i,
+                    epsilon=epsilon,
+                    start=m_for_l,
+                    end=original_l_end,
+                )
+                if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+                    return l
+
+                if searched_value < desired_value:
+                    l_start = l
+                else:
+                    l_end = l
+
+                iteration = iteration + 1
+
+            return to_decimal((l_start + l_end) / 2)
+
+        r = _binary_search_right_to_left(
+            preference=preference_1,
+            epsilon=epsilon,
+            start=to_decimal(0),
+            end=cake_size,
+            target=alpha,
+            tolerance=tolerance,
+        )
+        l_start = to_decimal(0)
+        l_end = r
+        l = _binary_search_case_0_2(
+            preference_1=preference_1,
+            preference_i=preference_i,
+            epsilon=epsilon,
+            l_start=l_start,
+            l_end=l_end,
+            alpha=alpha,
+            cake_size=cake_size,
+            tolerance=tolerance,
+        )
+        m = find_m_given_l(
+            l=l,
+            r=r,
+            alpha=alpha,
+            preference_1=preference_1,
+            epsilon=epsilon,
+        )
+        return [l, m, r]
+
+    # if k, k' = (1, 3)
+    #    0        1        2            3
+    # [0, l] | [l, m] | [m, r] | [r, cake_size]
+    #    1
+    # give r, find m(r), where v_1([m(r), r]) = alpha (third piece) = v_1([(0, l)])
+    # keep move r, making v_i([l, m(r)]) = v_i([r, cake_size])
+    if k == 1 and k_prime == 3:
+
+        def find_m_given_r(
+            l: Decimal,
+            r: Decimal,
+            alpha: Decimal,
+            preference_1: List[Segment],
+            epsilon: Decimal,
+        ) -> Decimal:
+            """find m given r: m(r), so that v_1(m(r), r) = alpha (third piece)"""
+            return _binary_search_left_to_right(
+                preference=preference_1,
+                epsilon=epsilon,
+                start=to_decimal(l),
+                end=to_decimal(r),
+                target=alpha,
+                tolerance=tolerance,
+            )
+
+        def _binary_search_case_1_3(
+            preference_1: List[Segment],
+            preference_i: List[Segment],
+            epsilon: Decimal,
+            r_start: Decimal,
+            r_end: Decimal,
+            alpha: Decimal,
+            cake_size: Decimal,
+            tolerance: Decimal = to_decimal(1e-10),
+            max_iterations: int = 1000,
+        ) -> Decimal:
+            original_r_start = to_decimal(r_start)  # namely l
+            iteration = 0
+
+            while r_end - r_start > tolerance and iteration < max_iterations:
+                r = (r_start + r_end) / 2
+                m_for_r = find_m_given_r(
+                    l=original_r_start,
+                    r=r,
+                    alpha=alpha,
+                    preference_1=preference_1,
+                    epsilon=epsilon,
+                )
+                # TODO: DELETE LATER FOR TESTING
+                # give r, find m(r), where v_1([m(r), r]) = alpha (third piece) = v_1([(0, l)])
+                assert almost_equal(
+                    a=get_double_prime_for_interval(
+                        segments=preference_1,
+                        epsilon=epsilon,
+                        start=m_for_r,
+                        end=r,
+                    ),
+                    b=get_double_prime_for_interval(
+                        segments=preference_1,
+                        epsilon=epsilon,
+                        start=to_decimal(0),
+                        end=original_r_start,
+                    ),
+                    tolerance=tolerance,
+                )
+
+                searched_value = get_double_prime_for_interval(
+                    segments=preference_i,
+                    epsilon=epsilon,
+                    start=r,
+                    end=to_decimal(cake_size),
+                )
+                print("***********")
+                print("Handle_one_between: binary search")
+                print(f"{r=}, {searched_value=}, {r=}, {cake_size=}")
+                print("***********")
+
+                # Want v_i([l, m(r)])= v_i([(r, cake_size])
+                desired_value = get_double_prime_for_interval(
+                    segments=preference_i, epsilon=epsilon, start=l, end=m_for_r
+                )
+
+                if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+                    return r
+
+                if searched_value < desired_value:
+                    r_end = r
+                else:
+                    r_start = r
+
+                iteration = iteration + 1
+
+            return to_decimal((r_start + r_end) / 2)
+
+        l = _binary_search_left_to_right(
+            preference=preference_1,
+            epsilon=epsilon,
+            start=to_decimal(0),
+            end=cake_size,
+            target=alpha,
+            tolerance=tolerance,
+        )
+        r_start = to_decimal(l)
+        l_end = to_decimal(cake_size)
+        r = _binary_search_case_1_3(
+            preference_1=preference_1,
+            preference_i=preference_i,
+            epsilon=epsilon,
+            r_start=r_start,
+            r_end=l_end,
+            cake_size=to_decimal(cake_size),
+            alpha=alpha,
+            tolerance=tolerance,
+        )
+        m = find_m_given_r(
+            l=l,
+            r=r,
+            alpha=alpha,
+            preference_1=preference_1,
+            epsilon=epsilon,
+        )
+        return [l, m, r]
 
 
 def _handle_leftmost_rightmost(
@@ -578,6 +821,38 @@ def _handle_leftmost_rightmost(
     cake_size: Decimal,
     tolerance: Decimal,
 ) -> List[Decimal]:
+    # if k, k' = (0, 3)
+    #    0        1        2            3
+    # [0, l] | [l, m] | [m, r] | [r, cake_size]
+
+    def find_m_and_r_given_l(
+        l: Decimal,
+        cake_size: Decimal,
+        alpha: Decimal,
+        preference_1: List[Segment],
+        epsilon: Decimal,
+    ) -> List[Decimal]:
+        """find m and r given l: m(l) and r(l), so that v_1([l, m(l)]) = v_1([m(l), r(l)]) = alpha"""
+        m_for_l = _binary_search_left_to_right(
+            preference=preference_1,
+            epsilon=epsilon,
+            start=to_decimal(l),
+            end=to_decimal(cake_size),
+            target=alpha,
+            tolerance=tolerance,
+        )
+
+        r_for_l = _binary_search_left_to_right(
+            preference=preference_1,
+            epsilon=epsilon,
+            start=to_decimal(m_for_l),
+            end=to_decimal(cake_size),
+            target=alpha,
+            tolerance=tolerance,
+        )
+
+        return [m_for_l, r_for_l]
+
     print(f"Handling leftmost and rightmost: ({k}, {k_prime})")
 
 
@@ -597,9 +872,8 @@ def _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
     preference_1: List[Segment],
     preference_i: List[Segment],
     epsilon: Decimal,
-    tolerance: Decimal = 1e-3,
+    tolerance: Decimal = to_decimal("1e-3"),
 ) -> Dict[str, Any]:
-
     alpha = to_decimal(alpha)
     start = to_decimal(0)
     end = to_decimal(cake_size)
