@@ -5,30 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48a125f2-163c-4b5f-9a30-5d9a99754e09" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/pythonProject.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/algorithms/alex_aviad_condition/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/algorithms/alex_aviad_condition/condition_a.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/algorithms/alex_aviad_condition/condition_b.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad_hepler.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad_hepler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad_condition/condition_b.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad_condition/condition_b.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad_hepler_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad_hepler_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms/algorithm_test_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/algorithm_test_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms/algorithm_test_utils_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/algorithm_test_utils_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms/algorithm_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/algorithm_types.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms/cut_and_choose.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/cut_and_choose.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms/cut_and_choose_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/cut_and_choose_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/base_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/base_types.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cut.py" beforeDir="false" afterPath="$PROJECT_DIR$/cut.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/type_helper_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/type_helper_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/valuation.py" beforeDir="false" afterPath="$PROJECT_DIR$/valuation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/valuation_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/valuation_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/values.py" beforeDir="false" afterPath="$PROJECT_DIR$/values.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/values_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/values_test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -326,7 +304,7 @@
       <workItem from="1720443618646" duration="126000" />
       <workItem from="1720443748424" duration="142000" />
       <workItem from="1720443894645" duration="647000" />
-      <workItem from="1720444543821" duration="2980000" />
+      <workItem from="1720444543821" duration="3758000" />
     </task>
     <servers />
   </component>
@@ -413,6 +391,6 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/treat_cake$main.coverage" NAME="main Coverage Results" MODIFIED="1718991756444" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/treat_cake" />
     <SUITE FILE_PATH="coverage/treat_cake$algorithm_test_utils.coverage" NAME="algorithm_test_utils Coverage Results" MODIFIED="1718987096812" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/treat_cake/algorithms" />
-    <SUITE FILE_PATH="coverage/treat_cake$.coverage" NAME=" Coverage Results" MODIFIED="1720446854713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.." />
+    <SUITE FILE_PATH="coverage/treat_cake$.coverage" NAME=" Coverage Results" MODIFIED="1720449752311" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.." />
   </component>
 </project>

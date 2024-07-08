@@ -5,11 +5,14 @@ import pytest
 from ..type_helper import to_decimal
 from ..valuation import get_double_prime_for_interval, get_values_for_cuts
 from .alex_aviad_condition.condition_a import _find_cuts_and_k_for_condition_a
-from .alex_aviad_hepler import (_binary_search_left_to_right,
-                                _binary_search_right_to_left, equipartition)
+from .alex_aviad_hepler import (
+    _binary_search_left_to_right,
+    _binary_search_right_to_left,
+    equipartition,
+)
 from .algorithm_test_utils import gen_flat_seg, gen_sloped_seg
 
-CAKE_SIZE: int = to_decimal(1)
+CAKE_SIZE: Decimal = to_decimal(1)
 EPSILON: Decimal = to_decimal(1e-15)
 TOLERANCE: Decimal = to_decimal(1e-10)
 

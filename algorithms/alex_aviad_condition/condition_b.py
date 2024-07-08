@@ -4,9 +4,11 @@ from typing import Any, Dict, List, Tuple
 from ...base_types import AssignedSlice, Preferences, Segment
 from ...type_helper import almost_equal, to_decimal
 from ...valuation import get_double_prime_for_interval
-from ..alex_aviad_hepler import (_binary_search_left_to_right,
-                                 _binary_search_right_to_left,
-                                 get_range_by_cuts)
+from ..alex_aviad_hepler import (
+    _binary_search_left_to_right,
+    _binary_search_right_to_left,
+    get_range_by_cuts,
+)
 
 POSSIBLE_K_AND_K_PRIME_COMBINATION_ON_CONDITION_B = [
     (0, 1, [2, 3]),
@@ -323,6 +325,10 @@ def _handle_adjacent(
             first_half_value, second_half_value, tolerance=tolerance
         ), "Should have almost the same value under the view of agent i"
 
+        return [l, m, r]
+    else:
+        raise ValueError("Invalid k and k'")
+
 
 def _find_m_given_l(
     l: Decimal,
@@ -485,7 +491,7 @@ def _binary_search_case_1_3(
 
         # Want v_i([l, m(r)])= v_i([(r, cake_size])
         desired_value = get_double_prime_for_interval(
-            segments=preference_i, epsilon=epsilon, start=l, end=m_for_r
+            segments=preference_i, epsilon=epsilon, start=original_r_start, end=m_for_r
         )
 
         if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
@@ -584,6 +590,8 @@ def _handle_one_between(
             tolerance=tolerance,
         )
         return [l, m, r]
+    else:
+        raise ValueError("Invalid k and k'")
 
 
 def _find_m_and_r_given_l(
@@ -1162,54 +1170,51 @@ def _binary_search_find_m(
             tolerance=tolerance,
         )
         # TODO: DELETE LATER FOR TESTING
-        # give r, find l(r) and m(r), so that v_1([l(r), m(r)]) = v_1([m(r), r]) = alpha
+        # give m, l(m) and r(m), so that v_1([l(m), m]) = v_1([m, r(m)]) = alpha
         assert almost_equal(
             a=get_double_prime_for_interval(
                 segments=preference_1,
                 epsilon=epsilon,
-                start=l_for_r,
-                end=m_for_r,
+                start=l_for_m,
+                end=m,
             ),
             b=get_double_prime_for_interval(
                 segments=preference_1,
                 epsilon=epsilon,
-                start=m_for_r,
-                end=r,
+                start=m,
+                end=r_for_m,
             ),
             tolerance=tolerance,
         ), "Should work"
 
         searched_value = get_double_prime_for_interval(
-            segments=preference_i,
-            epsilon=epsilon,
-            start=r,
-            end=to_decimal(cake_size),
+            segments=preference_i, epsilon=epsilon, start=cake_start, end=l_for_m
         )
 
         print("***********")
-        print(f"{r=}, {searched_value=}, {r=}, {cake_size=}")
+        print(f"{m=}, {searched_value=}, {cake_start=}, {l_for_m=}")
         print("***********")
 
-        # Want v_i([0, l(r)])= v_i([(r, cake_size])
+        # Want v_i([0, l(m)])= v_i([(r(m), cake_size])
         desired_value = get_double_prime_for_interval(
-            segments=preference_i, epsilon=epsilon, start=to_decimal(0), end=l_for_r
+            segments=preference_i, epsilon=epsilon, start=r_for_m, end=cake_end
         )
 
         if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
-            return r
+            return m
 
         if searched_value < desired_value:
-            m_end = r
+            m_start = m
         else:
-            m_start = r
+            m_end = m
 
         iteration = iteration + 1
 
     return to_decimal((m_start + m_end) / 2)
 
 
-def _expand_range_around_r(
-    found_r: Decimal,
+def _expand_range_around_m(
+    found_m: Decimal,
     preference_1: List[Segment],
     preference_i: List[Segment],
     epsilon: Decimal,
@@ -1221,11 +1226,11 @@ def _expand_range_around_r(
     cake_end = to_decimal(cake_size)
 
     # Expand the range to find the lower bound
-    lower_bound = found_r
+    lower_bound = found_m
     while lower_bound - epsilon >= cake_start:
         lower_bound_candidate = lower_bound - epsilon
-        l_for_r, m_for_r = _find_l_and_m_given_r(
-            r=lower_bound_candidate,
+        l_for_m, r_for_m = _find_l_and_r_given_m(
+            m=lower_bound_candidate,
             cake_size=to_decimal(cake_size),
             alpha=alpha,
             preference_1=preference_1,
@@ -1234,28 +1239,25 @@ def _expand_range_around_r(
         )
 
         # TODO: DELETE LATER FOR TESTING
-        # give r, find l(r) and m(r), so that v_1([l(r), m(r)]) = v_1([m(r), r]) = alpha
+        # give m, l(m) and r(m), so that v_1([l(m), m]) = v_1([m, r(m)]) = alpha
         assert almost_equal(
             a=get_double_prime_for_interval(
                 segments=preference_1,
                 epsilon=epsilon,
-                start=l_for_r,
-                end=m_for_r,
+                start=l_for_m,
+                end=lower_bound_candidate,
             ),
             b=get_double_prime_for_interval(
                 segments=preference_1,
                 epsilon=epsilon,
-                start=m_for_r,
-                end=lower_bound_candidate,
+                start=lower_bound_candidate,
+                end=r_for_m,
             ),
             tolerance=tolerance,
         ), "Should work"
 
         searched_value = get_double_prime_for_interval(
-            segments=preference_i,
-            epsilon=epsilon,
-            start=lower_bound_candidate,
-            end=to_decimal(cake_size),
+            segments=preference_i, epsilon=epsilon, start=cake_start, end=l_for_m
         )
 
         print("***********")
@@ -1264,9 +1266,9 @@ def _expand_range_around_r(
         )
         print("***********")
 
-        # Want v_i([0, l(r)])= v_i([(r, cake_size])
+        # Want v_i([0, l(m)])= v_i([(r(m), cake_size])
         desired_value = get_double_prime_for_interval(
-            segments=preference_i, epsilon=epsilon, start=to_decimal(0), end=l_for_r
+            segments=preference_i, epsilon=epsilon, start=r_for_m, end=cake_end
         )
 
         if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
@@ -1275,11 +1277,11 @@ def _expand_range_around_r(
             break
 
     # Expand the range to find the upper bound
-    upper_bound = found_r
+    upper_bound = found_m
     while upper_bound + epsilon <= cake_end:
         upper_bound_candidate = upper_bound + epsilon
-        l_for_r, m_for_r = _find_l_and_m_given_r(
-            r=upper_bound_candidate,
+        l_for_m, r_for_m = _find_l_and_r_given_m(
+            m=upper_bound_candidate,
             cake_size=to_decimal(cake_size),
             alpha=alpha,
             preference_1=preference_1,
@@ -1288,39 +1290,34 @@ def _expand_range_around_r(
         )
 
         # TODO: DELETE LATER FOR TESTING
-        # give r, find l(r) and m(r), so that v_1([l(r), m(r)]) = v_1([m(r), r]) = alpha
+        # give m, l(m) and r(m), so that v_1([l(m), m]) = v_1([m, r(m)]) = alpha
         assert almost_equal(
             a=get_double_prime_for_interval(
                 segments=preference_1,
                 epsilon=epsilon,
-                start=l_for_r,
-                end=m_for_r,
+                start=l_for_m,
+                end=upper_bound_candidate,
             ),
             b=get_double_prime_for_interval(
                 segments=preference_1,
                 epsilon=epsilon,
-                start=m_for_r,
-                end=upper_bound_candidate,
+                start=upper_bound_candidate,
+                end=r_for_m,
             ),
             tolerance=tolerance,
         ), "Should work"
 
         searched_value = get_double_prime_for_interval(
-            segments=preference_i,
-            epsilon=epsilon,
-            start=upper_bound_candidate,
-            end=to_decimal(cake_size),
+            segments=preference_i, epsilon=epsilon, start=cake_start, end=l_for_m
         )
 
         print("***********")
-        print(
-            f"{upper_bound_candidate=}, {searched_value=}, {upper_bound_candidate=}, {cake_size=}"
-        )
+        print(f"{upper_bound_candidate=}, {searched_value=}, {cake_start=}, {l_for_m=}")
         print("***********")
 
-        # Want v_i([0, l(r)])= v_i([(r, cake_size])
+        # Want v_i([0, l(m)])= v_i([(r(m), cake_size])
         desired_value = get_double_prime_for_interval(
-            segments=preference_i, epsilon=epsilon, start=to_decimal(0), end=l_for_r
+            segments=preference_i, epsilon=epsilon, start=r_for_m, end=cake_end
         )
 
         if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
@@ -1331,31 +1328,31 @@ def _expand_range_around_r(
     return lower_bound, upper_bound
 
 
-def _find_range_r(
+def _find_range_m(
     preference_1: List[Segment],
     preference_i: List[Segment],
     epsilon: Decimal,
-    r_start: Decimal,
-    r_end: Decimal,
+    m_start: Decimal,
+    m_end: Decimal,
     alpha: Decimal,
     cake_size: Decimal,
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
 ) -> Tuple[Decimal, Decimal]:
-    found_l = _binary_search_find_r(
+    found_m = _binary_search_find_m(
         preference_1=preference_1,
         preference_i=preference_i,
         epsilon=epsilon,
-        r_start=r_start,
-        r_end=r_end,
+        m_start=m_start,
+        m_end=m_end,
         alpha=alpha,
         cake_size=cake_size,
         tolerance=tolerance,
         max_iterations=max_iterations,
     )
 
-    lower_bound, upper_bound = _expand_range_around_r(
-        found_r=found_l,
+    lower_bound, upper_bound = _expand_range_around_m(
+        found_m=found_m,
         preference_1=preference_1,
         preference_i=preference_i,
         epsilon=epsilon,
@@ -1365,6 +1362,21 @@ def _find_range_r(
     )
 
     return lower_bound, upper_bound
+
+
+def _find_best_cuts_by_range(
+    lower_l: Decimal,
+    upper_l: Decimal,
+    lower_m: Decimal,
+    upper_m: Decimal,
+    lower_r: Decimal,
+    upper_r: Decimal,
+) -> List[Decimal]:
+    assert lower_l <= upper_l, "Wrong l cut range"
+    assert lower_m <= upper_m, "Wrong m cut range"
+    assert lower_r <= upper_r, "Wrong r cut range"
+
+    return [upper_l, (lower_m + upper_m) / 2, lower_r]
 
 
 def _handle_leftmost_rightmost(
@@ -1388,7 +1400,7 @@ def _handle_leftmost_rightmost(
         tolerance=tolerance,
     )
 
-    lower_r, lower_r = _find_range_r(
+    lower_r, upper_r = _find_range_r(
         preference_1=preference_1,
         preference_i=preference_i,
         epsilon=epsilon,
@@ -1397,6 +1409,26 @@ def _handle_leftmost_rightmost(
         alpha=alpha,
         cake_size=cake_size,
         tolerance=tolerance,
+    )
+
+    lower_m, upper_m = _find_range_m(
+        preference_1=preference_1,
+        preference_i=preference_i,
+        epsilon=epsilon,
+        m_start=to_decimal(0),
+        m_end=to_decimal(cake_size),
+        alpha=alpha,
+        cake_size=cake_size,
+        tolerance=tolerance,
+    )
+
+    return _find_best_cuts_by_range(
+        lower_l=lower_l,
+        upper_l=upper_l,
+        lower_m=lower_m,
+        upper_m=upper_m,
+        lower_r=lower_r,
+        upper_r=upper_r,
     )
     # if k, k' = (0, 3)
     #    0        1        2            3
