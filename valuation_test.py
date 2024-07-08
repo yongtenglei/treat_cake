@@ -1,17 +1,9 @@
-from decimal import Decimal
-
 import pytest
 
-from treat_cake.algorithms.algorithm_test_utils import gen_flat_seg, gen_sloped_seg
-from treat_cake.type_helper import to_decimal
-from treat_cake.valuation import (
-    _v_prime,
-    _v,
-    overline,
-    underline,
-    _v_double_prime,
-    get_double_prime_for_interval,
-)
+from .algorithms.algorithm_test_utils import gen_flat_seg, gen_sloped_seg
+from .type_helper import to_decimal
+from .valuation import (_v, _v_double_prime, _v_prime,
+                        get_double_prime_for_interval, overline, underline)
 
 EPSILON = to_decimal("1e-6")
 TOLERANCE = to_decimal("1e-4")

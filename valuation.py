@@ -1,9 +1,9 @@
 from decimal import Decimal, getcontext
 from typing import List
 
-from treat_cake.base_types import Segment
-from treat_cake.type_helper import to_decimal
-from treat_cake.values import get_value_for_interval
+from .base_types import Segment
+from .type_helper import to_decimal
+from .values import get_value_for_interval
 
 getcontext().prec = 15
 
@@ -28,7 +28,6 @@ def _v_prime(
 def get_double_prime_for_interval(
     segments: List[Segment], epsilon: Decimal, start: Decimal, end: Decimal
 ) -> Decimal:
-
     assert 0 <= start <= end, "start or end out of range"
 
     # Make sure using Decimal
@@ -71,7 +70,6 @@ def get_double_prime_for_interval(
 def _v_double_prime(
     segments: List[Segment], delta: Decimal, a: Decimal, b: Decimal
 ) -> Decimal:
-
     # Letting delta := epsilon, so,
     # any epsilon-envy-free allocation for (v_double_prime) is 5*epsilon-envy-free for (v_prime) for each agent.
 

@@ -1,10 +1,9 @@
-from itertools import permutations
-
-from treat_cake.algorithms.algorithm_test_utils import generate_all_possible_allocations
+from ..type_helper import to_decimal
+from .algorithm_test_utils import generate_all_possible_allocations
 
 
 def test_all_allocations():
-    cuts = [0.25, 0.5, 0.75]
+    cuts = [to_decimal(0.25), to_decimal(0.5), to_decimal(0.75)]
     num_agents = 4
 
     generated_allocations = [

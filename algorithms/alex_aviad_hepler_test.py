@@ -1,16 +1,17 @@
+from decimal import Decimal
+
 import pytest
 
-from treat_cake.algorithms.alex_aviad_hepler import (
-    _binary_search_left_to_right,
-    _binary_search_right_to_left,
-    _find_cuts_and_k_for_condition_a,
-    equipartition,
-)
-from treat_cake.algorithms.alex_aviad_test import CAKE_SIZE, EPSILON, TOLERANCE
-from treat_cake.algorithms.algorithm_test_utils import gen_flat_seg, gen_sloped_seg
-from treat_cake.type_helper import to_decimal
-from treat_cake.valuation import get_double_prime_for_interval, get_values_for_cuts
-from treat_cake.values import get_values_for_cuts_origin
+from ..type_helper import to_decimal
+from ..valuation import get_double_prime_for_interval, get_values_for_cuts
+from .alex_aviad_condition.condition_a import _find_cuts_and_k_for_condition_a
+from .alex_aviad_hepler import (_binary_search_left_to_right,
+                                _binary_search_right_to_left, equipartition)
+from .algorithm_test_utils import gen_flat_seg, gen_sloped_seg
+
+CAKE_SIZE: int = to_decimal(1)
+EPSILON: Decimal = to_decimal(1e-15)
+TOLERANCE: Decimal = to_decimal(1e-10)
 
 
 def test_binary_search_left_to_right():
@@ -259,4 +260,4 @@ def test_equipartition():
     for i in range(len(cuts)):
         assert cuts[i] == pytest.approx(
             expected_cuts[i], abs=TOLERANCE
-        ), f"Wrong cuts {cut[i]} yielded, expected {expected_cuts[i]}, got {cut[i]}"
+        ), f"Wrong cuts {cut[i]} yielded, expected {expected_cuts[i]}, got {cuts[i]}"

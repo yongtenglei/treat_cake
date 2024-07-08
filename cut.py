@@ -1,9 +1,9 @@
 from decimal import Decimal
 from typing import List
 
-from treat_cake.base_types import Preferences, FrozenUnassignedSlice, Slice
-from treat_cake.valuation import get_double_prime_for_interval
-from treat_cake.values import get_value_for_interval
+from .base_types import FrozenUnassignedSlice, Preferences, Slice
+from .valuation import get_double_prime_for_interval
+from .values import get_value_for_interval
 
 
 def cut_slice_origin(

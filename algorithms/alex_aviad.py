@@ -1,19 +1,13 @@
 from decimal import Decimal
-from typing import Dict, Any
+from typing import Any, Dict
 
-from .algorithm_test_utils import (
-    find_envy_free_allocation,
-)
-from .alex_aviad_hepler import (
-    check_condition_a,
-    check_condition_b,
-    find_allocation_on_condition_a,
-    find_allocation_on_condition_b,
-    equipartition,
-)
 from ..base_types import Preferences
 from ..type_helper import to_decimal
 from ..valuation import get_double_prime_for_interval
+from .alex_aviad_condition.condition_a import check_condition_a
+from .alex_aviad_condition.condition_b import check_condition_b
+from .alex_aviad_hepler import equipartition
+from .algorithm_test_utils import find_envy_free_allocation
 
 
 def alex_aviad(
@@ -41,8 +35,8 @@ def alex_aviad(
         preferences=preferences,
         epsilon=epsilon,
     )
-    # if solution is not None:
-    #     return {"solution": solution, "steps": steps}
+    if solution is not None:
+        return {"solution": solution, "steps": steps}
 
     alpha_underline = get_double_prime_for_interval(
         segments=preferences[0], epsilon=epsilon, start=to_decimal(0), end=cuts[0]

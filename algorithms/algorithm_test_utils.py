@@ -1,11 +1,10 @@
+import random
 from decimal import Decimal
 from itertools import permutations
-
-from ..base_types import Segment, AssignedSlice, Preferences
 from typing import List
-import random
 
-from ..cut import cut_slice, cut_slice_origin
+from ..base_types import AssignedSlice, Preferences, Segment
+from ..cut import cut_slice
 from ..type_helper import to_decimal
 
 halfway_point_of_triangle_area = 70.710678
@@ -28,7 +27,6 @@ def gen_flat_seg(start: Decimal, end: Decimal, value: Decimal) -> Segment:
 def gen_sloped_seg(
     start: Decimal, end: Decimal, start_value: Decimal, end_value: Decimal
 ) -> Segment:
-
     start = to_decimal(start)
     end = to_decimal(end)
     start_value = to_decimal(start_value)
@@ -131,7 +129,6 @@ def find_envy_free_allocation(
     preferences: Preferences,
     epsilon,
 ) -> List[AssignedSlice]:
-
     cake_size = to_decimal(cake_size)
 
     for allocation in generate_all_possible_allocations(cuts, num_agents):

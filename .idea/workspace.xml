@@ -4,47 +4,154 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9e8b0c5b-81ad-453f-8dd7-cc971f0b6e32" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+    <list default="true" id="48a125f2-163c-4b5f-9a30-5d9a99754e09" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/.idea/pythonProject.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/valuation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/algorithms/alex_aviad_condition/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/algorithms/alex_aviad_condition/condition_a.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/algorithms/alex_aviad_condition/condition_b.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad_hepler.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad_hepler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad_hepler_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad_hepler_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/algorithm_test_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/algorithm_test_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/algorithm_test_utils_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/algorithm_test_utils_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/algorithm_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/algorithm_types.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/cut_and_choose.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/cut_and_choose.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/cut_and_choose_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/cut_and_choose_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/base_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/base_types.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cut.py" beforeDir="false" afterPath="$PROJECT_DIR$/cut.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/type_helper_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/type_helper_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/valuation.py" beforeDir="false" afterPath="$PROJECT_DIR$/valuation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/valuation_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/valuation_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/values.py" beforeDir="false" afterPath="$PROJECT_DIR$/values.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/values_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/values_test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/algorithms/alex_aviad_hepler_test.py" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="OptimizeOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 2
+  &quot;associatedIndex&quot;: 3
 }</component>
-  <component name="ProjectId" id="2hc19KcdcJXjzTE8On6NHFQx3C7" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectId" id="2huZr8NlqVqm93wCAJYx39Hzmkb" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python tests.Python tests for Alex_test.test_equipartition.executor": "Run",
+    "Python tests.Python tests for Alex_test.test_equipartition_one_piece.executor": "Run",
+    "Python tests.Python tests for Alex_test.test_equipartition_seesaw_like_graph.executor": "Run",
+    "Python tests.Python tests for Alex_test.test_equipartition_seesaw_sloped_graph.executor": "Run",
+    "Python tests.Python tests for Alex_test.test_equipartition_two_piece.executor": "Run",
+    "Python tests.Python tests for Alex_test.test_gen_flat_seg_quarter.executor": "Run",
+    "Python tests.Python tests for alex_aviad_hepler_test.test_binary_search.executor": "Run",
+    "Python tests.Python tests for alex_aviad_hepler_test.test_binary_search_left_to_right.executor": "Run",
+    "Python tests.Python tests for alex_aviad_hepler_test.test_binary_search_right_to_left.executor": "Run",
+    "Python tests.Python tests for alex_aviad_hepler_test.test_find_cuts_for_condition_a.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_Alex_Aviad.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_alex_aviad.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_alex_aviad_generic_case.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_alex_aviad_generic_case_should_fail.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_alex_aviad_same_evaluations_case.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_alex_aviad_using_original_evaluation_func.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_equipartition.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_equipartition_one_piece.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_equipartition_one_piece_flat.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_equipartition_one_piece_slope.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_equipartition_seesaw_like_graph.executor": "Run",
+    "Python tests.Python tests for alex_aviad_test.test_equipartition_seesaw_sloped_graph.executor": "Run",
+    "Python tests.Python tests for algorithm_test_utils_test.test_all_allocations.executor": "Run",
+    "Python tests.Python tests for algorithms.alex_aviad_hepler_test.test_equipartition.executor": "Run",
+    "Python tests.Python tests for algorithms.alex_aviad_test.test_alex_aviad_generic_case_should_fail.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.TestCutAndChoose.test_splits_uniform_flat_value_graph_evenly_in_half.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_randomly_generated_preferences_fairly.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_randomly_generated_preferences_fairly_on_smaller_cake_size.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_seesaw_like_graph.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_seesaw_like_graph_evenly_in_half.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_seesaw_like_sloped_graph.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_seesaw_like_sloped_graph_evenly.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_tricky_case.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_tricky_case_evenly.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_tricky_sloped_case.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_tricky_sloped_case_evenly.executor": "Run",
+    "Python tests.Python tests for cut_and_choose_test.test_splits_uniform_flat_value_graph_evenly_in_half.executor": "Run",
+    "Python tests.Python tests for type_helper_test.test_to_decimal.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_cal.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_hi.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_overline.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_overline_small_range.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_tmp.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_underline.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_double_prime.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_double_prime_one_seg.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_double_prime_one_seg_by_interval.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_double_prime_one_seg_by_interval_2.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_double_prime_one_seg_by_interval_partial_case.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_double_prime_one_seg_by_interval_partial_case_1.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_double_prime_one_seg_by_interval_partial_case_2.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_double_prime_two_seesaw_like_segs.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_double_prime_various_cases.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_prime.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_prime.test_cal.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_prime_seesaw_like_gragh.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_prime_two_segs.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_seesaw_like_gragh.executor": "Run",
+    "Python tests.Python tests for valuation_test.test_v_two_segs.executor": "Run",
+    "Python tests.Python tests for values_test.test_find_cut_line_by_percent.executor": "Run",
+    "Python.algorithm_test_utils.executor": "Run",
+    "Python.main.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/rey/UoE/DISS/codes/treat_cake",
     "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.stylelint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.stylelint": "",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "run.code.analysis.last.selected.profile": "aDefault",
+    "settings.editor.selected.configurable": "com.intellij.pycharm.community.ide.impl.configuration.PythonContentEntriesConfigurable",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/treat_cake" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/treat_cake" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python tests.Python tests for valuation_test.test_v_double_prime_various_cases">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="pythonProject" />
       <option name="ENV_FILES" value="" />
@@ -54,8 +161,9 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="cake" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
@@ -68,6 +176,103 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="Python tests for alex_aviad_hepler_test.test_find_cuts_for_condition_a" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="treat_cake" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/treat_cake/algorithms" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;alex_aviad_hepler_test.test_find_cuts_for_condition_a&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for alex_aviad_test.test_alex_aviad_same_evaluations_case" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="treat_cake" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/treat_cake/algorithms" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;-s&quot;" />
+      <option name="_new_target" value="&quot;alex_aviad_test.test_alex_aviad_same_evaluations_case&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for algorithms.alex_aviad_hepler_test.test_equipartition" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="pythonProject" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.." />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;algorithms.alex_aviad_hepler_test.test_equipartition&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for algorithms.alex_aviad_test.test_alex_aviad_generic_case_should_fail" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="pythonProject" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.." />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;algorithms.alex_aviad_test.test_alex_aviad_generic_case_should_fail&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for valuation_test.test_v_double_prime_various_cases" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="pythonProject" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.." />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;valuation_test.test_v_double_prime_various_cases&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.main" />
+      <item itemvalue="Python tests.Python tests for algorithms.alex_aviad_hepler_test.test_equipartition" />
+      <item itemvalue="Python tests.Python tests for algorithms.alex_aviad_test.test_alex_aviad_generic_case_should_fail" />
+      <item itemvalue="Python tests.Python tests for valuation_test.test_v_double_prime_various_cases" />
+      <item itemvalue="Python tests.Python tests for alex_aviad_hepler_test.test_find_cuts_for_condition_a" />
+      <item itemvalue="Python tests.Python tests for alex_aviad_test.test_alex_aviad_same_evaluations_case" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python tests.Python tests for valuation_test.test_v_double_prime_various_cases" />
+        <item itemvalue="Python tests.Python tests for algorithms.alex_aviad_hepler_test.test_equipartition" />
+        <item itemvalue="Python tests.Python tests for algorithms.alex_aviad_test.test_alex_aviad_generic_case_should_fail" />
+        <item itemvalue="Python tests.Python tests for alex_aviad_test.test_alex_aviad_same_evaluations_case" />
+        <item itemvalue="Python tests.Python tests for alex_aviad_hepler_test.test_find_cuts_for_condition_a" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -80,19 +285,134 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="9e8b0c5b-81ad-453f-8dd7-cc971f0b6e32" name="Changes" comment="" />
-      <created>1717878399459</created>
+      <changelist id="48a125f2-163c-4b5f-9a30-5d9a99754e09" name="Changes" comment="" />
+      <created>1718446119077</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1717878399459</updated>
-      <workItem from="1717878402450" duration="1669000" />
-      <workItem from="1718375586126" duration="5453000" />
-      <workItem from="1718434903494" duration="69000" />
-      <workItem from="1718435078276" duration="119000" />
+      <updated>1718446119077</updated>
+      <workItem from="1718446120108" duration="287000" />
+      <workItem from="1718446413850" duration="42000" />
+      <workItem from="1718446461889" duration="22000" />
+      <workItem from="1718446489372" duration="117000" />
+      <workItem from="1718446611970" duration="154000" />
+      <workItem from="1718446771538" duration="62000" />
+      <workItem from="1718446841121" duration="16000" />
+      <workItem from="1718446862854" duration="266000" />
+      <workItem from="1718447138591" duration="102000" />
+      <workItem from="1718447245640" duration="182000" />
+      <workItem from="1718447436751" duration="176000" />
+      <workItem from="1718447619887" duration="183000" />
+      <workItem from="1718447809535" duration="34000" />
+      <workItem from="1718447848468" duration="216000" />
+      <workItem from="1718448070999" duration="70000" />
+      <workItem from="1718448147832" duration="24000" />
+      <workItem from="1718448177695" duration="303000" />
+      <workItem from="1718448484823" duration="239000" />
+      <workItem from="1718448731066" duration="37000" />
+      <workItem from="1718448773750" duration="190000" />
+      <workItem from="1718448970516" duration="36549000" />
+      <workItem from="1718728887169" duration="42462000" />
+      <workItem from="1718988068018" duration="13820000" />
+      <workItem from="1719258307677" duration="15000" />
+      <workItem from="1719258326572" duration="51494000" />
+      <workItem from="1719478297291" duration="2646000" />
+      <workItem from="1719481282836" duration="83307000" />
+      <workItem from="1720122177614" duration="7690000" />
+      <workItem from="1720190966146" duration="1190000" />
+      <workItem from="1720192166993" duration="29046000" />
+      <workItem from="1720366983035" duration="4216000" />
+      <workItem from="1720389929440" duration="3319000" />
+      <workItem from="1720443375338" duration="239000" />
+      <workItem from="1720443618646" duration="126000" />
+      <workItem from="1720443748424" duration="142000" />
+      <workItem from="1720443894645" duration="647000" />
+      <workItem from="1720444543821" duration="2980000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/valuation_bak.py</url>
+          <line>108</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/valuation_bak.py</url>
+          <line>10</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/valuation_bak.py</url>
+          <line>23</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/valuation_bak.py</url>
+          <line>120</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/valuation_bak.py</url>
+          <line>67</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/valuation_bak.py</url>
+          <line>71</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/valuation_bak.py</url>
+          <line>76</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/valuation_test.py</url>
+          <line>160</line>
+          <option name="timeStamp" value="21" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/valuation_bak.py</url>
+          <line>126</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/valuation_bak.py</url>
+          <line>114</line>
+          <option name="timeStamp" value="25" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/values.py</url>
+          <line>167</line>
+          <option name="timeStamp" value="34" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/treat_cake/values.py</url>
+          <line>169</line>
+          <option name="timeStamp" value="36" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/treat_cake$main.coverage" NAME="main Coverage Results" MODIFIED="1718991756444" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/treat_cake" />
+    <SUITE FILE_PATH="coverage/treat_cake$algorithm_test_utils.coverage" NAME="algorithm_test_utils Coverage Results" MODIFIED="1718987096812" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/treat_cake/algorithms" />
+    <SUITE FILE_PATH="coverage/treat_cake$.coverage" NAME=" Coverage Results" MODIFIED="1720446854713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.." />
   </component>
 </project>

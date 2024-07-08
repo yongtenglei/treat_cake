@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from treat_cake.type_helper import to_decimal
+from .type_helper import to_decimal
 
 
 def test_to_decimal():

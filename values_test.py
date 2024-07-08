@@ -1,8 +1,6 @@
-from typing import List
-
-from treat_cake.algorithms.algorithm_test_utils import gen_flat_seg
-from treat_cake.base_types import Segment
-from treat_cake.values import find_cut_line_by_percent
+from .algorithms.algorithm_test_utils import gen_flat_seg
+from .base_types import Segment
+from .values import find_cut_line_by_percent
 
 
 def test_find_cut_line_by_percent():
