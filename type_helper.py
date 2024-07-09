@@ -1,4 +1,6 @@
-from decimal import Decimal
+from decimal import Decimal, getcontext
+
+getcontext().prec = 15
 
 
 def to_decimal(value):

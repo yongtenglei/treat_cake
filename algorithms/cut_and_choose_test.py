@@ -2,11 +2,14 @@ from decimal import Decimal
 
 import pytest
 
-from ..base_types import AssignedSlice
-from .algorithm_test_utils import (check_if_envy_free_allocation_origin,
-                                   gen_flat_seg, gen_random_segs,
-                                   gen_sloped_seg,
-                                   halfway_point_of_triangle_area)
+from base_types import AssignedSlice
+from .algorithm_test_utils import (
+    check_if_envy_free_allocation_origin,
+    gen_flat_seg,
+    gen_random_segs,
+    gen_sloped_seg,
+    halfway_point_of_triangle_area,
+)
 from .cut_and_choose import cut_and_choose
 
 CAKE_SIZE = 100

@@ -2,8 +2,8 @@ from decimal import Decimal
 
 import pytest
 
-from ..type_helper import to_decimal
-from ..valuation import get_double_prime_for_interval, get_values_for_cuts
+from type_helper import to_decimal
+from valuation import get_double_prime_for_interval, get_values_for_cuts
 from .alex_aviad_condition.condition_a import _find_cuts_and_k_for_condition_a
 from .alex_aviad_hepler import (
     _binary_search_left_to_right,

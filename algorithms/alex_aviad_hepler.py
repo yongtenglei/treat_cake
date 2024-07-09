@@ -1,9 +1,9 @@
 from decimal import Decimal
 from typing import List, Tuple
 
-from ..base_types import Segment
-from ..type_helper import to_decimal
-from ..valuation import get_double_prime_for_interval
+from base_types import Segment
+from type_helper import to_decimal
+from valuation import get_double_prime_for_interval
 
 
 def _binary_search_left_to_right(
@@ -24,7 +24,7 @@ def _binary_search_left_to_right(
             preference, epsilon, original_start, mid
         )
         print("***********")
-        print(f"{mid=}, {searched_value=}, {start=}, {end=}")
+        print(f"{mid=}, {searched_value=}, {original_start=}, {mid=}")
         print("***********")
 
         if abs(searched_value - target) < tolerance:
@@ -57,7 +57,7 @@ def _binary_search_right_to_left(
             preference, epsilon, mid, original_end
         )
         print("***********")
-        print(f"{mid=}, {searched_value=}, {start=}, {end=}")
+        print(f"{mid=}, {searched_value=}, {mid=}, {original_end=}")
         print("***********")
 
         if abs(searched_value - target) < tolerance:
@@ -73,7 +73,11 @@ def _binary_search_right_to_left(
 
 
 def equipartition(
-    preference: List[Segment], epsilon: Decimal, start: Decimal, end: Decimal
+    preference: List[Segment],
+    epsilon: Decimal,
+    start: Decimal,
+    end: Decimal,
+    tolerance: Decimal = to_decimal(1e-10),
 ) -> List[Decimal]:
     epsilon = Decimal(epsilon)
     start = Decimal(start)
@@ -91,21 +95,29 @@ def equipartition(
         start=start,
         end=end,
         target=segment_value,
+        tolerance=tolerance,
     )
+    print(f"find l cut: {first_cut}")
+
     second_cut = _binary_search_left_to_right(
         preference=preference,
         epsilon=epsilon,
         start=first_cut,
         end=end,
         target=segment_value,
+        tolerance=tolerance,
     )
+    print(f"find m cut: {second_cut}")
+
     third_cut = _binary_search_left_to_right(
         preference=preference,
         epsilon=epsilon,
         start=second_cut,
         end=end,
         target=segment_value,
+        tolerance=tolerance,
     )
+    print(f"find r cut: {third_cut}")
 
     return [first_cut, second_cut, third_cut]
 

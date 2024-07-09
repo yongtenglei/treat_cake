@@ -1,9 +1,9 @@
 from decimal import Decimal, getcontext
 from typing import List
 
-from .base_types import Segment
-from .type_helper import to_decimal
-from .values import get_value_for_interval
+from base_types import Segment
+from type_helper import to_decimal
+from values import get_value_for_interval
 
 getcontext().prec = 15
 

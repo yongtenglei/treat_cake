@@ -1,10 +1,11 @@
 from decimal import Decimal
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
-from ...base_types import AssignedSlice, Preferences, Segment
-from ...cut import cut_cake
-from ...type_helper import almost_equal, to_decimal
-from ...valuation import get_double_prime_for_interval
+from base_types import AssignedSlice, Preferences, Segment
+from cut import cut_cake
+from type_helper import almost_equal, to_decimal
+from valuation import get_double_prime_for_interval
+
 from ..alex_aviad_hepler import (
     _binary_search_left_to_right,
     _binary_search_right_to_left,
@@ -19,7 +20,7 @@ def check_condition_a(
     cake_size: int,
     epsilon: Decimal,
     tolerance: Decimal,
-) -> bool:
+) -> Tuple[bool, Dict[str, Any]]:
     alpha = to_decimal(alpha)
     epsilon = to_decimal(epsilon)
     tolerance = to_decimal(tolerance)
@@ -30,7 +31,7 @@ def check_condition_a(
     results = _find_cuts_and_k_for_condition_a(
         alpha=alpha,
         preference=preference_a,
-        cake_size=cake_size,
+        cake_size=to_decimal(cake_size),
         epsilon=epsilon,
         tolerance=tolerance,
     )
@@ -60,14 +61,14 @@ def check_condition_a(
         print(
             f"Test A successful, {k=}, other agents (i and i') are {weak_preference_idx}"
         )
-        return True
+        return (True, {"cuts": cuts, "k": k})
     else:
-        return False
+        return (False, {})
 
 
 def _find_cuts_and_k_for_condition_a(
     alpha: Decimal,
-    cake_size: int,
+    cake_size: Decimal,
     preference: List[Segment],
     epsilon: Decimal,
     tolerance: Decimal = to_decimal(1e-3),
@@ -245,7 +246,10 @@ def _find_cuts_and_k_for_condition_a(
 
 
 def find_allocation_on_condition_a(
-    preferences: Preferences, cuts: List[Decimal], episilon: Decimal, k: int
+    preferences: Preferences,
+    cuts: List[Decimal],
+    k: int,
+    episilon: Decimal,
 ) -> List[AssignedSlice]:
     allocation: List[AssignedSlice] = [None for _ in range(len(preferences))]
 

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import List, Optional, Tuple
 
-from .type_helper import to_decimal
+from type_helper import to_decimal
 
 
 @dataclass

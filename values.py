@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import List, Optional
 
-from .base_types import Segment
-from .type_helper import to_decimal
+from base_types import Segment
+from type_helper import to_decimal
 
 
 @dataclass

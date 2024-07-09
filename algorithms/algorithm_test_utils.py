@@ -3,9 +3,9 @@ from decimal import Decimal
 from itertools import permutations
 from typing import List
 
-from ..base_types import AssignedSlice, Preferences, Segment
-from ..cut import cut_slice
-from ..type_helper import to_decimal
+from base_types import AssignedSlice, Preferences, Segment
+from cut import cut_slice
+from type_helper import to_decimal
 
 halfway_point_of_triangle_area = 70.710678
 

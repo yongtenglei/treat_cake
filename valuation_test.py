@@ -1,12 +1,18 @@
 import pytest
 
+from type_helper import to_decimal
+from valuation import (
+    _v,
+    _v_double_prime,
+    _v_prime,
+    get_double_prime_for_interval,
+    overline,
+    underline,
+)
 from .algorithms.algorithm_test_utils import gen_flat_seg, gen_sloped_seg
-from .type_helper import to_decimal
-from .valuation import (_v, _v_double_prime, _v_prime,
-                        get_double_prime_for_interval, overline, underline)
 
-EPSILON = to_decimal("1e-6")
-TOLERANCE = to_decimal("1e-4")
+EPSILON = to_decimal("1e-15")
+TOLERANCE = to_decimal("1e-3")
 
 
 def test_v():
@@ -131,6 +137,31 @@ def test_v_double_prime_one_seg_by_interval_weird_case_2():
     assert v == pytest.approx(
         to_decimal(3.75), abs=TOLERANCE
     ), "You should see this failed case"
+
+
+def test_tmp():
+    segs = [gen_flat_seg(0, 1, 10)]
+    # v = get_double_prime_for_interval(
+    #     segs,
+    #     to_decimal("1e-15"),
+    #     to_decimal("0.4999389648874057456851005554"),
+    #     to_decimal("0.7499694824437028728425502775"),
+    # )
+    # v = get_double_prime_for_interval(
+    #     segs,
+    #     to_decimal("1e-15"),
+    #     to_decimal("0.4999389648874057456851005554"),
+    #     to_decimal("0.666605631568932821331861717"),
+    # )
+
+    v = get_double_prime_for_interval(
+        segs,
+        to_decimal("1e-15"),
+        to_decimal("0.25"),
+        to_decimal("0.4999389649310614913702011108"),
+    )
+
+    assert v == pytest.approx(to_decimal("2.5"), abs=TOLERANCE), "NOOOO"
 
 
 # =====================

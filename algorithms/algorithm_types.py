@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List
 
-from ..base_types import FrozenUnassignedSlice, Portion, Slice
+from base_types import FrozenUnassignedSlice, Portion, Slice
 
 
 # Enumerating the algorithm names in Python, similar to TypeScript's enum but using class attributes

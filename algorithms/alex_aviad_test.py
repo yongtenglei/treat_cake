@@ -2,8 +2,8 @@ from decimal import Decimal
 
 import pytest
 
-from ..type_helper import to_decimal
-from ..valuation import get_double_prime_for_interval
+from type_helper import to_decimal
+from valuation import get_double_prime_for_interval
 from .alex_aviad import alex_aviad
 from .alex_aviad_hepler import equipartition
 from .algorithm_test_utils import gen_flat_seg

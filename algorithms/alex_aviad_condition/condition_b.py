@@ -1,10 +1,10 @@
 from decimal import Decimal
 from typing import Any, Dict, List, Tuple
 
-from ...base_types import AssignedSlice, Preferences, Segment
-from ...cut import cut_cake
-from ...type_helper import almost_equal, to_decimal
-from ...valuation import get_double_prime_for_interval
+from base_types import AssignedSlice, Preferences, Segment
+from cut import cut_cake
+from type_helper import almost_equal, to_decimal
+from valuation import get_double_prime_for_interval
 from ..alex_aviad_hepler import (
     _binary_search_left_to_right,
     _binary_search_right_to_left,
@@ -28,7 +28,7 @@ def check_condition_b(
     cake_size: int,
     epsilon: Decimal,
     tolerance: Decimal,
-) -> bool:
+) -> Tuple[bool, Dict[str, Any]]:
     alpha = to_decimal(alpha)
     epsilon = to_decimal(epsilon)
     tolerance = to_decimal(tolerance)
@@ -40,7 +40,7 @@ def check_condition_b(
         preference_i = preferences[i]
         results = _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
             alpha=alpha,
-            cake_size=cake_size,
+            cake_size=to_decimal(cake_size),
             preference_1=preference_1,
             preference_i=preference_i,
             epsilon=epsilon,
@@ -163,8 +163,8 @@ def check_condition_b(
                     k_value_j >= others_max_value_j
                     and k_prime_value_j >= others_max_value_j
                 ):
-                    return True
-    return False
+                    return (True, {"cuts": cuts, "k": k, "k_prime": k_prime})
+    return (False, {})
 
 
 def _handle_adjacent(
@@ -1521,7 +1521,7 @@ CODITION_B_Handlers = {
 
 def _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
     alpha: Decimal,
-    cake_size: int,
+    cake_size: Decimal,
     preference_1: List[Segment],
     preference_i: List[Segment],
     epsilon: Decimal,
@@ -1553,9 +1553,9 @@ def _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
 def find_allocation_on_condition_b(
     preferences: Preferences,
     cuts: List[Decimal],
-    episilon: Decimal,
     k: int,
     k_prime: int,
+    episilon: Decimal,
 ) -> List[AssignedSlice]:
     allocation: List[AssignedSlice] = [None for _ in range(len(preferences))]
 

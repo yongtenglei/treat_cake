@@ -1,4 +1,4 @@
-from ..type_helper import to_decimal
+from type_helper import to_decimal
 from .algorithm_test_utils import generate_all_possible_allocations
 
 
