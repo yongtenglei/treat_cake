@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48a125f2-163c-4b5f-9a30-5d9a99754e09" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad_condition/condition_a.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad_condition/condition_a.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad_condition/condition_b.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad_condition/condition_b.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algorithms/alex_aviad_hepler_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/alex_aviad_hepler_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cut.py" beforeDir="false" afterPath="$PROJECT_DIR$/cut.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -304,7 +306,7 @@
       <workItem from="1720443618646" duration="126000" />
       <workItem from="1720443748424" duration="142000" />
       <workItem from="1720443894645" duration="647000" />
-      <workItem from="1720444543821" duration="3758000" />
+      <workItem from="1720444543821" duration="7705000" />
     </task>
     <servers />
   </component>

@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import Any, Dict, List, Tuple
 
 from ...base_types import AssignedSlice, Preferences, Segment
+from ...cut import cut_cake
 from ...type_helper import almost_equal, to_decimal
 from ...valuation import get_double_prime_for_interval
 from ..alex_aviad_hepler import (
@@ -1549,5 +1550,23 @@ def _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
             raise ValueError(f"No handler for combination: ({k}, {k_prime})")
 
 
-def find_allocation_on_condition_b() -> List[AssignedSlice]:
-    return []
+def find_allocation_on_condition_b(
+    preferences: Preferences,
+    cuts: List[Decimal],
+    episilon: Decimal,
+    k: int,
+    k_prime: int,
+) -> List[AssignedSlice]:
+    allocation: List[AssignedSlice] = [None for _ in range(len(preferences))]
+
+    unassigned_slices = cut_cake(preferences=preferences, epsilon=episilon, cuts=cuts)
+
+    # First piece for agent 1
+    allocation[0] = unassigned_slices[0].assign(0)
+
+    # FIX: Partial Implementation
+    for i in range(1, len(unassigned_slices)):
+        allocation[i] = unassigned_slices[i].assign(i)
+
+    assert all(a is not None for a in allocation)
+    return allocation

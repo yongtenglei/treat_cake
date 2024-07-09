@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import List
 
 from .base_types import FrozenUnassignedSlice, Preferences, Slice
+from .type_helper import to_decimal
 from .valuation import get_double_prime_for_interval
 from .values import get_value_for_interval
 
@@ -19,6 +20,23 @@ def cut_slice_origin(
     return FrozenUnassignedSlice(
         start=Decimal(start), end=Decimal(end), values=values, id=id, note=note
     )
+
+
+def cut_cake(
+    preferences: Preferences,
+    epsilon: Decimal,
+    cuts: List[Decimal],
+) -> List[FrozenUnassignedSlice]:
+
+    slices = []
+    start = to_decimal(0)
+
+    for i, end in enumerate(cuts):
+        slice = cut_slice(preferences, epsilon, start, end, id=i, note=None)
+        slices.append(slice)
+        start = end
+
+    return slices
 
 
 def cut_slice(
