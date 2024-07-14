@@ -1,3 +1,5 @@
+from decimal import getcontext
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -13,6 +15,11 @@ app = Flask(__name__)
 
 # Allow specific domain
 cors = CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+
+
+@app.before_request
+def set_decimal_precision():
+    getcontext().prec = 15
 
 
 @app.route("/alex_aviad", methods=["POST"])
@@ -31,21 +38,20 @@ def handle_alex_aviad():
         ]
         for preference in data["preferences"]
     ]
-    cake_size = data["cake_size"]
+    cake_size = to_decimal(data["cake_size"])
     assert preferences and cake_size, "Should work"
-    print("preferences", preferences)
-    print("cake_size", cake_size)
 
     response = alex_aviad(
         preferences=preferences,
-        cake_size=to_decimal(cake_size),
+        cake_size=int(cake_size),
         epsilon=to_decimal("1e-15"),
-        tolerance=to_decimal("1e-3"),
+        tolerance=to_decimal("1e-6"),
     )
 
     print("response", response)
-    # response = serve(data)
-    # return jsonify(response)
+    print("preferences", preferences)
+    print("cake_size", cake_size)
+
     return jsonify(response)
 
 
