@@ -29,7 +29,7 @@ def test_alex_aviad_same_evaluations_case_flat_graph():
     sum_of_first_values = sum(slice.values[0] for slice in result)
 
     expected_sum_of_first_values = get_double_prime_for_interval(
-        preferences[0], EPSILON, to_decimal(0), to_decimal(1)
+        preferences[0], EPSILON, to_decimal(0), to_decimal(1), cake_size=CAKE_SIZE
     )
 
     assert sum_of_first_values == pytest.approx(
@@ -82,7 +82,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph():
     sum_of_first_values = sum(slice.values[0] for slice in result)
 
     expected_sum_of_first_values = get_double_prime_for_interval(
-        preferences[0], EPSILON, to_decimal(0), to_decimal(1)
+        preferences[0], EPSILON, to_decimal(0), to_decimal(1), cake_size=CAKE_SIZE
     )
 
     assert sum_of_first_values == pytest.approx(
@@ -116,17 +116,24 @@ def test_alex_aviad_generic_case_should_fail():
 
         l, m, r = equipartition(
             preference=preferences[0],
+            cake_size=to_decimal(cake_size),
             epsilon=epsilon,
             start=to_decimal(0),
             end=to_decimal(cake_size),
         )
         sum_of_first_values = sum(slice.values[0] for slice in result)
         expected_sum_of_first_values = (
-            get_double_prime_for_interval(preferences[0], epsilon, Decimal(0), l)
-            + get_double_prime_for_interval(preferences[0], epsilon, l, m)
-            + get_double_prime_for_interval(preferences[0], epsilon, m, r)
+            get_double_prime_for_interval(
+                preferences[0], epsilon, to_decimal(0), l, cake_size=CAKE_SIZE
+            )
             + get_double_prime_for_interval(
-                preferences[0], epsilon, r, Decimal(cake_size)
+                preferences[0], epsilon, l, m, cake_size=CAKE_SIZE
+            )
+            + get_double_prime_for_interval(
+                preferences[0], epsilon, m, r, cake_size=CAKE_SIZE
+            )
+            + get_double_prime_for_interval(
+                preferences[0], epsilon, r, to_decimal(cake_size), cake_size=CAKE_SIZE
             )
         )
 

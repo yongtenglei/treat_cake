@@ -145,7 +145,13 @@ def find_envy_free_allocation(
                 else:
                     end = cuts[slice_index]
                 unassigned_slice = cut_slice(
-                    preferences, epsilon, start, end, slice_index
+                    preferences=preferences,
+                    cake_size=to_decimal(cake_size),
+                    epsilon=epsilon,
+                    start=to_decimal(start),
+                    end=to_decimal(end),
+                    id=slice_index,
+                    note=None,
                 )
                 envy_free_allocation.append(unassigned_slice.assign(agent_id))
         if check_if_envy_free(num_agents, envy_free_allocation):

@@ -4,6 +4,7 @@ from typing import Any, Dict, List
 from base_types import Preferences
 from type_helper import to_decimal
 from valuation import get_double_prime_for_interval
+
 from .alex_aviad_condition.condition_a import (
     check_condition_a,
     find_allocation_on_condition_a,
@@ -31,6 +32,7 @@ def alex_aviad(
     # Find the equipartition by Agent1
     cuts = equipartition(
         preference=preferences[0],
+        cake_size=to_decimal(cake_size),
         epsilon=epsilon,
         start=to_decimal(0),
         end=to_decimal(cake_size),
@@ -47,13 +49,18 @@ def alex_aviad(
         return {"solution": solution, "steps": steps}
 
     alpha_underline = get_double_prime_for_interval(
-        segments=preferences[0], epsilon=epsilon, start=to_decimal(0), end=cuts[0]
+        segments=preferences[0],
+        epsilon=epsilon,
+        start=to_decimal(0),
+        end=cuts[0],
+        cake_size=to_decimal(cake_size),
     )
     alpha_overline = get_double_prime_for_interval(
         segments=preferences[0],
         epsilon=epsilon,
         start=to_decimal(0),
         end=to_decimal(cake_size),
+        cake_size=to_decimal(cake_size),
     )
 
     info = []
@@ -110,6 +117,7 @@ def alex_aviad(
         assert condition_info["A"]["cuts"] and condition_info["A"]["k"], "Should work"
         allocation = find_allocation_on_condition_a(
             preferences=preferences,
+            cake_size=to_decimal(cake_size),
             cuts=condition_info["A"]["cuts"],
             episilon=epsilon,
             k=condition_info["A"]["k"],
@@ -122,6 +130,7 @@ def alex_aviad(
         ), "Should work"
         allocation = find_allocation_on_condition_b(
             cuts=condition_info["B"]["cuts"],
+            cake_size=to_decimal(cake_size),
             episilon=epsilon,
             k=condition_info["B"]["k"],
             k_prime=condition_info["B"]["k_prime"],

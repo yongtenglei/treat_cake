@@ -9,6 +9,7 @@ from valuation import (
     overline,
     underline,
 )
+
 from .algorithms.algorithm_test_utils import gen_flat_seg, gen_sloped_seg
 
 EPSILON = to_decimal("1e-15")
@@ -88,25 +89,101 @@ def test_v_prime_seesaw_like_gragh():
 
 def test_v_double_prime_one_seg():
     segs = [gen_flat_seg(0, 1, 10)]
-    v = _v_double_prime(segs, EPSILON, to_decimal(0), to_decimal(1))
+    v = _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(1)
+    )
     assert v == pytest.approx(to_decimal(10), abs=TOLERANCE)
 
 
 def test_v_double_prime_one_seg_by_interval():
     segs = [gen_flat_seg(0, 1, 10)]
-    v = get_double_prime_for_interval(segs, EPSILON, to_decimal(0), to_decimal(1))
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(1)
+    )
     assert v == pytest.approx(to_decimal(10), abs=TOLERANCE)
-    assert v == _v_double_prime(segs, EPSILON, to_decimal(0), to_decimal(1))
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(1), to_decimal(1)
+    )
+
+
+def test_v_double_prime_two_flat_segs_by_interval():
+    segs = [
+        gen_flat_seg(to_decimal(0), to_decimal(1), to_decimal(10)),
+        gen_flat_seg(to_decimal(1), to_decimal(2), to_decimal(10)),
+    ]
+    # All segments
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(20), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
+    )
+
+    # First half
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(10), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
+    )
+
+    # Second half
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(10), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
+    )
+
+
+def test_v_double_prime_two_slop_segs_by_interval():
+    segs = [
+        gen_sloped_seg(to_decimal(0), to_decimal(1), to_decimal(10), to_decimal(0)),
+        gen_sloped_seg(to_decimal(1), to_decimal(2), to_decimal(0), to_decimal(10)),
+    ]
+    # All segments
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(10), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
+    )
+
+    # First half
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(5), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
+    )
+
+    # Second half
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(5), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
+    )
 
 
 # =====================Test for a weird case, precision of floating points may cause weird thing
 def test_v_double_prime_one_seg_by_interval_weird_case():
     segs = [gen_flat_seg(0, 1, 10)]
     v = get_double_prime_for_interval(
-        segs, EPSILON, to_decimal(0.25), to_decimal(0.625)
+        segs, EPSILON, to_decimal(0.25), to_decimal(0.625), cake_size=to_decimal(1)
     )
     v_2 = get_double_prime_for_interval(
-        segs, EPSILON, to_decimal(0.25000000002910383), to_decimal(0.6250000000145519)
+        segs,
+        EPSILON,
+        to_decimal(0.25000000002910383),
+        to_decimal(0.6250000000145519),
+        cake_size=to_decimal(1),
     )
     assert v == pytest.approx(v_2, abs=TOLERANCE), "You should see this failed case"
     # assert v == _v, "Should be equal"
@@ -116,9 +193,15 @@ def test_v_double_prime_one_seg_by_interval_weird_case():
 def test_v_double_prime_one_seg_by_interval_weird_case_1():
     segs = [gen_flat_seg(0, 1, 10)]
     v = get_double_prime_for_interval(
-        segs, EPSILON, to_decimal(0.25), to_decimal(0.625)
+        segs, EPSILON, to_decimal(0.25), to_decimal(0.625), cake_size=to_decimal(1)
     )
-    _v = _v_double_prime(segs, EPSILON, to_decimal(0.25), to_decimal(0.625))
+    _v = _v_double_prime(
+        segs,
+        EPSILON,
+        to_decimal(0.25),
+        to_decimal(0.625),
+        to_decimal(1),
+    )
     assert v == _v, "Should be equal"
     assert v == pytest.approx(
         to_decimal(3.75), abs=TOLERANCE
@@ -128,10 +211,18 @@ def test_v_double_prime_one_seg_by_interval_weird_case_1():
 def test_v_double_prime_one_seg_by_interval_weird_case_2():
     segs = [gen_flat_seg(0, 1, 10)]
     v = get_double_prime_for_interval(
-        segs, EPSILON, to_decimal(0.25000000002910383), to_decimal(0.6250000000145519)
+        segs,
+        EPSILON,
+        to_decimal(0.25000000002910383),
+        to_decimal(0.6250000000145519),
+        cake_size=to_decimal(1),
     )
     _v = _v_double_prime(
-        segs, EPSILON, to_decimal(0.25000000002910383), to_decimal(0.6250000000145519)
+        segs,
+        EPSILON,
+        to_decimal(0.25000000002910383),
+        to_decimal(0.6250000000145519),
+        cake_size=to_decimal(1),
     )
     assert v == _v, "Should be equal"
     assert v == pytest.approx(
@@ -159,6 +250,7 @@ def test_tmp():
         to_decimal("1e-15"),
         to_decimal("0.25"),
         to_decimal("0.4999389649310614913702011108"),
+        cake_size=to_decimal(1),
     )
 
     assert v == pytest.approx(to_decimal("2.5"), abs=TOLERANCE), "NOOOO"
@@ -181,7 +273,9 @@ def test_v_double_prime_various_cases():
 
     for start, end, expected in test_cases:
         print(f"\n======case {start}, {end}======")
-        result = get_double_prime_for_interval(segs, EPSILON, start, end)
+        result = get_double_prime_for_interval(
+            segs, EPSILON, start, end, cake_size=to_decimal(1)
+        )
         assert result == pytest.approx(to_decimal(expected), abs=TOLERANCE)
         print(
             f"get_double_prime_for_interval(segments, epsilon, {start}, {end}) = {result}"

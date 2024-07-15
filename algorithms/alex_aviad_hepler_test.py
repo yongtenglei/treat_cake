@@ -30,21 +30,23 @@ def test_binary_search_left_to_right():
     preference = [gen_flat_seg(0, cake_size, 10)]
 
     l = _binary_search_left_to_right(
-        preference, epsilon, to_decimal(0), cake_size, alpha, tolerance
+        preference, cake_size, epsilon, to_decimal(0), cake_size, alpha, tolerance
     )
     assert l == pytest.approx(to_decimal(0.25), rel=tolerance), "Wrong left cut point"
 
     m = _binary_search_left_to_right(
-        preference, epsilon, l, cake_size, alpha, tolerance
+        preference, cake_size, epsilon, l, cake_size, alpha, tolerance
     )
     assert m == pytest.approx(to_decimal(0.50), rel=tolerance), "Wrong mid cut point"
 
     r = _binary_search_left_to_right(
-        preference, epsilon, m, cake_size, alpha, tolerance
+        preference, cake_size, epsilon, m, cake_size, alpha, tolerance
     )
     assert r == pytest.approx(to_decimal(0.75), rel=tolerance), "Wrong right cut point"
 
-    remained_value = get_double_prime_for_interval(preference, epsilon, r, cake_size)
+    remained_value = get_double_prime_for_interval(
+        preference, epsilon, r, cake_size, cake_size=cake_size
+    )
     assert remained_value == pytest.approx(
         to_decimal(2.5), rel=tolerance
     ), "Wrong remained piece value"
@@ -61,23 +63,27 @@ def test_binary_search_right_to_left():
     preference = [gen_flat_seg(0, cake_size, 10)]
 
     r = _binary_search_right_to_left(
-        preference, epsilon, to_decimal(0), cake_size, alpha, tolerance
+        preference, cake_size, epsilon, to_decimal(0), cake_size, alpha, tolerance
     )
     assert r == pytest.approx(to_decimal(0.75), rel=tolerance), "Wrong right cut point"
+    print(1)
 
     m = _binary_search_right_to_left(
-        preference, epsilon, to_decimal(0), r, alpha, tolerance
+        preference, cake_size, epsilon, to_decimal(0), r, alpha, tolerance
     )
     assert m == pytest.approx(to_decimal(0.50), rel=tolerance), "Wrong mid cut point"
+    print(2)
 
     l = _binary_search_right_to_left(
-        preference, epsilon, to_decimal(0), m, alpha, tolerance
+        preference, cake_size, epsilon, to_decimal(0), m, alpha, tolerance
     )
     assert l == pytest.approx(to_decimal(0.25), rel=tolerance), "Wrong left cut point"
+    print(3)
 
     remained_value = get_double_prime_for_interval(
-        preference, epsilon, to_decimal(0), l
+        preference, epsilon, to_decimal(0), l, cake_size=cake_size
     )
+    print(4)
     assert remained_value == pytest.approx(
         to_decimal(2.5), rel=tolerance
     ), "Wrong remained piece value"
@@ -122,7 +128,11 @@ def test_equipartition_one_piece_flat():
     ]
 
     cuts = equipartition(
-        preference=preference, epsilon=EPSILON, start=to_decimal(0), end=CAKE_SIZE
+        preference=preference,
+        cake_size=CAKE_SIZE,
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=CAKE_SIZE,
     )
 
     slice_values = get_values_for_cuts(
@@ -151,7 +161,11 @@ def test_equipartition_one_piece_slope():
     ]
 
     cuts = equipartition(
-        preference=preference, epsilon=EPSILON, start=to_decimal(0), end=CAKE_SIZE
+        preference=preference,
+        cake_size=CAKE_SIZE,
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=CAKE_SIZE,
     )
     print(f"{cuts=}")
 
@@ -184,13 +198,25 @@ def test_equipartition_seesaw_like_graph():
     ]
 
     v = get_double_prime_for_interval(
-        segments=preference, epsilon=EPSILON, start=to_decimal(0), end=to_decimal(1)
+        segments=preference,
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=to_decimal(1),
+        cake_size=CAKE_SIZE,
     )
     v1 = get_double_prime_for_interval(
-        segments=preference, epsilon=EPSILON, start=to_decimal(0), end=to_decimal(0.5)
+        segments=preference,
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=to_decimal(0.5),
+        cake_size=CAKE_SIZE,
     )
     v2 = get_double_prime_for_interval(
-        segments=preference, epsilon=EPSILON, start=to_decimal(0.5), end=to_decimal(1)
+        segments=preference,
+        epsilon=EPSILON,
+        start=to_decimal(0.5),
+        end=to_decimal(1),
+        cake_size=CAKE_SIZE,
     )
     print(f"{v=}")
     print(f"{v1=}")
@@ -227,7 +253,14 @@ def test_equipartition_seesaw_sloped_graph():
         gen_sloped_seg(CAKE_SIZE // 2, CAKE_SIZE, 10, 0),
     ]
 
-    cuts = equipartition(preference)
+    cuts = equipartition(
+        preference=preference,
+        cake_size=CAKE_SIZE,
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=to_decimal(CAKE_SIZE),
+        tolerance=tolerance,
+    )
     print(f"{cuts=}")
 
     slice_values = get_values_for_cuts_origin(preference, cuts, CAKE_SIZE)
@@ -251,7 +284,11 @@ def test_equipartition_seesaw_sloped_graph():
 def test_equipartition():
     preferences = [gen_flat_seg(0, CAKE_SIZE, 10)]
     cuts = equipartition(
-        preference=preferences, epsilon=EPSILON, start=to_decimal(0), end=CAKE_SIZE
+        preference=preferences,
+        cake_size=CAKE_SIZE,
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=CAKE_SIZE,
     )
     assert len(cuts) == 3, "Should yield 3 cuts"
     expected_cuts = [

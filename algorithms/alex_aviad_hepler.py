@@ -8,6 +8,7 @@ from valuation import get_double_prime_for_interval
 
 def _binary_search_left_to_right(
     preference: List[Segment],
+    cake_size: Decimal,
     epsilon: Decimal,
     start: Decimal,
     end: Decimal,
@@ -21,7 +22,7 @@ def _binary_search_left_to_right(
     while end - start > tolerance and iteration < max_iterations:
         mid = to_decimal((start + end) / 2)
         searched_value = get_double_prime_for_interval(
-            preference, epsilon, original_start, mid
+            preference, epsilon, original_start, mid, cake_size
         )
         print("***********")
         print(f"{mid=}, {searched_value=}, {original_start=}, {mid=}")
@@ -41,6 +42,7 @@ def _binary_search_left_to_right(
 
 def _binary_search_right_to_left(
     preference: List[Segment],
+    cake_size: Decimal,
     epsilon: Decimal,
     start: Decimal,
     end: Decimal,
@@ -54,7 +56,7 @@ def _binary_search_right_to_left(
     while end - start > tolerance and iteration < max_iterations:
         mid = to_decimal((start + end) / 2)
         searched_value = get_double_prime_for_interval(
-            preference, epsilon, mid, original_end
+            preference, epsilon, mid, original_end, cake_size=to_decimal(cake_size)
         )
         print("***********")
         print(f"{mid=}, {searched_value=}, {mid=}, {original_end=}")
@@ -74,6 +76,7 @@ def _binary_search_right_to_left(
 
 def equipartition(
     preference: List[Segment],
+    cake_size: Decimal,
     epsilon: Decimal,
     start: Decimal,
     end: Decimal,
@@ -84,13 +87,14 @@ def equipartition(
     end = Decimal(end)
 
     total_v = get_double_prime_for_interval(
-        segments=preference, epsilon=epsilon, start=start, end=end
+        segments=preference, epsilon=epsilon, start=start, end=end, cake_size=cake_size
     )
     segment_value = total_v / 4
 
     # Finding cuts at 1/4, 1/2, and 3/4 of the cake
     first_cut = _binary_search_left_to_right(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=start,
         end=end,
@@ -101,6 +105,7 @@ def equipartition(
 
     second_cut = _binary_search_left_to_right(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=first_cut,
         end=end,
@@ -111,6 +116,7 @@ def equipartition(
 
     third_cut = _binary_search_left_to_right(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=second_cut,
         end=end,
@@ -152,11 +158,16 @@ def get_range_by_cuts(
 
 def _check_if_weakly_prefer_piece_k(
     preference: List[Segment],
+    cake_size: Decimal,
     epsilon: Decimal,
     start: Decimal,
     end: Decimal,
     alpha: Decimal,
 ) -> bool:
     return alpha <= get_double_prime_for_interval(
-        segments=preference, epsilon=epsilon, start=start, end=end
+        segments=preference,
+        epsilon=epsilon,
+        start=start,
+        end=end,
+        cake_size=to_decimal(cake_size),
     )

@@ -24,6 +24,7 @@ def cut_slice_origin(
 
 def cut_cake(
     preferences: Preferences,
+    cake_size: Decimal,
     epsilon: Decimal,
     cuts: List[Decimal],
 ) -> List[FrozenUnassignedSlice]:
@@ -32,7 +33,15 @@ def cut_cake(
     start = to_decimal(0)
 
     for i, end in enumerate(cuts):
-        slice = cut_slice(preferences, epsilon, start, end, id=i, note=None)
+        slice = cut_slice(
+            preferences=preferences,
+            cake_size=cake_size,
+            epsilon=epsilon,
+            start=start,
+            end=end,
+            id=i,
+            note=None,
+        )
         slices.append(slice)
         start = end
 
@@ -41,6 +50,7 @@ def cut_cake(
 
 def cut_slice(
     preferences: Preferences,
+    cake_size: Decimal,
     epsilon: Decimal,
     start: Decimal,
     end: Decimal,
@@ -53,7 +63,9 @@ def cut_slice(
         )
 
     values = [
-        get_double_prime_for_interval(segments, epsilon, start, end)
+        get_double_prime_for_interval(
+            segments, epsilon, start, end, cake_size=cake_size
+        )
         for segments in preferences
     ]
 

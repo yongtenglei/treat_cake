@@ -49,6 +49,7 @@ def check_condition_a(
     for i in range(1, len(preferences)):
         weak_preference[i] = _check_if_weakly_prefer_piece_k(
             preference=preferences[i],
+            cake_size=to_decimal(cake_size),
             epsilon=epsilon,
             start=start_k,
             end=end_k,
@@ -86,6 +87,7 @@ def _find_cuts_and_k_for_condition_a(
     #    *       3         2          1
     r = _binary_search_right_to_left(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=start,
         end=end,
@@ -95,6 +97,7 @@ def _find_cuts_and_k_for_condition_a(
 
     m = _binary_search_right_to_left(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=start,
         end=r,
@@ -104,6 +107,7 @@ def _find_cuts_and_k_for_condition_a(
 
     l = _binary_search_right_to_left(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=start,
         end=m,
@@ -112,7 +116,11 @@ def _find_cuts_and_k_for_condition_a(
     )
 
     remained_value = get_double_prime_for_interval(
-        segments=preference, epsilon=epsilon, start=start, end=l
+        segments=preference,
+        epsilon=epsilon,
+        start=start,
+        end=l,
+        cake_size=to_decimal(cake_size),
     )
 
     if remained_value < alpha:
@@ -126,6 +134,7 @@ def _find_cuts_and_k_for_condition_a(
 
     l = _binary_search_left_to_right(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=start,
         end=end,
@@ -135,6 +144,7 @@ def _find_cuts_and_k_for_condition_a(
 
     r = _binary_search_right_to_left(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=l,
         end=end,
@@ -144,6 +154,7 @@ def _find_cuts_and_k_for_condition_a(
 
     m = _binary_search_right_to_left(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=l,
         end=r,
@@ -152,7 +163,11 @@ def _find_cuts_and_k_for_condition_a(
     )
 
     remained_value = get_double_prime_for_interval(
-        segments=preference, epsilon=epsilon, start=l, end=m
+        segments=preference,
+        epsilon=epsilon,
+        start=l,
+        end=m,
+        cake_size=to_decimal(cake_size),
     )
 
     if remained_value < alpha:
@@ -165,6 +180,7 @@ def _find_cuts_and_k_for_condition_a(
     #    1       2         *          3
     l = _binary_search_left_to_right(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=start,
         end=end,
@@ -174,6 +190,7 @@ def _find_cuts_and_k_for_condition_a(
 
     m = _binary_search_left_to_right(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=l,
         end=end,
@@ -183,6 +200,7 @@ def _find_cuts_and_k_for_condition_a(
 
     r = _binary_search_right_to_left(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=m,
         end=end,
@@ -191,7 +209,11 @@ def _find_cuts_and_k_for_condition_a(
     )
 
     remained_value = get_double_prime_for_interval(
-        segments=preference, epsilon=epsilon, start=m, end=r
+        segments=preference,
+        epsilon=epsilon,
+        start=m,
+        end=r,
+        cake_size=to_decimal(cake_size),
     )
 
     if remained_value < alpha:
@@ -204,6 +226,7 @@ def _find_cuts_and_k_for_condition_a(
     #    1       2         3          *
     l = _binary_search_left_to_right(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=start,
         end=end,
@@ -213,6 +236,7 @@ def _find_cuts_and_k_for_condition_a(
 
     m = _binary_search_left_to_right(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=l,
         end=end,
@@ -222,6 +246,7 @@ def _find_cuts_and_k_for_condition_a(
 
     r = _binary_search_left_to_right(
         preference=preference,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=m,
         end=end,
@@ -230,7 +255,11 @@ def _find_cuts_and_k_for_condition_a(
     )
 
     remained_value = get_double_prime_for_interval(
-        segments=preference, epsilon=epsilon, start=r, end=end
+        segments=preference,
+        epsilon=epsilon,
+        start=r,
+        end=end,
+        cake_size=to_decimal(cake_size),
     )
 
     if remained_value < alpha:
@@ -247,13 +276,16 @@ def _find_cuts_and_k_for_condition_a(
 
 def find_allocation_on_condition_a(
     preferences: Preferences,
+    cake_size: Decimal,
     cuts: List[Decimal],
     k: int,
     episilon: Decimal,
 ) -> List[AssignedSlice]:
     allocation: List[AssignedSlice] = [None for _ in range(len(preferences))]
 
-    unassigned_slices = cut_cake(preferences=preferences, epsilon=episilon, cuts=cuts)
+    unassigned_slices = cut_cake(
+        preferences=preferences, cake_size=cake_size, epsilon=episilon, cuts=cuts
+    )
 
     # First piece for agent 1
     allocation[0] = unassigned_slices[0].assign(0)
