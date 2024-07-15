@@ -133,6 +133,68 @@ def test_alex_aviad_same_evaluations_case_flat_graph_two_segs():
     assert sum_of_first_values == pytest.approx(
         expected_sum_of_first_values, abs=TOLERANCE
     )
+    print(f"{result=}")
+    assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
+
+
+def test_alex_aviad_same_evaluations_case_flat_graph_three_segs():
+    cake_size = to_decimal(3)
+
+    preferences = [
+        [
+            gen_sloped_seg(
+                start=Decimal("0"),
+                end=Decimal("3"),
+                start_value=Decimal("10"),
+                end_value=Decimal("10"),
+            )
+        ],
+        [
+            gen_sloped_seg(
+                start=Decimal("0"),
+                end=Decimal("3"),
+                start_value=Decimal("10"),
+                end_value=Decimal("10"),
+            )
+        ],
+        [
+            gen_sloped_seg(
+                start=Decimal("0"),
+                end=Decimal("3"),
+                start_value=Decimal("10"),
+                end_value=Decimal("10"),
+            )
+        ],
+        [
+            gen_sloped_seg(
+                start=Decimal("0"),
+                end=Decimal("3"),
+                start_value=Decimal("10"),
+                end_value=Decimal("10"),
+            )
+        ],
+    ]
+
+    result = alex_aviad(preferences, int(cake_size), EPSILON, tolerance=TOLERANCE)[
+        "solution"
+    ]
+    assert len(result) == 4, "The result should have exactly four segments."
+
+    sum_of_first_values = sum(slice.values[0] for slice in result)
+
+    expected_sum_of_first_values = get_double_prime_for_interval(
+        preferences[0],
+        EPSILON,
+        to_decimal(0),
+        to_decimal(cake_size),
+        cake_size=cake_size,
+    )
+
+    assert sum_of_first_values == pytest.approx(
+        expected_sum_of_first_values, abs=TOLERANCE
+    )
+    print(f"{result=}")
+    assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
 
 
 def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():

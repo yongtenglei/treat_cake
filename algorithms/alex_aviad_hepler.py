@@ -22,7 +22,11 @@ def _binary_search_left_to_right(
     while end - start > tolerance and iteration < max_iterations:
         mid = to_decimal((start + end) / 2)
         searched_value = get_double_prime_for_interval(
-            preference, epsilon, original_start, mid, cake_size
+            segments=preference,
+            epsilon=epsilon,
+            start=original_start,
+            end=mid,
+            cake_size=cake_size,
         )
         print("***********")
         print(f"{mid=}, {searched_value=}, {original_start=}, {mid=}")
@@ -56,7 +60,11 @@ def _binary_search_right_to_left(
     while end - start > tolerance and iteration < max_iterations:
         mid = to_decimal((start + end) / 2)
         searched_value = get_double_prime_for_interval(
-            preference, epsilon, mid, original_end, cake_size=to_decimal(cake_size)
+            segments=preference,
+            epsilon=epsilon,
+            start=mid,
+            end=original_end,
+            cake_size=to_decimal(cake_size),
         )
         print("***********")
         print(f"{mid=}, {searched_value=}, {mid=}, {original_end=}")

@@ -55,19 +55,22 @@ def get_double_prime_for_interval(
     if start == start_int and end == end_int:
         return _v_double_prime(segments, epsilon, start, end, cake_size)
 
-    # Start segments
+    # Incomplete start segment
     if start != start_int:
-        first_segment_end = to_decimal(start_int + 1)
+        first_segment_end = min(end, start_int + 1)
         total += _v_double_prime(segments, epsilon, start, first_segment_end, cake_size)
+        start_int += 1
 
-    # Intermediate segments
-    if start_int + 1 < end_int:
-        total += _v_double_prime(
-            segments, epsilon, to_decimal(start_int + 1), to_decimal(end_int), cake_size
-        )
+    # Complete middle segments
+    for mid in range(start_int, end_int):
+        mid_start = to_decimal(mid)
+        mid_end = to_decimal(mid + 1)
+        if mid_end > end:
+            mid_end = end
+        total += _v_double_prime(segments, epsilon, mid_start, mid_end, cake_size)
 
-    # Last segments
-    if end != end_int:
+    # Incomplete end segment
+    if end > end_int:
         last_segment_start = to_decimal(end_int)
         total += _v_double_prime(segments, epsilon, last_segment_start, end, cake_size)
 
