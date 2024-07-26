@@ -155,6 +155,39 @@ def test_equipartition_one_piece_flat():
         ), f"slice {slice_value} not equal to average value {average_value}"
 
 
+def test_equipartition_one_piece_flat_zero_value():
+    preference = [
+        gen_flat_seg(0, CAKE_SIZE, 0),
+    ]
+
+    cuts = equipartition(
+        preference=preference,
+        cake_size=CAKE_SIZE,
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=CAKE_SIZE,
+    )
+
+    slice_values = get_values_for_cuts(
+        preference=preference, cuts=cuts, cake_size=CAKE_SIZE, epsilon=EPSILON
+    )
+    assert len(slice_values) == 4
+
+    sum_value = sum(slice_values)
+    assert sum_value == pytest.approx(
+        to_decimal(0), TOLERANCE
+    ), "sum value not equal to expected full cake value"
+
+    average_value = sum_value / len(slice_values)
+    expected_average_value = to_decimal(0)
+    assert average_value == pytest.approx(expected_average_value, TOLERANCE)
+
+    for slice_value in slice_values:
+        assert slice_value == pytest.approx(
+            expected_average_value, TOLERANCE
+        ), f"slice {slice_value} not equal to average value {average_value}"
+
+
 def test_equipartition_one_piece_slope():
     preference = [
         gen_sloped_seg(0, CAKE_SIZE, 10, 0),
@@ -189,68 +222,116 @@ def test_equipartition_one_piece_slope():
         ), f"slice {slice_value} not equal to average value {average_value}"
 
 
-def test_equipartition_seesaw_like_graph():
-    """TODO:multi-segments case should be investigated later"""
-
+def test_equipartition_one_piece_slope_zero_value():
     preference = [
-        gen_flat_seg(0, CAKE_SIZE // 2, 10),
-        gen_flat_seg(CAKE_SIZE // 2, CAKE_SIZE, 5),
+        gen_sloped_seg(0, CAKE_SIZE, 0, 0),
     ]
 
-    v = get_double_prime_for_interval(
-        segments=preference,
+    cuts = equipartition(
+        preference=preference,
+        cake_size=CAKE_SIZE,
         epsilon=EPSILON,
         start=to_decimal(0),
-        end=to_decimal(1),
-        cake_size=CAKE_SIZE,
+        end=CAKE_SIZE,
     )
-    v1 = get_double_prime_for_interval(
-        segments=preference,
+    print(f"{cuts=}")
+
+    slice_values = get_values_for_cuts(
+        preference=preference, cuts=cuts, cake_size=CAKE_SIZE, epsilon=EPSILON
+    )
+    assert len(slice_values) == 4
+
+    sum_value = sum(slice_values)
+    assert sum_value == pytest.approx(
+        to_decimal(0), TOLERANCE
+    ), "sum value not equal to expected full cake value"
+
+    average_value = sum_value / len(slice_values)
+    expected_average_value = to_decimal(0)
+    assert average_value == pytest.approx(expected_average_value, TOLERANCE)
+
+    for slice_value in slice_values:
+        assert slice_value == pytest.approx(
+            expected_average_value, TOLERANCE
+        ), f"slice {slice_value} not equal to average value {average_value}"
+
+
+def test_equipartition_seesaw_like_graph():
+    tolerance = to_decimal("1e-8")
+
+    preference = [
+        gen_flat_seg(to_decimal(0), to_decimal(CAKE_SIZE / 2), to_decimal(10)),
+        gen_flat_seg(to_decimal(CAKE_SIZE / 2), to_decimal(CAKE_SIZE), to_decimal(5)),
+    ]
+
+    cuts = equipartition(
+        preference=preference,
+        cake_size=CAKE_SIZE,
         epsilon=EPSILON,
         start=to_decimal(0),
-        end=to_decimal(0.5),
-        cake_size=CAKE_SIZE,
+        end=CAKE_SIZE,
     )
-    v2 = get_double_prime_for_interval(
-        segments=preference,
+
+    slice_values = get_values_for_cuts(
+        preference=preference, cuts=cuts, cake_size=CAKE_SIZE, epsilon=EPSILON
+    )
+    assert len(slice_values) == 4
+
+    average_value = sum(slice_values) / len(slice_values)
+    expected_average_value = to_decimal(1.875)
+    assert average_value == pytest.approx(expected_average_value, rel=tolerance)
+
+    for slice_value in slice_values:
+        assert slice_value == pytest.approx(
+            expected_average_value, tolerance
+        ), f"Slice {slice_value} not equal to average value {average_value}"
+
+
+def test_equipartition_seesaw_like_graph_zero_value():
+    tolerance = to_decimal("1e-8")
+
+    preference = [
+        gen_flat_seg(to_decimal(0), to_decimal(CAKE_SIZE / 2), to_decimal(10)),
+        gen_flat_seg(to_decimal(CAKE_SIZE / 2), to_decimal(CAKE_SIZE), to_decimal(0)),
+    ]
+
+    cuts = equipartition(
+        preference=preference,
+        cake_size=CAKE_SIZE,
         epsilon=EPSILON,
-        start=to_decimal(0.5),
-        end=to_decimal(1),
-        cake_size=CAKE_SIZE,
+        start=to_decimal(0),
+        end=CAKE_SIZE,
+        tolerance=tolerance,
     )
-    print(f"{v=}")
-    print(f"{v1=}")
-    print(f"{v2=}")
 
-    assert 1 == 2, "Should see this error"
+    slice_values = get_values_for_cuts(
+        preference=preference, cuts=cuts, cake_size=CAKE_SIZE, epsilon=EPSILON
+    )
+    assert len(slice_values) == 4
 
-    # cuts = equipartition(
-    #     preference=preference, epsilon=EPSILON, start=to_decimal(0), end=CAKE_SIZE
-    # )
-    #
-    # slice_values = get_values_for_cuts(
-    #     preference=preference, cuts=cuts, cake_size=CAKE_SIZE, epsilon=EPSILON
-    # )
-    # assert len(slice_values) == 4
-    #
-    # average_value = sum(slice_values) / len(slice_values)
-    # expected_average_value = to_decimal(1.875)  # 750 / 4
-    # assert average_value == pytest.approx(expected_average_value, TOLERANCE)
-    #
-    # for slice_value in slice_values:
-    #     assert slice_value == pytest.approx(
-    #         expected_average_value, TOLERANCE
-    #     ), f"Slice {slice_value} not equal to average value {average_value}"
+    average_value = sum(slice_values) / len(slice_values)
+    expected_average_value = to_decimal(1.25)
+    assert average_value == pytest.approx(expected_average_value, rel=tolerance)
+
+    for slice_value in slice_values:
+        assert slice_value == pytest.approx(
+            expected_average_value, tolerance
+        ), f"Slice {slice_value} not equal to average value {average_value}"
 
 
 def test_equipartition_seesaw_sloped_graph():
-    tolerance = to_decimal(0.0001)
-
-    assert 1 == 2, "Should see this error"
+    tolerance = to_decimal("1e-3")
 
     preference = [
-        gen_sloped_seg(0, CAKE_SIZE // 2, 0, 10),
-        gen_sloped_seg(CAKE_SIZE // 2, CAKE_SIZE, 10, 0),
+        gen_sloped_seg(
+            to_decimal(0), to_decimal(CAKE_SIZE / 2), to_decimal(0), to_decimal(10)
+        ),
+        gen_sloped_seg(
+            to_decimal(CAKE_SIZE / 2),
+            to_decimal(CAKE_SIZE),
+            to_decimal(10),
+            to_decimal(0),
+        ),
     ]
 
     cuts = equipartition(
@@ -261,14 +342,53 @@ def test_equipartition_seesaw_sloped_graph():
         end=to_decimal(CAKE_SIZE),
         tolerance=tolerance,
     )
-    print(f"{cuts=}")
 
-    slice_values = get_values_for_cuts_origin(preference, cuts, CAKE_SIZE)
-    print(f"{slice_values=}")
+    slice_values = get_values_for_cuts(preference, cuts, CAKE_SIZE, EPSILON)
 
     assert len(slice_values) == 4, "The number of slices should be exactly four."
 
-    expected_total_value = to_decimal(500)
+    expected_total_value = to_decimal(5)
+    expected_average_value = expected_total_value / 4
+
+    assert expected_total_value == pytest.approx(
+        to_decimal(sum(slice_values)), tolerance
+    ), "The sum of slice values should equal the total cake value."
+
+    for slice_value in slice_values:
+        assert slice_value == pytest.approx(
+            expected_average_value, tolerance
+        ), f"Slice value {slice_value} not approximately equal to expected average value {expected_average_value}"
+
+
+def test_equipartition_seesaw_sloped_graph_zero_value():
+    tolerance = to_decimal("1e-4")
+
+    preference = [
+        gen_sloped_seg(
+            to_decimal(0), to_decimal(CAKE_SIZE / 2), to_decimal(0), to_decimal(10)
+        ),
+        gen_sloped_seg(
+            to_decimal(CAKE_SIZE / 2),
+            to_decimal(CAKE_SIZE),
+            to_decimal(0),
+            to_decimal(0),
+        ),
+    ]
+
+    cuts = equipartition(
+        preference=preference,
+        cake_size=CAKE_SIZE,
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=to_decimal(CAKE_SIZE),
+        tolerance=tolerance,
+    )
+
+    slice_values = get_values_for_cuts(preference, cuts, CAKE_SIZE, EPSILON)
+
+    assert len(slice_values) == 4, "The number of slices should be exactly four."
+
+    expected_total_value = to_decimal(2.5)
     expected_average_value = expected_total_value / 4
 
     assert expected_total_value == pytest.approx(
@@ -282,7 +402,7 @@ def test_equipartition_seesaw_sloped_graph():
 
 
 def test_equipartition():
-    preferences = [gen_flat_seg(0, CAKE_SIZE, 10)]
+    preferences = [gen_flat_seg(to_decimal(0), to_decimal(CAKE_SIZE), to_decimal(10))]
     cuts = equipartition(
         preference=preferences,
         cake_size=CAKE_SIZE,

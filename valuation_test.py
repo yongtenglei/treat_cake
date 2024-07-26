@@ -22,6 +22,12 @@ def test_v():
     assert v == 1000
 
 
+def test_v_zero_value():
+    segs = [gen_flat_seg(0, 100, 0)]
+    v = _v(segs, 0, 100)
+    assert v == 0
+
+
 def test_v_two_segs():
     segs = [
         gen_flat_seg(0, 50, 10),
@@ -30,6 +36,16 @@ def test_v_two_segs():
 
     v = _v(segs, 0, 100)
     assert v == 750
+
+
+def test_v_two_segs_zero_value():
+    segs = [
+        gen_flat_seg(0, 50, 10),
+        gen_flat_seg(50, 100, 0),
+    ]
+
+    v = _v(segs, 0, 100)
+    assert v == 500
 
 
 def test_v_seesaw_like_gragh():
@@ -106,6 +122,17 @@ def test_v_double_prime_one_seg_by_interval():
     )
 
 
+def test_v_double_prime_one_seg_by_interval_zero_value():
+    segs = [gen_flat_seg(0, 1, 0)]
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(1)
+    )
+    assert v == pytest.approx(to_decimal(0), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(1), to_decimal(1)
+    )
+
+
 def test_v_double_prime_two_flat_segs_by_interval():
     segs = [
         gen_flat_seg(to_decimal(0), to_decimal(1), to_decimal(10)),
@@ -139,6 +166,39 @@ def test_v_double_prime_two_flat_segs_by_interval():
     )
 
 
+def test_v_double_prime_two_flat_segs_by_interval_zero_value():
+    segs = [
+        gen_flat_seg(to_decimal(0), to_decimal(1), to_decimal(10)),
+        gen_flat_seg(to_decimal(1), to_decimal(2), to_decimal(0)),
+    ]
+    # All segments
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(10), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
+    )
+
+    # First half
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(10), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
+    )
+
+    # Second half
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(0), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
+    )
+
+
 def test_v_double_prime_two_slop_segs_by_interval():
     segs = [
         gen_sloped_seg(to_decimal(0), to_decimal(1), to_decimal(10), to_decimal(0)),
@@ -158,6 +218,39 @@ def test_v_double_prime_two_slop_segs_by_interval():
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
     )
     assert v == pytest.approx(to_decimal(5), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
+    )
+
+    # Second half
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(5), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
+    )
+
+
+def test_v_double_prime_two_slop_segs_by_interval_zero_value():
+    segs = [
+        gen_sloped_seg(to_decimal(0), to_decimal(1), to_decimal(0), to_decimal(0)),
+        gen_sloped_seg(to_decimal(1), to_decimal(2), to_decimal(0), to_decimal(10)),
+    ]
+    # All segments
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(5), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
+    )
+
+    # First half
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
+    )
+    assert v == pytest.approx(to_decimal(0), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
     )
