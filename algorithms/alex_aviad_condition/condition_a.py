@@ -12,6 +12,7 @@ from ..alex_aviad_hepler import (
     _check_if_weakly_prefer_piece_k,
     get_range_by_cuts,
 )
+from ..algorithm_test_utils import find_envy_free_allocation
 
 
 def check_condition_a(
@@ -281,18 +282,28 @@ def find_allocation_on_condition_a(
     k: int,
     episilon: Decimal,
 ) -> List[AssignedSlice]:
-    allocation: List[AssignedSlice] = [None for _ in range(len(preferences))]
-
-    unassigned_slices = cut_cake(
-        preferences=preferences, cake_size=cake_size, epsilon=episilon, cuts=cuts
+    allocation = find_envy_free_allocation(
+        cuts=cuts,
+        num_agents=4,
+        cake_size=cake_size,
+        preferences=preferences,
+        epsilon=episilon,
     )
-
-    # First piece for agent 1
-    allocation[0] = unassigned_slices[0].assign(0)
-
-    # FIX: Partial Implementation
-    for i in range(1, len(unassigned_slices)):
-        allocation[i] = unassigned_slices[i].assign(i)
-
-    assert all(a is not None for a in allocation)
+    assert (
+        allocation is not None
+    ), "Should always find a final allocation on condition a"
+    # allocation: List[AssignedSlice] = [None for _ in range(len(preferences))]
+    #
+    # unassigned_slices = cut_cake(
+    #     preferences=preferences, cake_size=cake_size, epsilon=episilon, cuts=cuts
+    # )
+    #
+    # # First piece for agent 1
+    # allocation[0] = unassigned_slices[0].assign(0)
+    #
+    # # FIX: Partial Implementation
+    # for i in range(1, len(unassigned_slices)):
+    #     allocation[i] = unassigned_slices[i].assign(i)
+    #
+    # assert all(a is not None for a in allocation)
     return allocation

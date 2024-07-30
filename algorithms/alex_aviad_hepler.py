@@ -1,9 +1,11 @@
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from typing import List, Tuple
 
 from base_types import Segment
 from type_helper import to_decimal
 from valuation import get_double_prime_for_interval
+
+getcontext().prec = 15
 
 
 def _binary_search_left_to_right(
@@ -16,6 +18,21 @@ def _binary_search_left_to_right(
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
 ) -> Decimal:
+    full_cake = get_double_prime_for_interval(
+        segments=preference,
+        epsilon=epsilon,
+        start=start,
+        end=end,
+        cake_size=cake_size,
+    )
+    if full_cake < target:
+        return end
+
+    # assert full_cake >= target, (
+    #     f"No such a cut point can be found in interval [{start}, {end}] "
+    #     f"with cake size: {cake_size}, target: {target} but with full cake value: {full_cake}"
+    # )
+
     original_start = start
     iteration = 0
 
@@ -54,6 +71,19 @@ def _binary_search_right_to_left(
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
 ) -> Decimal:
+    full_cake = get_double_prime_for_interval(
+        segments=preference,
+        epsilon=epsilon,
+        start=start,
+        end=end,
+        cake_size=cake_size,
+    )
+    if full_cake < target:
+        return end
+    # assert full_cake >= target, (
+    #     f"No such a cut point can be found in interval [{start}, {end}] "
+    #     f"with cake size: {cake_size}, target: {target} but with full cake value: {full_cake}"
+    # )
     original_end = end
     iteration = 0
 

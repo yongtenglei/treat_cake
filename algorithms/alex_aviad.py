@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from typing import Any, Dict, List
 
 from base_types import Preferences
@@ -16,6 +16,8 @@ from .alex_aviad_condition.condition_b import (
 from .alex_aviad_hepler import equipartition
 from .algorithm_test_utils import find_envy_free_allocation
 from .algorithm_types import Step
+
+getcontext().prec = 15
 
 
 def alex_aviad(
@@ -41,7 +43,7 @@ def alex_aviad(
     solution = find_envy_free_allocation(
         cuts=cuts,
         num_agents=4,
-        cake_size=cake_size,
+        cake_size=to_decimal(cake_size),
         preferences=preferences,
         epsilon=epsilon,
     )
@@ -69,75 +71,87 @@ def alex_aviad(
         "A": {"cuts": [], "k": -1},
         "B": {"cuts": [], "k": -1, "k_prime": -1},
     }
-    meet_condition = "A"
+    meet_condition = ""
     print(
         f"abs(alpha_overline - alpha_underline) = {abs(alpha_overline - alpha_underline)}\n (epsilon**4 / 12) = {(epsilon**4 / 12)}"
     )
-    while abs(alpha_overline - alpha_underline) >= (epsilon**4 / 12):
-        alpha = (alpha_underline + alpha_overline) / 2
-        meet_a, condition_a_info = check_condition_a(
-            alpha=alpha,
-            preferences=preferences,
-            cake_size=cake_size,
-            epsilon=epsilon,
-            tolerance=tolerance,
-        )
-        if meet_a:
-            meet_condition = "A"
-            alpha_underline = alpha
-            condition_info["A"] = condition_a_info
-            info.append(
-                f"meet A, alpha_underline:{alpha_underline} = {alpha}\n\t{condition_info=}"
+    counter = 0
+    try:
+        while (
+            abs(alpha_overline - alpha_underline) >= (epsilon**4 / 12)
+            and counter <= 100
+        ):
+            alpha = (alpha_underline + alpha_overline) / 2
+            meet_a, condition_a_info = check_condition_a(
+                alpha=alpha,
+                preferences=preferences,
+                cake_size=cake_size,
+                epsilon=epsilon,
+                tolerance=tolerance,
             )
-            continue
+            if meet_a:
+                meet_condition = "A"
+                alpha_underline = alpha
+                condition_info["A"] = condition_a_info
+                info.append(
+                    f"meet A, alpha_underline:{alpha_underline} = {alpha}\n\t{condition_info=}"
+                )
+                continue
 
-        meet_b, condition_b_info = check_condition_b(
-            alpha=alpha,
-            preferences=preferences,
-            cake_size=cake_size,
-            epsilon=epsilon,
-            tolerance=tolerance,
-        )
-        if meet_b:
-            meet_condition = "B"
-            alpha_underline = alpha
-            condition_info["B"] = condition_b_info
-            info.append(
-                f"meet B, alpha_underline:{alpha_underline} = {alpha}\n\t{condition_info=}"
+            meet_b, condition_b_info = check_condition_b(
+                alpha=alpha,
+                preferences=preferences,
+                cake_size=cake_size,
+                epsilon=epsilon,
+                tolerance=tolerance,
             )
-            continue
+            if meet_b:
+                meet_condition = "B"
+                alpha_underline = alpha
+                condition_info["B"] = condition_b_info
+                info.append(
+                    f"meet B, alpha_underline:{alpha_underline} = {alpha}\n\t{condition_info=}"
+                )
+                continue
 
-        alpha_overline = alpha
-        info.append(
-            f"Missed conditions, alpha_overline:{alpha_overline} = {alpha}\n\t{condition_info=}"
-        )
+            alpha_overline = alpha
+            info.append(
+                f"Missed conditions, alpha_overline:{alpha_overline} = {alpha}\n\t{condition_info=}"
+            )
+            counter += 1
 
-    allocation = None
-    if meet_condition == "A":
-        assert condition_info["A"]["cuts"] and condition_info["A"]["k"], "Should work"
-        allocation = find_allocation_on_condition_a(
-            preferences=preferences,
-            cake_size=to_decimal(cake_size),
-            cuts=condition_info["A"]["cuts"],
-            episilon=epsilon,
-            k=condition_info["A"]["k"],
-        )
-    elif meet_condition == "B":
-        assert (
-            condition_info["B"]["cuts"]
-            and condition_info["B"]["k"]
-            and condition_info["B"]["k_prime"]
-        ), "Should work"
-        allocation = find_allocation_on_condition_b(
-            cuts=condition_info["B"]["cuts"],
-            cake_size=to_decimal(cake_size),
-            episilon=epsilon,
-            k=condition_info["B"]["k"],
-            k_prime=condition_info["B"]["k_prime"],
-            preferences=preferences,
-        )
-
-    for i in info:
-        print(i)
-
-    return {"solution": allocation, "steps": steps}
+        allocation = None
+        assert meet_condition != "", "Should work"
+        if meet_condition == "A":
+            assert (
+                condition_info["A"]["cuts"] and condition_info["A"]["k"]
+            ), "Should work"
+            allocation = find_allocation_on_condition_a(
+                preferences=preferences,
+                cake_size=to_decimal(cake_size),
+                cuts=condition_info["A"]["cuts"],
+                episilon=epsilon,
+                k=condition_info["A"]["k"],
+            )
+        elif meet_condition == "B":
+            assert (
+                condition_info["B"]["cuts"]
+                and condition_info["B"]["k"]
+                and condition_info["B"]["k_prime"]
+            ), "Should work"
+            allocation = find_allocation_on_condition_b(
+                cuts=condition_info["B"]["cuts"],
+                cake_size=to_decimal(cake_size),
+                episilon=epsilon,
+                k=condition_info["B"]["k"],
+                k_prime=condition_info["B"]["k_prime"],
+                preferences=preferences,
+            )
+        for i in info:
+            print(i)
+        return {"solution": allocation, "steps": steps}
+    except Exception as e:
+        print(e)
+        # for i in info:
+        #     print(i)
+    # assert 1 == 2, "Should not be here"

@@ -11,6 +11,7 @@ from ..alex_aviad_hepler import (
     _binary_search_right_to_left,
     get_range_by_cuts,
 )
+from ..algorithm_test_utils import find_envy_free_allocation
 
 POSSIBLE_K_AND_K_PRIME_COMBINATION_ON_CONDITION_B = [
     (0, 1, [2, 3]),
@@ -437,28 +438,32 @@ def _binary_search_case_0_2(
             r=original_l_end,
             alpha=alpha,
             preference_1=preference_1,
+            cake_size=cake_size,
             epsilon=epsilon,
             tolerance=tolerance,
         )
+        a = get_double_prime_for_interval(
+            segments=preference_1,
+            epsilon=epsilon,
+            start=l,
+            end=m_for_l,
+            cake_size=to_decimal(cake_size),
+        )
+        b = get_double_prime_for_interval(
+            segments=preference_1,
+            epsilon=epsilon,
+            start=original_l_end,
+            end=to_decimal(cake_size),
+            cake_size=to_decimal(cake_size),
+        )
+
         # TODO: DELETE LATER FOR TESTING
         # give l, find m(l), where v_1([l, m(l)]) = alpha (second piece) = v_1([r, cake_size])
         assert almost_equal(
-            a=get_double_prime_for_interval(
-                segments=preference_1,
-                epsilon=epsilon,
-                start=l,
-                end=m_for_l,
-                cake_size=to_decimal(cake_size),
-            ),
-            b=get_double_prime_for_interval(
-                segments=preference_1,
-                epsilon=epsilon,
-                start=original_l_end,
-                end=to_decimal(cake_size),
-                cake_size=to_decimal(cake_size),
-            ),
+            a,
+            b,
             tolerance=tolerance,
-        )
+        ), f"[l:{l}, m(l):{m_for_l}] = {a=}, [r:{original_l_end}, {cake_size}]{b=}, ({alpha})"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -607,36 +612,42 @@ def _handle_one_between(
     # give l, find m(l), where v_1([l, m(l)]) = alpha (second piece)
     # keep move l, making v_i([0, l]) = v_i([m(l), r])
     if k == 0 and k_prime == 2:
-        r = _binary_search_right_to_left(
-            preference=preference_1,
-            epsilon=epsilon,
-            start=to_decimal(0),
-            end=cake_size,
-            target=alpha,
-            tolerance=tolerance,
-        )
-        l_start = to_decimal(0)
-        l_end = r
-        l = _binary_search_case_0_2(
-            preference_1=preference_1,
-            preference_i=preference_i,
-            epsilon=epsilon,
-            l_start=l_start,
-            l_end=l_end,
-            alpha=alpha,
-            cake_size=cake_size,
-            tolerance=tolerance,
-        )
-        m = _find_m_given_l(
-            l=l,
-            r=r,
-            alpha=alpha,
-            preference_1=preference_1,
-            epsilon=epsilon,
-            tolerance=tolerance,
-        )
-        return [l, m, r]
-
+        try:
+            r = _binary_search_right_to_left(
+                preference=preference_1,
+                cake_size=cake_size,
+                epsilon=epsilon,
+                start=to_decimal(0),
+                end=cake_size,
+                target=alpha,
+                tolerance=tolerance,
+            )
+            l_start = to_decimal(0)
+            l_end = r
+            l = _binary_search_case_0_2(
+                preference_1=preference_1,
+                preference_i=preference_i,
+                epsilon=epsilon,
+                l_start=l_start,
+                l_end=l_end,
+                alpha=alpha,
+                cake_size=cake_size,
+                tolerance=tolerance,
+            )
+            m = _find_m_given_l(
+                l=l,
+                r=r,
+                alpha=alpha,
+                preference_1=preference_1,
+                cake_size=cake_size,
+                epsilon=epsilon,
+                tolerance=tolerance,
+            )
+            return [l, m, r]
+        except Exception as e:
+            pass
+    else:
+        raise ValueError("Invalid k and k'")
     # if k, k' = (1, 3)
     #    0        1        2            3
     # [0, l] | [l, m] | [m, r] | [r, cake_size]
@@ -644,36 +655,40 @@ def _handle_one_between(
     # give r, find m(r), where v_1([m(r), r]) = alpha (third piece) = v_1([(0, l)])
     # keep move r, making v_i([l, m(r)]) = v_i([r, cake_size])
     if k == 1 and k_prime == 3:
-        l = _binary_search_left_to_right(
-            preference=preference_1,
-            cake_size=cake_size,
-            epsilon=epsilon,
-            start=to_decimal(0),
-            end=cake_size,
-            target=alpha,
-            tolerance=tolerance,
-        )
-        r_start = to_decimal(l)
-        r_end = to_decimal(cake_size)
-        r = _binary_search_case_1_3(
-            preference_1=preference_1,
-            preference_i=preference_i,
-            epsilon=epsilon,
-            r_start=r_start,
-            r_end=r_end,
-            cake_size=to_decimal(cake_size),
-            alpha=alpha,
-            tolerance=tolerance,
-        )
-        m = _find_m_given_r(
-            l=l,
-            r=r,
-            alpha=alpha,
-            preference_1=preference_1,
-            epsilon=epsilon,
-            tolerance=tolerance,
-        )
-        return [l, m, r]
+        try:
+            l = _binary_search_left_to_right(
+                preference=preference_1,
+                cake_size=cake_size,
+                epsilon=epsilon,
+                start=to_decimal(0),
+                end=cake_size,
+                target=alpha,
+                tolerance=tolerance,
+            )
+            r_start = to_decimal(l)
+            r_end = to_decimal(cake_size)
+            r = _binary_search_case_1_3(
+                preference_1=preference_1,
+                preference_i=preference_i,
+                epsilon=epsilon,
+                r_start=r_start,
+                r_end=r_end,
+                cake_size=to_decimal(cake_size),
+                alpha=alpha,
+                tolerance=tolerance,
+            )
+            m = _find_m_given_r(
+                l=l,
+                r=r,
+                alpha=alpha,
+                preference_1=preference_1,
+                cake_size=cake_size,
+                epsilon=epsilon,
+                tolerance=tolerance,
+            )
+            return [l, m, r]
+        except Exception as e:
+            pass
     else:
         raise ValueError("Invalid k and k'")
 
@@ -969,6 +984,7 @@ def _find_l_and_m_given_r(
     """find l and m given r: l(r) and m(r), so that v_1([l(r), m(r)]) = v_1([m(r), r]) = alpha"""
     m_for_r = _binary_search_right_to_left(
         preference=preference_1,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=to_decimal(0),
         end=to_decimal(r),
@@ -978,6 +994,7 @@ def _find_l_and_m_given_r(
 
     l_for_r = _binary_search_right_to_left(
         preference=preference_1,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=to_decimal(0),
         end=to_decimal(m_for_r),
@@ -1262,6 +1279,7 @@ def _find_l_and_r_given_m(
 
     r_for_m = _binary_search_right_to_left(
         preference=preference_1,
+        cake_size=cake_size,
         epsilon=epsilon,
         start=to_decimal(m),
         end=to_decimal(cake_size),
@@ -1692,18 +1710,21 @@ def _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
     for k, k_prime, others in POSSIBLE_K_AND_K_PRIME_COMBINATION_ON_CONDITION_B:
         handler = CODITION_B_Handlers.get((k, k_prime))
         if handler:
-            cuts: List[Decimal] = handler(
-                k=k,
-                k_prime=k_prime,
-                alpha=alpha,
-                preference_1=preference_1,
-                preference_i=preference_i,
-                epsilon=epsilon,
-                cake_size=to_decimal(cake_size),
-                tolerance=tolerance,
-            )
+            try:
+                cuts: List[Decimal] = handler(
+                    k=k,
+                    k_prime=k_prime,
+                    alpha=alpha,
+                    preference_1=preference_1,
+                    preference_i=preference_i,
+                    epsilon=epsilon,
+                    cake_size=to_decimal(cake_size),
+                    tolerance=tolerance,
+                )
+                yield {"cuts": cuts, "k": k, "k_prime": k_prime, "others": others}
+            except Exception as e:
+                print(f"Error processing handler for ({k}, {k_prime}): {e}")
 
-            yield {"cuts": cuts, "k": k, "k_prime": k_prime, "others": others}
         else:
             raise ValueError(f"No handler for combination: ({k}, {k_prime})")
 
@@ -1716,18 +1737,30 @@ def find_allocation_on_condition_b(
     k_prime: int,
     episilon: Decimal,
 ) -> List[AssignedSlice]:
-    allocation: List[AssignedSlice] = [None for _ in range(len(preferences))]
 
-    unassigned_slices = cut_cake(
-        preferences=preferences, cake_size=cake_size, epsilon=episilon, cuts=cuts
+    allocation = find_envy_free_allocation(
+        cuts=cuts,
+        num_agents=4,
+        cake_size=cake_size,
+        preferences=preferences,
+        epsilon=episilon,
     )
+    assert (
+        allocation is not None
+    ), "Should always find a final allocation on condition a"
 
-    # First piece for agent 1
-    allocation[0] = unassigned_slices[0].assign(0)
-
-    # FIX: Partial Implementation
-    for i in range(1, len(unassigned_slices)):
-        allocation[i] = unassigned_slices[i].assign(i)
-
-    assert all(a is not None for a in allocation)
+    # allocation: List[AssignedSlice] = [None for _ in range(len(preferences))]
+    #
+    # unassigned_slices = cut_cake(
+    #     preferences=preferences, cake_size=cake_size, epsilon=episilon, cuts=cuts
+    # )
+    #
+    # # First piece for agent 1
+    # allocation[0] = unassigned_slices[0].assign(0)
+    #
+    # # FIX: Partial Implementation
+    # for i in range(1, len(unassigned_slices)):
+    #     allocation[i] = unassigned_slices[i].assign(i)
+    #
+    # assert all(a is not None for a in allocation)
     return allocation

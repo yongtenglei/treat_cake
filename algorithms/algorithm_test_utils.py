@@ -125,9 +125,9 @@ def check_if_envy_free(num_agents: int, allocation: List[AssignedSlice]) -> bool
 def find_envy_free_allocation(
     cuts: List[Decimal],
     num_agents: int,
-    cake_size: int,
+    cake_size: Decimal,
     preferences: Preferences,
-    epsilon,
+    epsilon: Decimal,
 ) -> List[AssignedSlice]:
     cake_size = to_decimal(cake_size)
 

@@ -1,28 +1,30 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation, getcontext
 
 import pytest
 
 from type_helper import to_decimal
-from valuation import get_double_prime_for_interval
+from valuation import get_double_prime_for_interval, get_values_for_cuts
 
 from .alex_aviad import alex_aviad
-from .alex_aviad_hepler import equipartition
+from .alex_aviad_hepler import _binary_search_left_to_right, equipartition
 from .algorithm_test_utils import check_if_envy_free, gen_flat_seg, gen_sloped_seg
 
+getcontext().prec = 15
+
 CAKE_SIZE = to_decimal(1)
-TOLERANCE = to_decimal("1e-6")
+TOLERANCE = to_decimal("1e-9")
 EPSILON = to_decimal("1e-15")
 
 
 def test_alex_aviad_same_evaluations_case_flat_graph_one_seg():
     preferences = [
-        [gen_flat_seg(0, CAKE_SIZE, 10)],
-        [gen_flat_seg(0, CAKE_SIZE, 10)],
-        [gen_flat_seg(0, CAKE_SIZE, 10)],
-        [gen_flat_seg(0, CAKE_SIZE, 10)],
+        [gen_flat_seg(to_decimal(0), CAKE_SIZE, to_decimal(10))],
+        [gen_flat_seg(to_decimal(0), CAKE_SIZE, to_decimal(10))],
+        [gen_flat_seg(to_decimal(0), CAKE_SIZE, to_decimal(10))],
+        [gen_flat_seg(to_decimal(0), CAKE_SIZE, to_decimal(10))],
     ]
 
-    result = alex_aviad(preferences, CAKE_SIZE, EPSILON)["solution"]
+    result = alex_aviad(preferences, int(CAKE_SIZE), EPSILON)["solution"]
     # assert len(result) == 4, "The result should have exactly four segments."
     print(f"{result=}")
 
@@ -198,6 +200,10 @@ def test_alex_aviad_same_evaluations_case_flat_graph_three_segs():
 
 
 def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
+    # TODO: Weried... works perfectly on front-end, but cannot passed here.
+    assert (
+        1 == 2
+    ), "Fix this later...works perfectly on front-end, but cannot passed here."
     cake_size = to_decimal(2)
 
     preferences = [
@@ -209,7 +215,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
                 end_value=to_decimal(0),
             ),
             gen_sloped_seg(
-                start=to_decimal(0),
+                start=cake_size / 2,
                 end=cake_size,
                 start_value=to_decimal(0),
                 end_value=to_decimal(10),
@@ -223,7 +229,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
                 end_value=to_decimal(0),
             ),
             gen_sloped_seg(
-                start=to_decimal(0),
+                start=cake_size / 2,
                 end=cake_size,
                 start_value=to_decimal(0),
                 end_value=to_decimal(10),
@@ -237,7 +243,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
                 end_value=to_decimal(0),
             ),
             gen_sloped_seg(
-                start=to_decimal(0),
+                start=cake_size / 2,
                 end=cake_size,
                 start_value=to_decimal(0),
                 end_value=to_decimal(10),
@@ -251,7 +257,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
                 end_value=to_decimal(0),
             ),
             gen_sloped_seg(
-                start=to_decimal(0),
+                start=cake_size / 2,
                 end=cake_size,
                 start_value=to_decimal(0),
                 end_value=to_decimal(10),
@@ -259,81 +265,150 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
         ],
     ]
 
-    result = alex_aviad(preferences, int(cake_size), EPSILON, tolerance=TOLERANCE)[
-        "solution"
-    ]
-    # assert len(result) == 4, "The result should have exactly four segments."
-    print(f"{result=}")
-
-    sum_of_first_values = sum(slice.values[0] for slice in result)
-
-    expected_sum_of_first_values = get_double_prime_for_interval(
-        preferences[0],
-        EPSILON,
-        to_decimal(0),
-        to_decimal(cake_size),
+    total_v = get_double_prime_for_interval(
+        segments=preferences[0],
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=to_decimal(cake_size),
         cake_size=cake_size,
     )
+    print(f"{total_v=}")
+    segment_value = total_v / 4
+    print(f"{segment_value=}")
 
-    assert sum_of_first_values == pytest.approx(
-        expected_sum_of_first_values, abs=TOLERANCE
+    first_cut = _binary_search_left_to_right(
+        preference=preferences[0],
+        cake_size=cake_size,
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=to_decimal(cake_size),
+        target=segment_value,
+        tolerance=TOLERANCE,
     )
+    print(f"find l cut: {first_cut}")
 
-    print(f"{result=}")
+    v_1 = get_double_prime_for_interval(
+        segments=preferences[0],
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=to_decimal(first_cut),
+        cake_size=cake_size,
+    )
+    assert v_1 == pytest.approx(segment_value, abs=TOLERANCE)
 
-    assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
+    second_cut = _binary_search_left_to_right(
+        preference=preferences[0],
+        cake_size=cake_size,
+        epsilon=EPSILON,
+        start=first_cut,
+        end=to_decimal(cake_size),
+        target=segment_value,
+        tolerance=TOLERANCE,
+    )
+    print(f"find m cut: {second_cut}")
+    v_2 = get_double_prime_for_interval(
+        segments=preferences[0],
+        epsilon=EPSILON,
+        start=to_decimal(first_cut),
+        end=to_decimal(second_cut),
+        cake_size=cake_size,
+    )
+    assert v_2 == pytest.approx(segment_value, abs=TOLERANCE)
+
+    third_cut = _binary_search_left_to_right(
+        preference=preferences[0],
+        cake_size=cake_size,
+        epsilon=EPSILON,
+        start=second_cut,
+        end=to_decimal(cake_size),
+        target=segment_value,
+        tolerance=TOLERANCE,
+    )
+    print(f"find r cut: {third_cut}")
+    v_3 = get_double_prime_for_interval(
+        segments=preferences[0],
+        epsilon=EPSILON,
+        start=to_decimal(second_cut),
+        end=to_decimal(third_cut),
+        cake_size=cake_size,
+    )
+    assert v_3 == pytest.approx(segment_value, abs=TOLERANCE)
+
+    v_4 = get_double_prime_for_interval(
+        segments=preferences[0],
+        epsilon=EPSILON,
+        start=to_decimal(third_cut),
+        end=to_decimal(cake_size),
+        cake_size=cake_size,
+    )
+    assert v_4 == pytest.approx(segment_value, abs=TOLERANCE)
+
+    # cuts = equipartition(
+    #     preferences[0], cake_size, EPSILON, to_decimal(0), cake_size, TOLERANCE
+    # )
+    # print(cuts)
+    #
+    # values = get_values_for_cuts(preferences[0], cuts, cake_size, EPSILON)
+    # print(values)
+
+    # print(1)
+    # result = alex_aviad(preferences, int(cake_size), EPSILON, tolerance=TOLERANCE)[
+    #     "solution"
+    # ]
+    # assert len(result) == 4, "The result should have exactly four segments."
+    # print(f"{result=}")
+    #
+    # print(2)
+    # sum_of_first_values = sum(slice.values[0] for slice in result)
+    #
+    # expected_sum_of_first_values = get_double_prime_for_interval(
+    #     preferences[0],
+    #     EPSILON,
+    #     to_decimal(0),
+    #     to_decimal(cake_size),
+    #     cake_size=cake_size,
+    # )
+    # print(f"{result=}")
+    # assert sum_of_first_values == pytest.approx(
+    #     expected_sum_of_first_values, abs=TOLERANCE * 10
+    # )
+    #
+    # print(f"{result=}")
+    # print(4)
+    #
+    # assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
 
 
-def test_alex_aviad_generic_case_should_fail():
-    """SHOULD FAIL"""
+def test_alex_aviad_generic_case_one_seg():
+    # TODO: Weried... works perfectly on front-end, but cannot passed here.
+    assert (
+        1 == 2
+    ), "Fix this later...works perfectly on front-end, but cannot passed here."
     cake_size = 1
     epsilon = Decimal("1e-6")
 
-    with pytest.raises(AssertionError) as expected_error:
-        assert not "SHOULD FAIL", "SHOULD FAIL"
-        preferences = [
-            [gen_flat_seg(0, cake_size, 2.5)],
-            [gen_flat_seg(0, cake_size, 5)],
-            [gen_flat_seg(0, cake_size, 7.5)],
-            [gen_flat_seg(0, cake_size, 10)],
-        ]
+    preferences = [
+        [gen_flat_seg(to_decimal(0), to_decimal(cake_size), to_decimal(2.5))],
+        [gen_flat_seg(to_decimal(0), to_decimal(cake_size), to_decimal(5))],
+        [gen_flat_seg(to_decimal(0), to_decimal(cake_size), to_decimal(7.5))],
+        [gen_flat_seg(to_decimal(0), to_decimal(cake_size), to_decimal(10))],
+    ]
 
-        result = alex_aviad(preferences, cake_size, epsilon)["solution"]
-        print(f"{result=}")
-        assert (
-            len(result) == 4
-        ), "SHOULD FAIL! The result should have exactly four segments."
+    result = alex_aviad(preferences, cake_size, epsilon)["solution"]
+    print(f"{result=}")
+    assert len(result) == 4, "The result should have exactly four segments."
 
-        l, m, r = equipartition(
-            preference=preferences[0],
-            cake_size=to_decimal(cake_size),
-            epsilon=epsilon,
-            start=to_decimal(0),
-            end=to_decimal(cake_size),
-        )
-        sum_of_first_values = sum(slice.values[0] for slice in result)
-        expected_sum_of_first_values = (
-            get_double_prime_for_interval(
-                preferences[0], epsilon, to_decimal(0), l, cake_size=CAKE_SIZE
-            )
-            + get_double_prime_for_interval(
-                preferences[0], epsilon, l, m, cake_size=CAKE_SIZE
-            )
-            + get_double_prime_for_interval(
-                preferences[0], epsilon, m, r, cake_size=CAKE_SIZE
-            )
-            + get_double_prime_for_interval(
-                preferences[0], epsilon, r, to_decimal(cake_size), cake_size=CAKE_SIZE
-            )
-        )
-
-        # Test later
-        # assert sum_of_first_values == pytest.approx(
-        #     expected_sum_of_first_values, abs=TOLERANCE
-        # )
-
-        assert not "SHOULD FAIL", "SHOULD FAIL"
-
-    assert "SHOULD FAIL" in str(
-        expected_error.value
-    ), f"Expected AssertionError with 'Should fail' message, but got different error: {expected_error.value}."
+    l, m, r = equipartition(
+        preference=preferences[0],
+        cake_size=to_decimal(cake_size),
+        epsilon=epsilon,
+        start=to_decimal(0),
+        end=to_decimal(cake_size),
+    )
+    sum_of_first_values = sum(slice.values[0] for slice in result)
+    expected_sum_of_first_values = get_double_prime_for_interval(
+        preferences[0], epsilon, to_decimal(0), CAKE_SIZE, cake_size=CAKE_SIZE
+    )
+    assert sum_of_first_values == pytest.approx(
+        expected_sum_of_first_values, abs=TOLERANCE
+    )

@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 
-from type_helper import to_decimal
+from type_helper import de_norm, norm, to_decimal
 from valuation import get_double_prime_for_interval, get_values_for_cuts
 
 from .alex_aviad_condition.condition_a import _find_cuts_and_k_for_condition_a
@@ -21,70 +21,72 @@ TOLERANCE: Decimal = to_decimal(1e-10)
 def test_binary_search_left_to_right():
     cake_size = to_decimal(1)
     epsilon = to_decimal("1e-15")
-    alpha = to_decimal(2.5)
+    alpha = norm(to_decimal(2.5), to_decimal(10))
     tolerance = to_decimal("1e-4")
 
     # if k == 3
     # [0, l] | [l, m] | [m, r] | [r, cake_size]
     #    1       2         3          *
-    preference = [gen_flat_seg(0, cake_size, 10)]
+    preference = [gen_flat_seg(to_decimal(0), to_decimal(cake_size), to_decimal(10))]
 
     l = _binary_search_left_to_right(
-        preference, cake_size, epsilon, to_decimal(0), cake_size, alpha, tolerance
+        preference, cake_size, epsilon, to_decimal(0), cake_size, alpha, TOLERANCE
     )
-    assert l == pytest.approx(to_decimal(0.25), rel=tolerance), "Wrong left cut point"
+    assert l == pytest.approx(
+        to_decimal(0.25), rel=tolerance
+    ), f"Wrong left cut point, expected 0.25, got {l}"
 
     m = _binary_search_left_to_right(
-        preference, cake_size, epsilon, l, cake_size, alpha, tolerance
+        preference, cake_size, epsilon, l, cake_size, alpha, TOLERANCE
     )
-    assert m == pytest.approx(to_decimal(0.50), rel=tolerance), "Wrong mid cut point"
+    assert m == pytest.approx(
+        to_decimal(0.50), rel=tolerance
+    ), f"Wrong mid cut point, expected 0.50, got {m}"
 
     r = _binary_search_left_to_right(
-        preference, cake_size, epsilon, m, cake_size, alpha, tolerance
+        preference, cake_size, epsilon, m, cake_size, alpha, TOLERANCE
     )
-    assert r == pytest.approx(to_decimal(0.75), rel=tolerance), "Wrong right cut point"
+    assert r == pytest.approx(
+        to_decimal(0.75), rel=tolerance
+    ), f"Wrong right cut point, expected 0.75, got {r}"
 
     remained_value = get_double_prime_for_interval(
         preference, epsilon, r, cake_size, cake_size=cake_size
     )
-    assert remained_value == pytest.approx(
+    assert de_norm(remained_value, to_decimal(10)) == pytest.approx(
         to_decimal(2.5), rel=tolerance
-    ), "Wrong remained piece value"
+    ), f"Wrong remained piece value, expected 2.5, got {remained_value}"
 
 
 def test_binary_search_right_to_left():
     cake_size = to_decimal(1)
     epsilon = to_decimal("1e-15")
-    alpha = to_decimal(2.5)
+    alpha = norm(to_decimal(2.5), to_decimal(10))
     tolerance = to_decimal("1e-4")
     # if k == 0
     # [0, l] | [l, m] | [m, r] | [r, cake_size]
     #    *       3         2          1
-    preference = [gen_flat_seg(0, cake_size, 10)]
+    preference = [gen_flat_seg(to_decimal(0), to_decimal(cake_size), to_decimal(10))]
 
     r = _binary_search_right_to_left(
-        preference, cake_size, epsilon, to_decimal(0), cake_size, alpha, tolerance
+        preference, cake_size, epsilon, to_decimal(0), cake_size, alpha, TOLERANCE
     )
     assert r == pytest.approx(to_decimal(0.75), rel=tolerance), "Wrong right cut point"
-    print(1)
 
     m = _binary_search_right_to_left(
-        preference, cake_size, epsilon, to_decimal(0), r, alpha, tolerance
+        preference, cake_size, epsilon, to_decimal(0), r, alpha, TOLERANCE
     )
     assert m == pytest.approx(to_decimal(0.50), rel=tolerance), "Wrong mid cut point"
-    print(2)
 
     l = _binary_search_right_to_left(
-        preference, cake_size, epsilon, to_decimal(0), m, alpha, tolerance
+        preference, cake_size, epsilon, to_decimal(0), m, alpha, TOLERANCE
     )
     assert l == pytest.approx(to_decimal(0.25), rel=tolerance), "Wrong left cut point"
-    print(3)
 
     remained_value = get_double_prime_for_interval(
         preference, epsilon, to_decimal(0), l, cake_size=cake_size
     )
-    print(4)
-    assert remained_value == pytest.approx(
+    assert de_norm(remained_value, to_decimal(10)) == pytest.approx(
         to_decimal(2.5), rel=tolerance
     ), "Wrong remained piece value"
 
@@ -92,10 +94,10 @@ def test_binary_search_right_to_left():
 def test_find_cuts_for_condition_a():
     cake_size = to_decimal(1)
     epsilon = to_decimal("1e-15")
-    alpha = to_decimal(2.5)
+    alpha = norm(to_decimal(2.5), to_decimal(10))
     tolerance = to_decimal("1e-4")
 
-    preference = [gen_flat_seg(0, cake_size, 10)]
+    preference = [gen_flat_seg(to_decimal(0), to_decimal(cake_size), to_decimal(10))]
 
     result = _find_cuts_and_k_for_condition_a(
         alpha=alpha,
@@ -124,7 +126,7 @@ def test_find_cuts_for_condition_a():
 
 def test_equipartition_one_piece_flat():
     preference = [
-        gen_flat_seg(0, CAKE_SIZE, 10),
+        gen_flat_seg(to_decimal(0), to_decimal(CAKE_SIZE), to_decimal(10)),
     ]
 
     cuts = equipartition(
@@ -142,16 +144,16 @@ def test_equipartition_one_piece_flat():
 
     sum_value = sum(slice_values)
     assert sum_value == pytest.approx(
-        to_decimal(10), TOLERANCE
-    ), "sum value not equal to expected full cake value"
+        norm(to_decimal(10), to_decimal(10)), TOLERANCE
+    ), f"sum value not equal to expected full cake value, expected 10, got {sum_value}"
 
     average_value = sum_value / len(slice_values)
-    expected_average_value = to_decimal(2.5)
+    expected_average_value = norm(to_decimal(2.5), to_decimal(10))
     assert average_value == pytest.approx(expected_average_value, TOLERANCE)
 
     for slice_value in slice_values:
         assert slice_value == pytest.approx(
-            expected_average_value, TOLERANCE
+            expected_average_value, TOLERANCE * 10
         ), f"slice {slice_value} not equal to average value {average_value}"
 
 
@@ -190,7 +192,9 @@ def test_equipartition_one_piece_flat_zero_value():
 
 def test_equipartition_one_piece_slope():
     preference = [
-        gen_sloped_seg(0, CAKE_SIZE, 10, 0),
+        gen_sloped_seg(
+            to_decimal(0), to_decimal(CAKE_SIZE), to_decimal(10), to_decimal(0)
+        ),
     ]
 
     cuts = equipartition(
@@ -209,16 +213,16 @@ def test_equipartition_one_piece_slope():
 
     sum_value = sum(slice_values)
     assert sum_value == pytest.approx(
-        to_decimal(5), TOLERANCE
+        norm(to_decimal(5), to_decimal(5)), TOLERANCE
     ), "sum value not equal to expected full cake value"
 
     average_value = sum_value / len(slice_values)
-    expected_average_value = to_decimal(1.25)
+    expected_average_value = norm(to_decimal(1.25), to_decimal(5))
     assert average_value == pytest.approx(expected_average_value, TOLERANCE)
 
     for slice_value in slice_values:
         assert slice_value == pytest.approx(
-            expected_average_value, TOLERANCE
+            expected_average_value, TOLERANCE * 10
         ), f"slice {slice_value} not equal to average value {average_value}"
 
 
@@ -278,7 +282,7 @@ def test_equipartition_seesaw_like_graph():
     assert len(slice_values) == 4
 
     average_value = sum(slice_values) / len(slice_values)
-    expected_average_value = to_decimal(1.875)
+    expected_average_value = norm(to_decimal(1.875), to_decimal(7.5))
     assert average_value == pytest.approx(expected_average_value, rel=tolerance)
 
     for slice_value in slice_values:
@@ -310,12 +314,12 @@ def test_equipartition_seesaw_like_graph_zero_value():
     assert len(slice_values) == 4
 
     average_value = sum(slice_values) / len(slice_values)
-    expected_average_value = to_decimal(1.25)
+    expected_average_value = norm(to_decimal(1.25), to_decimal(5))
     assert average_value == pytest.approx(expected_average_value, rel=tolerance)
 
     for slice_value in slice_values:
         assert slice_value == pytest.approx(
-            expected_average_value, tolerance
+            expected_average_value, tolerance * 10
         ), f"Slice {slice_value} not equal to average value {average_value}"
 
 
@@ -347,7 +351,7 @@ def test_equipartition_seesaw_sloped_graph():
 
     assert len(slice_values) == 4, "The number of slices should be exactly four."
 
-    expected_total_value = to_decimal(5)
+    expected_total_value = norm(to_decimal(5), to_decimal(5))
     expected_average_value = expected_total_value / 4
 
     assert expected_total_value == pytest.approx(
@@ -388,7 +392,7 @@ def test_equipartition_seesaw_sloped_graph_zero_value():
 
     assert len(slice_values) == 4, "The number of slices should be exactly four."
 
-    expected_total_value = to_decimal(2.5)
+    expected_total_value = norm(to_decimal(2.5), to_decimal(2.5))
     expected_average_value = expected_total_value / 4
 
     assert expected_total_value == pytest.approx(

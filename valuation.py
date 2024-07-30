@@ -1,17 +1,16 @@
 from decimal import Decimal, getcontext
 from typing import List
 
-from pytest import raises
-
 from base_types import Segment
-from type_helper import scale_back_from_unit, scale_to_unit, to_decimal
+from type_helper import norm, scale_back_from_unit, scale_to_unit, to_decimal
 from values import get_value_for_interval
 
 getcontext().prec = 15
 
 
-def _v(segments: List[Segment], a: Decimal, b: Decimal) -> Decimal:
-    v = get_value_for_interval(segments, a, b)
+def _v(segments: List[Segment], a: Decimal, b: Decimal, cake_size: Decimal) -> Decimal:
+    whole_cake_value = get_value_for_interval(segments, to_decimal(0), cake_size)
+    v = norm(get_value_for_interval(segments, a, b), whole_cake_value)
     print(f"v={v}({a=}, {b=})")
     return v
 
@@ -21,8 +20,9 @@ def _v_prime(
     epsilon: Decimal,
     a: Decimal,
     b: Decimal,
+    cake_size: Decimal,
 ) -> Decimal:
-    v = _v(segments, a, b) / 2 + epsilon * abs(b - a)
+    v = _v(segments, a, b, cake_size) / 2 + epsilon * abs(b - a)
     print(f"v_prime={v}({a=}, {b=})")
     return v
 
@@ -113,14 +113,20 @@ def _v_double_prime(
     a_overline = scale_back_from_unit(a_overline_unit, cake_size)
     b_underline = scale_back_from_unit(b_underline_unit, cake_size)
 
-    v_prime_a_under_b_over = _v_prime(segments, delta, a_underline, b_overline)
-    v_prime_a_over_b_under = _v_prime(segments, delta, a_overline, b_underline)
+    v_prime_a_under_b_over = _v_prime(
+        segments, delta, a_underline, b_overline, cake_size
+    )
+    v_prime_a_over_b_under = _v_prime(
+        segments, delta, a_overline, b_underline, cake_size
+    )
     print(f"{v_prime_a_under_b_over=}({a_underline=}, {b_overline=})")
     print(f"{v_prime_a_over_b_under=}({a_overline=}, {b_underline=})")
 
     if a_overline_unit - a_unit >= b_unit - b_underline_unit:
         print("Case 1")
-        v_prime_a_under_b_under = _v_prime(segments, delta, a_underline, b_underline)
+        v_prime_a_under_b_under = _v_prime(
+            segments, delta, a_underline, b_underline, cake_size
+        )
         print(f"{v_prime_a_under_b_under=}({a_underline=}, {b_underline=})")
         v_double_prime = (
             ((a_overline_unit - a_unit) - (b_unit - b_underline_unit))
@@ -145,7 +151,9 @@ def _v_double_prime(
         return v_double_prime
     elif a_overline_unit - a_unit <= b_unit - b_underline_unit:
         print("Case 2")
-        v_prime_a_over_b_over = _v_prime(segments, delta, a_overline, b_overline)
+        v_prime_a_over_b_over = _v_prime(
+            segments, delta, a_overline, b_overline, cake_size
+        )
         print(f"{v_prime_a_over_b_over=}({a_overline=}, {b_overline=})")
         v_double_prime = (
             ((b_unit - b_underline_unit) - (a_overline_unit - a_unit))
@@ -167,6 +175,7 @@ def overline(x, delta, epsilon=Decimal("1e-10")) -> Decimal:
 
     x = to_decimal(x)
     delta = to_decimal(delta)
+    epsilon = delta
 
     if x < delta or x == 0:
         return delta
@@ -189,6 +198,7 @@ def underline(x, delta, epsilon=Decimal("1e-10")) -> Decimal:
 
     x = to_decimal(x)
     delta = to_decimal(delta)
+    epsilon = delta
 
     if x < delta or x == 0:
         return to_decimal(0)
@@ -211,7 +221,7 @@ def get_values_for_cuts(
 ) -> List[Decimal]:
     slice_values = []
 
-    start = 0
+    start = to_decimal(0)
     for end in cuts:
         value = get_double_prime_for_interval(
             preference, epsilon, start, end, cake_size=cake_size
@@ -219,5 +229,13 @@ def get_values_for_cuts(
         slice_values.append(value)
         start = end
     # Last piece
-    slice_values.append(get_value_for_interval(preference, cuts[-1], cake_size))
+    slice_values.append(
+        get_double_prime_for_interval(
+            segments=preference,
+            epsilon=epsilon,
+            start=cuts[-1],
+            end=cake_size,
+            cake_size=cake_size,
+        )
+    )
     return slice_values
