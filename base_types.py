@@ -134,8 +134,15 @@ class Portion:
     """
 
     owner: int
-    percent_values: List[float]
-    edges: List[Tuple[int, int]]
+    percent_values: List[Decimal]
+    edges: List[Tuple[Decimal, Decimal]]
+
+    def to_dict(self):
+        return {
+            "owner": self.owner,
+            "percentValues": [float(val) for val in self.percent_values],
+            "edges": [[float(edge[0]), float(edge[1])] for edge in self.edges],
+        }
 
 
 @dataclass

@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from algorithms.alex_aviad import alex_aviad
+from algorithms.alex_aviad_result_helper import build_solution
 from base_types import Segment
 from type_helper import to_decimal
 
@@ -41,16 +42,28 @@ def handle_alex_aviad():
     cake_size = to_decimal(data["cake_size"])
     assert preferences and cake_size, "Should work"
 
-    response = alex_aviad(
+    epsilon = to_decimal("1e-15")
+    tolerance = to_decimal("1e-6")
+
+    result = alex_aviad(
         preferences=preferences,
         cake_size=int(cake_size),
-        epsilon=to_decimal("1e-15"),
-        tolerance=to_decimal("1e-6"),
+        epsilon=epsilon,
+        tolerance=tolerance,
     )
 
-    print("response", response)
+    response = build_solution(
+        preferences=preferences,
+        cake_size=to_decimal(cake_size),
+        epsilon=epsilon,
+        result=result["solution"],
+        steps=result["steps"],
+    )
+
+    print("response", result)
     print("preferences", preferences)
     print("cake_size", cake_size)
+    print(f"{response=}")
 
     return jsonify(response)
 

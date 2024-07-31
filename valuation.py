@@ -39,7 +39,7 @@ def get_double_prime_for_interval(
     # Make sure using Decimal
     epsilon = to_decimal(epsilon)
     start = to_decimal(start)
-    end = to_decimal(end)
+    end = to_decimal(min(end, cake_size))
     cake_size = to_decimal(cake_size)
 
     # Only one segment

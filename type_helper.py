@@ -37,7 +37,7 @@ def scale_back_from_unit(a: Decimal, cake_size: Decimal) -> Decimal:
     """
     assert (
         to_decimal(0) <= a <= to_decimal(1)
-    ), f"a must be greater than or equal to 0 and less than 1, to transform back to [0, cake_size({cake_size}), got {a}], "
+    ), f"a must be greater than or equal to 0 and less than 1, to transform back to [0, cake_size({cake_size})], got {a}, "
 
     if cake_size == 1:
         return to_decimal(a)

@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import List
 
 from base_types import FrozenUnassignedSlice, Preferences, Slice
-from type_helper import to_decimal
+from type_helper import de_norm, to_decimal
 from valuation import get_double_prime_for_interval
 from values import get_value_for_interval
 
@@ -63,8 +63,17 @@ def cut_slice(
         )
 
     values = [
-        get_double_prime_for_interval(
-            segments, epsilon, start, end, cake_size=cake_size
+        de_norm(
+            v=get_double_prime_for_interval(
+                segments, epsilon, start, end, cake_size=cake_size
+            ),
+            whole_cake_value=get_double_prime_for_interval(
+                segments,
+                epsilon,
+                to_decimal(0),
+                to_decimal(cake_size),
+                cake_size=cake_size,
+            ),
         )
         for segments in preferences
     ]

@@ -2,7 +2,6 @@ from decimal import Decimal
 from typing import Any, Dict, List, Tuple
 
 from base_types import AssignedSlice, Preferences, Segment
-from cut import cut_cake
 from type_helper import almost_equal, to_decimal
 from valuation import get_double_prime_for_interval
 

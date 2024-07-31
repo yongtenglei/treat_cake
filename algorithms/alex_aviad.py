@@ -64,6 +64,7 @@ def alex_aviad(
         end=to_decimal(cake_size),
         cake_size=to_decimal(cake_size),
     )
+    assert alpha_overline == 1, "Should be 1"
 
     info = []
     alpha = -1
@@ -152,6 +153,3 @@ def alex_aviad(
         return {"solution": allocation, "steps": steps}
     except Exception as e:
         print(e)
-        # for i in info:
-        #     print(i)
-    # assert 1 == 2, "Should not be here"
