@@ -149,7 +149,7 @@ def alex_aviad(
                 preferences=preferences,
             )
         for i in info:
-            print(i)
+            print(f"info: {i}")
         return {"solution": allocation, "steps": steps}
     except Exception as e:
         print(e)

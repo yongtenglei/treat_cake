@@ -23,6 +23,7 @@ def _v_prime(
     cake_size: Decimal,
 ) -> Decimal:
     v = _v(segments, a, b, cake_size) / 2 + epsilon * abs(b - a)
+    assert 0 <= v <= 1, f"prime value should in [0, 1], got {v}"
     print(f"v_prime={v}({a=}, {b=})")
     return v
 
@@ -52,12 +53,12 @@ def get_double_prime_for_interval(
     start_int = int(start)
     end_int = int(end)
 
-    if start == start_int and end == end_int:
+    if start == to_decimal(start_int) and end == to_decimal(end_int):
         return _v_double_prime(segments, epsilon, start, end, cake_size)
 
     # Incomplete start segment
-    if start != start_int:
-        first_segment_end = min(end, start_int + 1)
+    if start != to_decimal(start_int):
+        first_segment_end = to_decimal(min(end, to_decimal(start_int + 1)))
         total += _v_double_prime(segments, epsilon, start, first_segment_end, cake_size)
         start_int += 1
 
@@ -70,7 +71,7 @@ def get_double_prime_for_interval(
         total += _v_double_prime(segments, epsilon, mid_start, mid_end, cake_size)
 
     # Incomplete end segment
-    if end > end_int:
+    if end > to_decimal(end_int):
         last_segment_start = to_decimal(end_int)
         total += _v_double_prime(segments, epsilon, last_segment_start, end, cake_size)
 
@@ -129,11 +130,19 @@ def _v_double_prime(
         )
         print(f"{v_prime_a_under_b_under=}({a_underline=}, {b_underline=})")
         v_double_prime = (
-            ((a_overline_unit - a_unit) - (b_unit - b_underline_unit))
-            / delta
+            (((a_overline_unit - a_unit) - (b_unit - b_underline_unit)) / delta)
             * v_prime_a_under_b_under
-            + (b_unit - b_underline_unit) / delta * v_prime_a_under_b_over
-            + (a_unit - a_underline_unit) / delta * v_prime_a_over_b_under
+            + ((b_unit - b_underline_unit) / delta) * v_prime_a_under_b_over
+            + ((a_unit - a_underline_unit) / delta) * v_prime_a_over_b_under
+        )
+        print(
+            f"((a_overline_unit - a_unit) - (b_unit - b_underline_unit))/ delta * v_prime_a_under_b_under = (({a_overline_unit} - {a_unit}) - ({b_unit} - {b_underline_unit}))/ {delta} * {v_prime_a_under_b_under} = {((a_overline_unit - a_unit) - (b_unit - b_underline_unit))/ delta * v_prime_a_under_b_under}"
+        )
+        print(
+            f"+(b_unit - b_underline_unit) / delta * v_prime_a_under_b_over=({b_unit} - {b_underline_unit}) / {delta} * {v_prime_a_under_b_over} = {(b_unit - b_underline_unit) / delta * v_prime_a_under_b_over}"
+        )
+        print(
+            f"+ (a_unit - a_underline_unit) / delta * v_prime_a_over_b_under =  ({a_unit} - {a_underline_unit}) / {delta} * {v_prime_a_over_b_under} ={ (a_unit - a_underline_unit) / delta * v_prime_a_over_b_under}"
         )
 
         if (
@@ -156,11 +165,10 @@ def _v_double_prime(
         )
         print(f"{v_prime_a_over_b_over=}({a_overline=}, {b_overline=})")
         v_double_prime = (
-            ((b_unit - b_underline_unit) - (a_overline_unit - a_unit))
-            / delta
+            (((b_unit - b_underline_unit) - (a_overline_unit - a_unit)) / delta)
             * v_prime_a_over_b_over
-            + (a_overline_unit - a_unit) / delta * v_prime_a_under_b_over
-            + (b_overline_unit - b_unit) / delta * v_prime_a_over_b_under
+            + ((a_overline_unit - a_unit) / delta) * v_prime_a_under_b_over
+            + ((b_overline_unit - b_unit) / delta) * v_prime_a_over_b_under
         )
         print(f"v_double_prime={v_double_prime}({a_unit=}, {b_unit=})")
         print("====end====")

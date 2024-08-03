@@ -107,6 +107,16 @@ def generate_all_possible_allocations(cuts: List[Decimal], num_agents: int):
 
 
 def check_if_envy_free(num_agents: int, allocation: List[AssignedSlice]) -> bool:
+    # fudge_factor = to_decimal("1e-3")
+    # for a in range(num_agents):
+    #     for b in range(num_agents):
+    #         if (
+    #             a != b
+    #             and allocation[a].values[a] < allocation[a].values[b] - fudge_factor
+    #         ):
+    #             return False
+    # return True
+
     total_values = [to_decimal(0)] * num_agents
     for slice in allocation:
         for agent_id in range(num_agents):

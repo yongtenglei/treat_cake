@@ -65,6 +65,7 @@ def test_v_seesaw_like_gragh():
 def test_v_prime():
     segs = [gen_flat_seg(0, 100, 10)]
     v = _v_prime(segs, EPSILON, 0, 100, 100)
+    assert 0 <= v <= 1, f"prime value should in [0, 1], got {v}"
     assert v == pytest.approx(
         to_decimal(_v(segs, 0, 100, 100) / 2 + EPSILON * abs(100 - 0)), abs=TOLERANCE
     )
@@ -76,10 +77,11 @@ def test_v_prime_two_segs():
         gen_flat_seg(50, 100, 5),
     ]
 
-    v = _v_prime(segs, to_decimal(0.1), 0, 100, 100)
+    v = _v_prime(segs, to_decimal(EPSILON), 0, 100, 100)
+    assert 0 <= v <= 1, f"prime value should in [0, 1], got {v}"
     assert v == pytest.approx(
-        to_decimal(_v(segs, 0, 50, 100) / 2 + to_decimal(0.1) * abs(50 - 0))
-        + to_decimal(_v(segs, 50, 100, 100) / 2 + to_decimal(0.1) * abs(100 - 50)),
+        to_decimal(_v(segs, 0, 50, 100) / 2 + to_decimal(EPSILON) * abs(50 - 0))
+        + to_decimal(_v(segs, 50, 100, 100) / 2 + to_decimal(EPSILON) * abs(100 - 50)),
         abs=TOLERANCE,
     )
 
@@ -94,10 +96,11 @@ def test_v_prime_seesaw_like_gragh():
         ),
         gen_sloped_seg(50, 100, 5, 0),
     ]
-    v = _v_prime(segs, to_decimal(0.1), 0, 100, 100)
+    v = _v_prime(segs, to_decimal(EPSILON), 0, 100, 100)
+    assert 0 <= v <= 1, f"prime value should in [0, 1], got {v}"
     assert v == pytest.approx(
-        to_decimal(_v(segs, 0, 50, 100) / 2 + to_decimal(0.1) * abs(50 - 0))
-        + to_decimal(_v(segs, 50, 100, 100) / 2 + to_decimal(0.1) * abs(100 - 50)),
+        to_decimal(_v(segs, 0, 50, 100) / 2 + to_decimal(EPSILON) * abs(50 - 0))
+        + to_decimal(_v(segs, 50, 100, 100) / 2 + to_decimal(EPSILON) * abs(100 - 50)),
         abs=TOLERANCE,
     )
 
@@ -107,6 +110,7 @@ def test_v_double_prime_one_seg():
     v = _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(1)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 10) == pytest.approx(to_decimal(10), abs=TOLERANCE)
 
 
@@ -115,6 +119,7 @@ def test_v_double_prime_one_seg_by_interval():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(1)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 10) == pytest.approx(to_decimal(10), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(1), to_decimal(1)
@@ -126,6 +131,7 @@ def test_v_double_prime_one_seg_by_interval_zero_value():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(1)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 0) == pytest.approx(to_decimal(0), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(1), to_decimal(1)
@@ -141,6 +147,7 @@ def test_v_double_prime_two_flat_segs_by_interval():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 20) == pytest.approx(to_decimal(20), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
@@ -150,7 +157,8 @@ def test_v_double_prime_two_flat_segs_by_interval():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
     )
-    assert de_norm(v, 20) == pytest.approx(to_decimal(10), abs=TOLERANCE)
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
+    assert de_norm(v, to_decimal(20)) == pytest.approx(to_decimal(10), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
     )
@@ -159,9 +167,61 @@ def test_v_double_prime_two_flat_segs_by_interval():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
     )
-    assert de_norm(v, 20) == pytest.approx(to_decimal(10), abs=TOLERANCE)
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
+    assert de_norm(v, to_decimal(20)) == pytest.approx(to_decimal(10), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
+    )
+    # assert de_norm(v, 20) == pytest.approx(to_decimal(10), abs=TOLERANCE)
+
+
+def test_v_double_prime_three_flat_segs_by_interval():
+    segs = [
+        gen_flat_seg(to_decimal(0), to_decimal(1), to_decimal(10)),
+        gen_flat_seg(to_decimal(1), to_decimal(2), to_decimal(10)),
+        gen_flat_seg(to_decimal(2), to_decimal(3), to_decimal(10)),
+    ]
+    # All segments
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
+    )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
+    assert de_norm(v, 30) == pytest.approx(to_decimal(30), abs=TOLERANCE)
+    assert v == pytest.approx(
+        _v_double_prime(
+            segs, EPSILON, to_decimal(0), to_decimal(3), cake_size=to_decimal(3)
+        ),
+        abs=TOLERANCE,
+    )
+
+    # First third
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(3)
+    )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
+    assert de_norm(v, to_decimal(30)) == pytest.approx(to_decimal(10), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(3)
+    )
+
+    # Second piece
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(3)
+    )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
+    assert de_norm(v, to_decimal(30)) == pytest.approx(to_decimal(10), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(3)
+    )
+
+    # Third piece
+    v = get_double_prime_for_interval(
+        segs, EPSILON, to_decimal(2), to_decimal(3), cake_size=to_decimal(3)
+    )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
+    assert de_norm(v, to_decimal(30)) == pytest.approx(to_decimal(10), abs=TOLERANCE)
+    assert v == _v_double_prime(
+        segs, EPSILON, to_decimal(2), to_decimal(3), cake_size=to_decimal(3)
     )
 
 
@@ -174,6 +234,7 @@ def test_v_double_prime_two_flat_segs_by_interval_zero_value():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 10) == pytest.approx(to_decimal(10), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
@@ -183,6 +244,7 @@ def test_v_double_prime_two_flat_segs_by_interval_zero_value():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 10) == pytest.approx(to_decimal(10), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
@@ -192,6 +254,7 @@ def test_v_double_prime_two_flat_segs_by_interval_zero_value():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 10) == pytest.approx(to_decimal(0), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
@@ -207,6 +270,7 @@ def test_v_double_prime_two_slop_segs_by_interval():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 10) == pytest.approx(to_decimal(10), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
@@ -216,6 +280,7 @@ def test_v_double_prime_two_slop_segs_by_interval():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 10) == pytest.approx(to_decimal(5), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
@@ -225,6 +290,7 @@ def test_v_double_prime_two_slop_segs_by_interval():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 10) == pytest.approx(to_decimal(5), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
@@ -240,6 +306,7 @@ def test_v_double_prime_two_slop_segs_by_interval_zero_value():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 5) == pytest.approx(to_decimal(5), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
@@ -249,6 +316,7 @@ def test_v_double_prime_two_slop_segs_by_interval_zero_value():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 5) == pytest.approx(to_decimal(0), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(1), cake_size=to_decimal(2)
@@ -258,6 +326,7 @@ def test_v_double_prime_two_slop_segs_by_interval_zero_value():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 5) == pytest.approx(to_decimal(5), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(1), to_decimal(2), cake_size=to_decimal(2)
@@ -277,6 +346,8 @@ def test_v_double_prime_one_seg_by_interval_weird_case():
         to_decimal(0.6250000000145519),
         cake_size=to_decimal(1),
     )
+    assert 0 <= v_1 <= 1, f"double prime value should in [0, 1], got {v}"
+    assert 0 <= v_2 <= 1, f"double prime value should in [0, 1], got {v}"
     assert v_1 == pytest.approx(v_2, abs=TOLERANCE), "Should be equal"
 
 
@@ -292,6 +363,8 @@ def test_v_double_prime_one_seg_by_interval_weird_case_1():
         to_decimal(0.625),
         to_decimal(1),
     )
+    assert 0 <= v_1 <= 1, f"double prime value should in [0, 1], got {v}"
+    assert 0 <= v_2 <= 1, f"double prime value should in [0, 1], got {v}"
     assert v_1 == pytest.approx(v_2, abs=TOLERANCE), "Should be equal"
     assert de_norm(v_1, 10) == pytest.approx(
         to_decimal(3.75), abs=TOLERANCE
@@ -314,6 +387,8 @@ def test_v_double_prime_one_seg_by_interval_weird_case_2():
         to_decimal(0.6250000000145519),
         cake_size=to_decimal(1),
     )
+    assert 0 <= v_1 <= 1, f"double prime value should in [0, 1], got {v}"
+    assert 0 <= v_2 <= 1, f"double prime value should in [0, 1], got {v}"
     assert v_1 == v_2, "Should be equal"
     assert de_norm(v_1, 10) == pytest.approx(
         to_decimal(3.75), abs=TOLERANCE
@@ -340,6 +415,7 @@ def test_v_double_prime_various_cases():
         result = get_double_prime_for_interval(
             segs, EPSILON, start, end, cake_size=to_decimal(1)
         )
+        assert 0 <= result <= 1, f"double prime value should in [0, 1], got {v}"
         assert de_norm(result, 10) == pytest.approx(to_decimal(expected), abs=TOLERANCE)
         print(
             f"get_double_prime_for_interval(segments, epsilon, {start}, {end}) = {result}"
@@ -355,6 +431,7 @@ def test_v_double_prime_two_seesaw_like_segs():
     v = get_double_prime_for_interval(
         segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
     )
+    assert 0 <= v <= 1, f"double prime value should in [0, 1], got {v}"
     assert de_norm(v, 15) == pytest.approx(to_decimal(15), abs=TOLERANCE)
     assert v == _v_double_prime(
         segs, EPSILON, to_decimal(0), to_decimal(2), cake_size=to_decimal(2)
