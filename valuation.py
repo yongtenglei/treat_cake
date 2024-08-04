@@ -28,6 +28,18 @@ def _v_prime(
     return v
 
 
+def _safe_double_prime(v: Decimal, tolerance: Decimal) -> Decimal:
+    """Check if the total slightly exceeds 1 due to precision issues"""
+
+    tolerance = to_decimal(tolerance)
+    if v > to_decimal("1") and v - to_decimal("1") <= tolerance:
+        return to_decimal("1")
+    else:
+        assert 0 <= v <= 1, f"v should in [0, 1], got {v}"
+
+    return v
+
+
 def get_double_prime_for_interval(
     segments: List[Segment],
     epsilon: Decimal,
@@ -43,9 +55,14 @@ def get_double_prime_for_interval(
     end = to_decimal(min(end, cake_size))
     cake_size = to_decimal(cake_size)
 
+    tolerance = to_decimal("1e-10")
+
     # Only one segment
     if end <= 1:
-        return _v_double_prime(segments, epsilon, start, end, cake_size)
+        return _safe_double_prime(
+            _v_double_prime(segments, epsilon, start, end, cake_size),
+            tolerance=tolerance,
+        )
 
     # Multi-segments
     total = to_decimal(0)
@@ -54,7 +71,10 @@ def get_double_prime_for_interval(
     end_int = int(end)
 
     if start == to_decimal(start_int) and end == to_decimal(end_int):
-        return _v_double_prime(segments, epsilon, start, end, cake_size)
+        return _safe_double_prime(
+            _v_double_prime(segments, epsilon, start, end, cake_size),
+            tolerance=tolerance,
+        )
 
     # Incomplete start segment
     if start != to_decimal(start_int):
@@ -75,7 +95,7 @@ def get_double_prime_for_interval(
         last_segment_start = to_decimal(end_int)
         total += _v_double_prime(segments, epsilon, last_segment_start, end, cake_size)
 
-    return total
+    return _safe_double_prime(total, tolerance=tolerance)
 
 
 def _v_double_prime(
@@ -135,15 +155,15 @@ def _v_double_prime(
             + ((b_unit - b_underline_unit) / delta) * v_prime_a_under_b_over
             + ((a_unit - a_underline_unit) / delta) * v_prime_a_over_b_under
         )
-        print(
-            f"((a_overline_unit - a_unit) - (b_unit - b_underline_unit))/ delta * v_prime_a_under_b_under = (({a_overline_unit} - {a_unit}) - ({b_unit} - {b_underline_unit}))/ {delta} * {v_prime_a_under_b_under} = {((a_overline_unit - a_unit) - (b_unit - b_underline_unit))/ delta * v_prime_a_under_b_under}"
-        )
-        print(
-            f"+(b_unit - b_underline_unit) / delta * v_prime_a_under_b_over=({b_unit} - {b_underline_unit}) / {delta} * {v_prime_a_under_b_over} = {(b_unit - b_underline_unit) / delta * v_prime_a_under_b_over}"
-        )
-        print(
-            f"+ (a_unit - a_underline_unit) / delta * v_prime_a_over_b_under =  ({a_unit} - {a_underline_unit}) / {delta} * {v_prime_a_over_b_under} ={ (a_unit - a_underline_unit) / delta * v_prime_a_over_b_under}"
-        )
+        # print(
+        #     f"((a_overline_unit - a_unit) - (b_unit - b_underline_unit))/ delta * v_prime_a_under_b_under = (({a_overline_unit} - {a_unit}) - ({b_unit} - {b_underline_unit}))/ {delta} * {v_prime_a_under_b_under} = {((a_overline_unit - a_unit) - (b_unit - b_underline_unit))/ delta * v_prime_a_under_b_under}"
+        # )
+        # print(
+        #     f"+(b_unit - b_underline_unit) / delta * v_prime_a_under_b_over=({b_unit} - {b_underline_unit}) / {delta} * {v_prime_a_under_b_over} = {(b_unit - b_underline_unit) / delta * v_prime_a_under_b_over}"
+        # )
+        # print(
+        #     f"+ (a_unit - a_underline_unit) / delta * v_prime_a_over_b_under =  ({a_unit} - {a_underline_unit}) / {delta} * {v_prime_a_over_b_under} ={ (a_unit - a_underline_unit) / delta * v_prime_a_over_b_under}"
+        # )
 
         if (
             a_unit == 0

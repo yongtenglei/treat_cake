@@ -2,7 +2,7 @@ from decimal import Decimal, InvalidOperation, getcontext
 
 import pytest
 
-from type_helper import to_decimal
+from type_helper import de_norm, to_decimal
 from valuation import get_double_prime_for_interval, get_values_for_cuts
 
 from .alex_aviad import alex_aviad
@@ -35,7 +35,7 @@ def test_alex_aviad_same_evaluations_case_flat_graph_one_seg():
     )
 
     assert sum_of_first_values == pytest.approx(
-        expected_sum_of_first_values, abs=TOLERANCE
+        de_norm(expected_sum_of_first_values, 10), abs=TOLERANCE
     )
 
 
@@ -88,7 +88,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph_one_seg():
     )
 
     assert sum_of_first_values == pytest.approx(
-        expected_sum_of_first_values, abs=TOLERANCE
+        de_norm(expected_sum_of_first_values, to_decimal(5)), abs=TOLERANCE
     )
 
     print(f"{result=}")
@@ -102,19 +102,19 @@ def test_alex_aviad_same_evaluations_case_flat_graph_two_segs():
     preferences = [
         [
             gen_flat_seg(to_decimal(0), cake_size / 2, to_decimal(10)),
-            gen_flat_seg(to_decimal(0), cake_size, to_decimal(10)),
+            gen_flat_seg(to_decimal(cake_size / 2), cake_size, to_decimal(10)),
         ],
         [
             gen_flat_seg(to_decimal(0), cake_size / 2, to_decimal(10)),
-            gen_flat_seg(to_decimal(0), cake_size, to_decimal(10)),
+            gen_flat_seg(to_decimal(cake_size / 2), cake_size, to_decimal(10)),
         ],
         [
             gen_flat_seg(to_decimal(0), cake_size / 2, to_decimal(10)),
-            gen_flat_seg(to_decimal(0), cake_size, to_decimal(10)),
+            gen_flat_seg(to_decimal(cake_size / 2), cake_size, to_decimal(10)),
         ],
         [
             gen_flat_seg(to_decimal(0), cake_size / 2, to_decimal(10)),
-            gen_flat_seg(to_decimal(0), cake_size, to_decimal(10)),
+            gen_flat_seg(to_decimal(cake_size / 2), cake_size, to_decimal(10)),
         ],
     ]
 
@@ -133,7 +133,7 @@ def test_alex_aviad_same_evaluations_case_flat_graph_two_segs():
     )
 
     assert sum_of_first_values == pytest.approx(
-        expected_sum_of_first_values, abs=TOLERANCE
+        de_norm(expected_sum_of_first_values, to_decimal(20)), abs=TOLERANCE
     )
     print(f"{result=}")
     assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
@@ -191,9 +191,10 @@ def test_alex_aviad_same_evaluations_case_flat_graph_three_segs():
         to_decimal(cake_size),
         cake_size=cake_size,
     )
+    print(expected_sum_of_first_values)
 
     assert sum_of_first_values == pytest.approx(
-        expected_sum_of_first_values, abs=TOLERANCE
+        de_norm(expected_sum_of_first_values, to_decimal(30)), abs=TOLERANCE
     )
     print(f"{result=}")
     assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
