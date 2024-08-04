@@ -67,12 +67,10 @@ def cut_slice(
             v=get_double_prime_for_interval(
                 segments, epsilon, start, end, cake_size=cake_size
             ),
-            whole_cake_value=get_double_prime_for_interval(
+            whole_cake_value=get_value_for_interval(
                 segments,
-                epsilon,
                 to_decimal(0),
                 to_decimal(cake_size),
-                cake_size=cake_size,
             ),
         )
         for segments in preferences

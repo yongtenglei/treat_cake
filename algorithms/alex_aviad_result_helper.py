@@ -5,6 +5,7 @@ from algorithms.algorithm_types import Result, Step
 from base_types import Portion, Preferences
 from type_helper import to_decimal
 from valuation import get_double_prime_for_interval
+from values import get_value_for_interval
 
 from .algorithm_types import make_step
 
@@ -23,14 +24,19 @@ def build_solution(
 
     total_values = []
     for preference in preferences:
-        double_prime_v = get_double_prime_for_interval(
+        # double_prime_v = get_value_for_interval(
+        #     segments=preference,
+        #     epsilon=epsilon,
+        #     start=Decimal(0),
+        #     end=Decimal(cake_size),
+        #     cake_size=Decimal(cake_size),
+        # )
+        v = get_value_for_interval(
             segments=preference,
-            epsilon=epsilon,
             start=Decimal(0),
             end=Decimal(cake_size),
-            cake_size=Decimal(cake_size),
         )
-        total_values.append(double_prime_v)
+        total_values.append(v)
 
     portions = [
         Portion(owner=i, percent_values=[Decimal(0)] * num_people, edges=[])

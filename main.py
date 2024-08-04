@@ -60,7 +60,7 @@ def handle_alex_aviad():
         steps=result["steps"],
     )
 
-    print("response", result)
+    print(f"{result=}")
     print("preferences", preferences)
     print("cake_size", cake_size)
     print(f"{response=}")

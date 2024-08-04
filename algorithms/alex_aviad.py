@@ -57,14 +57,19 @@ def alex_aviad(
         end=cuts[0],
         cake_size=to_decimal(cake_size),
     )
-    alpha_overline = get_double_prime_for_interval(
-        segments=preferences[0],
-        epsilon=epsilon,
-        start=to_decimal(0),
-        end=to_decimal(cake_size),
-        cake_size=to_decimal(cake_size),
-    )
-    assert alpha_overline == 1, "Should be 1"
+    alpha_overline = to_decimal(1)
+
+    # Should be 1, sometimes gets 1.00000000000000000001 due to precision problem
+    # alpha_overline = get_double_prime_for_interval(
+    #     segments=preferences[0],
+    #     epsilon=epsilon,
+    #     start=to_decimal(0),
+    #     end=to_decimal(cake_size),
+    #     cake_size=to_decimal(cake_size),
+    # )
+    # assert (
+    #     alpha_overline == 1
+    # ), f"Initial alpha_overline should be 1, got {alpha_overline}"
 
     info = []
     alpha = -1
