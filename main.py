@@ -40,7 +40,9 @@ def handle_alex_aviad():
         for preference in data["preferences"]
     ]
     cake_size = to_decimal(data["cake_size"])
-    assert preferences and cake_size, "Should work"
+    assert (
+        preferences and cake_size
+    ), "main: should get preferences and cake_size from front end successfully"
 
     epsilon = to_decimal("1e-15")
     tolerance = to_decimal("1e-6")

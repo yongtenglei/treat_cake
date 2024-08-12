@@ -84,8 +84,7 @@ def alex_aviad(
     counter = 0
     try:
         while (
-            abs(alpha_overline - alpha_underline) >= (epsilon**4 / 12)
-            and counter <= 100
+            abs(alpha_overline - alpha_underline) > (epsilon**4 / 12) or counter <= 100
         ):
             alpha = (alpha_underline + alpha_overline) / 2
             meet_a, condition_a_info = check_condition_a(
@@ -96,6 +95,7 @@ def alex_aviad(
                 tolerance=tolerance,
             )
             if meet_a:
+                # assert "OHHHHH" == "", "GOODDDDD, meet conditon A"
                 meet_condition = "A"
                 alpha_underline = alpha
                 condition_info["A"] = condition_a_info
@@ -112,6 +112,7 @@ def alex_aviad(
                 tolerance=tolerance,
             )
             if meet_b:
+                # assert "OHHHHH" == "", "GOODDDDD, meet conditon B"
                 meet_condition = "B"
                 alpha_underline = alpha
                 condition_info["B"] = condition_b_info
@@ -127,11 +128,13 @@ def alex_aviad(
             counter += 1
 
         allocation = None
-        assert meet_condition != "", "Should work"
+        assert (
+            meet_condition != ""
+        ), "At least one condition should be met when exit the loop"
         if meet_condition == "A":
             assert (
                 condition_info["A"]["cuts"] and condition_info["A"]["k"]
-            ), "Should work"
+            ), "Should have necessary information of condition A to yied a final allocation"
             allocation = find_allocation_on_condition_a(
                 preferences=preferences,
                 cake_size=to_decimal(cake_size),
@@ -144,7 +147,7 @@ def alex_aviad(
                 condition_info["B"]["cuts"]
                 and condition_info["B"]["k"]
                 and condition_info["B"]["k_prime"]
-            ), "Should work"
+            ), "Should have necessary information of condition A to yied a final allocation"
             allocation = find_allocation_on_condition_b(
                 cuts=condition_info["B"]["cuts"],
                 cake_size=to_decimal(cake_size),

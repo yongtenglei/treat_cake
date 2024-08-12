@@ -200,6 +200,53 @@ def test_alex_aviad_same_evaluations_case_flat_graph_three_segs():
     assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
 
 
+def test_alex_aviad_same_evaluations_case_flat_graph_four_special_segs():
+    cake_size = to_decimal(4)
+
+    preferences = [
+        [
+            gen_flat_seg(to_decimal(0), to_decimal(1), to_decimal(10)),
+            gen_flat_seg(to_decimal(1), to_decimal(cake_size), to_decimal(0)),
+        ],
+        [
+            gen_flat_seg(to_decimal(0), to_decimal(1), to_decimal(0)),
+            gen_flat_seg(to_decimal(1), to_decimal(2), to_decimal(10)),
+            gen_flat_seg(to_decimal(2), to_decimal(cake_size), to_decimal(0)),
+        ],
+        [
+            gen_flat_seg(to_decimal(0), to_decimal(2), to_decimal(0)),
+            gen_flat_seg(to_decimal(2), to_decimal(3), to_decimal(10)),
+            gen_flat_seg(to_decimal(3), to_decimal(cake_size), to_decimal(0)),
+        ],
+        [
+            gen_flat_seg(to_decimal(0), to_decimal(3), to_decimal(0)),
+            gen_flat_seg(to_decimal(3), to_decimal(cake_size), to_decimal(10)),
+        ],
+    ]
+
+    result = alex_aviad(preferences, int(cake_size), EPSILON, tolerance=TOLERANCE)[
+        "solution"
+    ]
+    assert len(result) == 4, "The result should have exactly four segments."
+
+    sum_of_first_values = sum(slice.values[0] for slice in result)
+
+    expected_sum_of_first_values = get_double_prime_for_interval(
+        preferences[0],
+        EPSILON,
+        to_decimal(0),
+        to_decimal(cake_size),
+        cake_size=cake_size,
+    )
+    print(expected_sum_of_first_values)
+
+    assert sum_of_first_values == pytest.approx(
+        de_norm(expected_sum_of_first_values, to_decimal(10)), abs=TOLERANCE
+    )
+    print(f"{result=}")
+    assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
+
+
 def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
     # TODO: Weried... works perfectly on front-end, but cannot passed here.
     assert (

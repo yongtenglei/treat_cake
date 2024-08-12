@@ -35,6 +35,8 @@ def check_condition_a(
         epsilon=epsilon,
         tolerance=tolerance,
     )
+    if len(results) == 0:
+        return (False, {})
 
     cuts = results["cuts"]
     k = results["k"]
@@ -271,7 +273,8 @@ def _find_cuts_and_k_for_condition_a(
         print("All segments have the same value, treat the last piece as k")
         return {"cuts": [l, m, r], "k": 3}
     else:
-        raise ValueError("Cannot find a valid cuts, CHECK IMPLEMENTATION")
+        return {}
+        # raise ValueError("Cannot find a valid cuts, CHECK IMPLEMENTATION")
 
 
 def find_allocation_on_condition_a(

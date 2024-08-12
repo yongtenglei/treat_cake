@@ -107,29 +107,30 @@ def generate_all_possible_allocations(cuts: List[Decimal], num_agents: int):
 
 
 def check_if_envy_free(num_agents: int, allocation: List[AssignedSlice]) -> bool:
-    # fudge_factor = to_decimal("1e-3")
-    # for a in range(num_agents):
-    #     for b in range(num_agents):
-    #         if (
-    #             a != b
-    #             and allocation[a].values[a] < allocation[a].values[b] - fudge_factor
-    #         ):
-    #             return False
-    # return True
-
-    total_values = [to_decimal(0)] * num_agents
-    for slice in allocation:
-        for agent_id in range(num_agents):
-            total_values[agent_id] += slice.values[agent_id]
-
+    """O(m * n): m: number of Assigned Slice, n: number of agents"""
     fudge_factor = to_decimal("1e-12")
 
-    for a in range(num_agents):
-        obtained_value = total_values[a]
-        for value in total_values:
-            if value - fudge_factor > obtained_value:
+    for slice in allocation:
+        owner_value = slice.values[slice.owner]
+
+        # Check if the owner envies any other agent's value of the slice
+        for i in range(num_agents):
+            if i != slice.owner and slice.values[i] > owner_value + fudge_factor:
                 return False
+
     return True
+
+    # total_values = [to_decimal(0)] * num_agents
+    # for slice in allocation:
+    #     for agent_id in range(num_agents):
+    #         total_values[agent_id] += slice.values[agent_id]
+    #
+    # for a in range(num_agents):
+    #     obtained_value = total_values[a]
+    #     for value in total_values:
+    #         if value - fudge_factor > obtained_value:
+    #             return False
+    # return True
 
 
 def find_envy_free_allocation(
