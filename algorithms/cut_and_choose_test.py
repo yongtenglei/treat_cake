@@ -1,8 +1,10 @@
+import logging
 from decimal import Decimal
 
 import pytest
 
 from base_types import AssignedSlice
+
 from .algorithm_test_utils import (
     check_if_envy_free_allocation_origin,
     gen_flat_seg,
@@ -40,7 +42,7 @@ def test_splits_uniform_flat_value_graph_evenly_in_half():
         values=[Decimal(500), Decimal(500)],
         id=2,
     )
-    print("{result[0}=}")
+    logging.info("{result[0}=}")
     assert result[0] == expected_segment_1, "First segment does not match expected"
     assert result[1] == expected_segment_2, "Second segment does not match expected"
 

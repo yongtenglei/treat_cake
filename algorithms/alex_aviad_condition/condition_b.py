@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 from typing import Any, Dict, List, Tuple
 
@@ -471,10 +472,10 @@ def _binary_search_case_0_2(
             end=l,
             cake_size=to_decimal(cake_size),
         )
-        print("***********")
-        print("Handle_one_between: binary search")
-        print(f"{l=}, {searched_value=}, {l=}, {m_for_l=}")
-        print("***********")
+        logging.info("***********")
+        logging.info("Handle_one_between: binary search")
+        logging.info(f"{l=}, {searched_value=}, {l=}, {m_for_l=}")
+        logging.info("***********")
 
         # Want v_i[(0, l)]= v_i[(m(l), r)]
         desired_value = get_double_prime_for_interval(
@@ -568,9 +569,9 @@ def _binary_search_case_1_3(
             end=to_decimal(cake_size),
             cake_size=to_decimal(cake_size),
         )
-        print("***********")
-        print(f"{r=}, {searched_value=}, {r=}, {cake_size=}")
-        print("***********")
+        logging.info("***********")
+        logging.info(f"{r=}, {searched_value=}, {r=}, {cake_size=}")
+        logging.info("***********")
 
         # Want v_i([l, m(r)])= v_i([(r, cake_size])
         desired_value = get_double_prime_for_interval(
@@ -777,9 +778,9 @@ def _binary_search_find_l(
             cake_size=to_decimal(cake_size),
         )
 
-        print("***********")
-        print(f"{l=}, {searched_value=}, {cake_start=}, {l=}")
-        print("***********")
+        logging.info("***********")
+        logging.info(f"{l=}, {searched_value=}, {cake_start=}, {l=}")
+        logging.info("***********")
 
         # Want v_i([0, l])= v_i([(r(l), cake_size])
         desired_value = get_double_prime_for_interval(
@@ -855,11 +856,11 @@ def _expand_range_around_l(
             cake_size=to_decimal(cake_size),
         )
 
-        print("***********")
-        print(
+        logging.info("***********")
+        logging.info(
             f"{lower_bound_candidate=}, {searched_value=}, {cake_start=}, {lower_bound_candidate=}"
         )
-        print("***********")
+        logging.info("***********")
 
         # Want v_i([0, l])= v_i([(r(l), cake_size])
         desired_value = get_double_prime_for_interval(
@@ -913,11 +914,11 @@ def _expand_range_around_l(
             cake_size=to_decimal(cake_size),
         )
 
-        print("***********")
-        print(
+        logging.info("***********")
+        logging.info(
             f"{upper_bound_candidate=}, {searched_value=}, {cake_start=}, {upper_bound_candidate=}"
         )
-        print("***********")
+        logging.info("***********")
 
         # Want v_i([0, l])= v_i([(r(l), cake_size])
         desired_value = get_double_prime_for_interval(
@@ -1058,9 +1059,9 @@ def _binary_search_find_r(
             cake_size=to_decimal(cake_size),
         )
 
-        print("***********")
-        print(f"{r=}, {searched_value=}, {r=}, {cake_size=}")
-        print("***********")
+        logging.info("***********")
+        logging.info(f"{r=}, {searched_value=}, {r=}, {cake_size=}")
+        logging.info("***********")
 
         # Want v_i([0, l(r)])= v_i([(r, cake_size])
         desired_value = get_double_prime_for_interval(
@@ -1137,11 +1138,11 @@ def _expand_range_around_r(
             cake_size=to_decimal(cake_size),
         )
 
-        print("***********")
-        print(
+        logging.info("***********")
+        logging.info(
             f"{lower_bound_candidate=}, {searched_value=}, {lower_bound_candidate=}, {cake_size=}"
         )
-        print("***********")
+        logging.info("***********")
 
         # Want v_i([0, l(r)])= v_i([(r, cake_size])
         desired_value = get_double_prime_for_interval(
@@ -1198,11 +1199,11 @@ def _expand_range_around_r(
             cake_size=to_decimal(cake_size),
         )
 
-        print("***********")
-        print(
+        logging.info("***********")
+        logging.info(
             f"{upper_bound_candidate=}, {searched_value=}, {upper_bound_candidate=}, {cake_size=}"
         )
-        print("***********")
+        logging.info("***********")
 
         # Want v_i([0, l(r)])= v_i([(r, cake_size])
         desired_value = get_double_prime_for_interval(
@@ -1343,9 +1344,9 @@ def _binary_search_find_m(
             cake_size=to_decimal(cake_size),
         )
 
-        print("***********")
-        print(f"{m=}, {searched_value=}, {cake_start=}, {l_for_m=}")
-        print("***********")
+        logging.info("***********")
+        logging.info(f"{m=}, {searched_value=}, {cake_start=}, {l_for_m=}")
+        logging.info("***********")
 
         # Want v_i([0, l(m)])= v_i([(r(m), cake_size])
         desired_value = get_double_prime_for_interval(
@@ -1422,11 +1423,11 @@ def _expand_range_around_m(
             cake_size=to_decimal(cake_size),
         )
 
-        print("***********")
-        print(
+        logging.info("***********")
+        logging.info(
             f"{lower_bound_candidate=}, {searched_value=}, {lower_bound_candidate=}, {cake_size=}"
         )
-        print("***********")
+        logging.info("***********")
 
         # Want v_i([0, l(m)])= v_i([(r(m), cake_size])
         desired_value = get_double_prime_for_interval(
@@ -1483,9 +1484,11 @@ def _expand_range_around_m(
             cake_size=to_decimal(cake_size),
         )
 
-        print("***********")
-        print(f"{upper_bound_candidate=}, {searched_value=}, {cake_start=}, {l_for_m=}")
-        print("***********")
+        logging.info("***********")
+        logging.info(
+            f"{upper_bound_candidate=}, {searched_value=}, {cake_start=}, {l_for_m=}"
+        )
+        logging.info("***********")
 
         # Want v_i([0, l(m)])= v_i([(r(m), cake_size])
         desired_value = get_double_prime_for_interval(
@@ -1659,10 +1662,10 @@ def _handle_leftmost_rightmost(
     #             start=cake_start,
     #             end=l,
     #         )
-    #         print("***********")
-    #         print("Handle_one_between: binary search")
-    #         print(f"{l=}, {searched_value=}, {l=}, {cake_end=}")
-    #         print("***********")
+    #         logging.info("***********")
+    #         logging.info("Handle_one_between: binary search")
+    #         logging.info(f"{l=}, {searched_value=}, {l=}, {cake_end=}")
+    #         logging.info("***********")
     #
     #         # Want v_i([0, l])= v_i([(r(l), cake_size])
     #         desired_value = get_double_prime_for_interval(
@@ -1681,7 +1684,7 @@ def _handle_leftmost_rightmost(
     #
     #     return to_decimal((l_start + l_end) / 2)
 
-    print(f"Handling leftmost and rightmost: ({k}, {k_prime})")
+    logging.info(f"Handling leftmost and rightmost: ({k}, {k_prime})")
 
 
 CODITION_B_Handlers = {
@@ -1722,7 +1725,7 @@ def _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
                 )
                 yield {"cuts": cuts, "k": k, "k_prime": k_prime, "others": others}
             except Exception as e:
-                print(f"Error processing handler for ({k}, {k_prime}): {e}")
+                logging.info(f"Error processing handler for ({k}, {k_prime}): {e}")
 
         else:
             raise ValueError(f"No handler for combination: ({k}, {k_prime})")

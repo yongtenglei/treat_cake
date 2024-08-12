@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 
 import pytest
@@ -204,7 +205,7 @@ def test_equipartition_one_piece_slope():
         start=to_decimal(0),
         end=CAKE_SIZE,
     )
-    print(f"{cuts=}")
+    logging.info(f"{cuts=}")
 
     slice_values = get_values_for_cuts(
         preference=preference, cuts=cuts, cake_size=CAKE_SIZE, epsilon=EPSILON
@@ -238,7 +239,7 @@ def test_equipartition_one_piece_slope_zero_value():
         start=to_decimal(0),
         end=CAKE_SIZE,
     )
-    print(f"{cuts=}")
+    logging.info(f"{cuts=}")
 
     slice_values = get_values_for_cuts(
         preference=preference, cuts=cuts, cake_size=CAKE_SIZE, epsilon=EPSILON

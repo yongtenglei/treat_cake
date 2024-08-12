@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal, getcontext
 from typing import Any, Dict, List
 
@@ -78,7 +79,7 @@ def alex_aviad(
         "B": {"cuts": [], "k": -1, "k_prime": -1},
     }
     meet_condition = ""
-    print(
+    logging.info(
         f"abs(alpha_overline - alpha_underline) = {abs(alpha_overline - alpha_underline)}\n (epsilon**4 / 12) = {(epsilon**4 / 12)}"
     )
     counter = 0
@@ -157,7 +158,7 @@ def alex_aviad(
                 preferences=preferences,
             )
         for i in info:
-            print(f"info: {i}")
+            logging.info(f"info: {i}")
         return {"solution": allocation, "steps": steps}
     except Exception as e:
-        print(e)
+        logging.info(e)

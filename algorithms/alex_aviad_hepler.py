@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal, getcontext
 from typing import List, Tuple
 
@@ -45,9 +46,9 @@ def _binary_search_left_to_right(
             end=mid,
             cake_size=cake_size,
         )
-        print("***********")
-        print(f"{mid=}, {searched_value=}, {original_start=}, {mid=}")
-        print("***********")
+        logging.info("***********")
+        logging.info(f"{mid=}, {searched_value=}, {original_start=}, {mid=}")
+        logging.info("***********")
 
         if abs(searched_value - target) < tolerance:
             return mid
@@ -96,9 +97,9 @@ def _binary_search_right_to_left(
             end=original_end,
             cake_size=to_decimal(cake_size),
         )
-        print("***********")
-        print(f"{mid=}, {searched_value=}, {mid=}, {original_end=}")
-        print("***********")
+        logging.info("***********")
+        logging.info(f"{mid=}, {searched_value=}, {mid=}, {original_end=}")
+        logging.info("***********")
 
         if abs(searched_value - target) < tolerance:
             return mid
@@ -139,7 +140,7 @@ def equipartition(
         target=segment_value,
         tolerance=tolerance,
     )
-    print(f"find l cut: {first_cut}")
+    logging.info(f"find l cut: {first_cut}")
 
     second_cut = _binary_search_left_to_right(
         preference=preference,
@@ -150,7 +151,7 @@ def equipartition(
         target=segment_value,
         tolerance=tolerance,
     )
-    print(f"find m cut: {second_cut}")
+    logging.info(f"find m cut: {second_cut}")
 
     third_cut = _binary_search_left_to_right(
         preference=preference,
@@ -161,7 +162,7 @@ def equipartition(
         target=segment_value,
         tolerance=tolerance,
     )
-    print(f"find r cut: {third_cut}")
+    logging.info(f"find r cut: {third_cut}")
 
     return [first_cut, second_cut, third_cut]
 

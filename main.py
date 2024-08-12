@@ -1,3 +1,5 @@
+import logging
+import os
 from decimal import getcontext
 
 from flask import Flask, jsonify, request
@@ -10,6 +12,10 @@ from type_helper import to_decimal
 
 app = Flask(__name__)
 
+# Logging settings
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+log_format = os.getenv("LOG_FORMAT", "%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=getattr(logging, log_level), format=log_format)
 
 # Allow all domains
 # CORS(app)
@@ -62,10 +68,10 @@ def handle_alex_aviad():
         steps=result["steps"],
     )
 
-    print(f"{result=}")
-    print("preferences", preferences)
-    print("cake_size", cake_size)
-    print(f"{response=}")
+    logging.info(f"{result=}")
+    logging.info("preferences", preferences)
+    logging.info("cake_size", cake_size)
+    logging.info(f"{response=}")
 
     return jsonify(response)
 

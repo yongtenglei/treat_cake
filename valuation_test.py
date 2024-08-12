@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from type_helper import de_norm, to_decimal
@@ -411,13 +413,13 @@ def test_v_double_prime_various_cases():
     ]
 
     for start, end, expected in test_cases:
-        print(f"\n======case {start}, {end}======")
+        logging.info(f"\n======case {start}, {end}======")
         result = get_double_prime_for_interval(
             segs, EPSILON, start, end, cake_size=to_decimal(1)
         )
         assert 0 <= result <= 1, f"double prime value should in [0, 1], got {v}"
         assert de_norm(result, 10) == pytest.approx(to_decimal(expected), abs=TOLERANCE)
-        print(
+        logging.info(
             f"get_double_prime_for_interval(segments, epsilon, {start}, {end}) = {result}"
         )
 
