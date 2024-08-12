@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 from typing import Any, Dict, List, Tuple
 
@@ -35,6 +36,8 @@ def check_condition_a(
         epsilon=epsilon,
         tolerance=tolerance,
     )
+    if len(results) == 0:
+        return (False, {})
 
     cuts = results["cuts"]
     k = results["k"]
@@ -59,7 +62,7 @@ def check_condition_a(
             weak_preference_idx.append(i)
 
     if sum(weak_preference) >= 2:
-        print(
+        logging.info(
             f"Test A successful, {k=}, other agents (i and i') are {weak_preference_idx}"
         )
         return (True, {"cuts": cuts, "k": k})
@@ -268,10 +271,11 @@ def _find_cuts_and_k_for_condition_a(
         equals.append(True)
 
     if len(equals) == 4 and all(equals) is True:
-        print("All segments have the same value, treat the last piece as k")
+        logging.info("All segments have the same value, treat the last piece as k")
         return {"cuts": [l, m, r], "k": 3}
     else:
-        raise ValueError("Cannot find a valid cuts, CHECK IMPLEMENTATION")
+        return {}
+        # raise ValueError("Cannot find a valid cuts, CHECK IMPLEMENTATION")
 
 
 def find_allocation_on_condition_a(

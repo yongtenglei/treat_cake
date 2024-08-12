@@ -1,9 +1,10 @@
-from decimal import Decimal, InvalidOperation, getcontext
+import logging
+from decimal import Decimal, getcontext
 
 import pytest
 
 from type_helper import de_norm, to_decimal
-from valuation import get_double_prime_for_interval, get_values_for_cuts
+from valuation import get_double_prime_for_interval
 
 from .alex_aviad import alex_aviad
 from .alex_aviad_hepler import _binary_search_left_to_right, equipartition
@@ -26,7 +27,7 @@ def test_alex_aviad_same_evaluations_case_flat_graph_one_seg():
 
     result = alex_aviad(preferences, int(CAKE_SIZE), EPSILON)["solution"]
     # assert len(result) == 4, "The result should have exactly four segments."
-    print(f"{result=}")
+    logging.info(f"{result=}")
 
     sum_of_first_values = sum(slice.values[0] for slice in result)
 
@@ -79,7 +80,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph_one_seg():
         "solution"
     ]
     # assert len(result) == 4, "The result should have exactly four segments."
-    print(f"{result=}")
+    logging.info(f"{result=}")
 
     sum_of_first_values = sum(slice.values[0] for slice in result)
 
@@ -91,7 +92,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph_one_seg():
         de_norm(expected_sum_of_first_values, to_decimal(5)), abs=TOLERANCE
     )
 
-    print(f"{result=}")
+    logging.info(f"{result=}")
 
     assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
 
@@ -120,7 +121,7 @@ def test_alex_aviad_same_evaluations_case_flat_graph_two_segs():
 
     result = alex_aviad(preferences, int(cake_size), EPSILON)["solution"]
     # assert len(result) == 4, "The result should have exactly four segments."
-    print(f"{result=}")
+    logging.info(f"{result=}")
 
     sum_of_first_values = sum(slice.values[0] for slice in result)
 
@@ -135,7 +136,7 @@ def test_alex_aviad_same_evaluations_case_flat_graph_two_segs():
     assert sum_of_first_values == pytest.approx(
         de_norm(expected_sum_of_first_values, to_decimal(20)), abs=TOLERANCE
     )
-    print(f"{result=}")
+    logging.info(f"{result=}")
     assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
 
 
@@ -191,13 +192,60 @@ def test_alex_aviad_same_evaluations_case_flat_graph_three_segs():
         to_decimal(cake_size),
         cake_size=cake_size,
     )
-    print(expected_sum_of_first_values)
+    logging.info(expected_sum_of_first_values)
 
     assert sum_of_first_values == pytest.approx(
         de_norm(expected_sum_of_first_values, to_decimal(30)), abs=TOLERANCE
     )
-    print(f"{result=}")
+    logging.info(f"{result=}")
     assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
+
+
+# def test_alex_aviad_same_evaluations_case_flat_graph_four_special_segs():
+#     cake_size = to_decimal(4)
+#
+#     preferences = [
+#         [
+#             gen_flat_seg(to_decimal(0), to_decimal(1), to_decimal(10)),
+#             gen_flat_seg(to_decimal(1), to_decimal(cake_size), to_decimal(0)),
+#         ],
+#         [
+#             gen_flat_seg(to_decimal(0), to_decimal(1), to_decimal(0)),
+#             gen_flat_seg(to_decimal(1), to_decimal(2), to_decimal(10)),
+#             gen_flat_seg(to_decimal(2), to_decimal(cake_size), to_decimal(0)),
+#         ],
+#         [
+#             gen_flat_seg(to_decimal(0), to_decimal(2), to_decimal(0)),
+#             gen_flat_seg(to_decimal(2), to_decimal(3), to_decimal(10)),
+#             gen_flat_seg(to_decimal(3), to_decimal(cake_size), to_decimal(0)),
+#         ],
+#         [
+#             gen_flat_seg(to_decimal(0), to_decimal(3), to_decimal(0)),
+#             gen_flat_seg(to_decimal(3), to_decimal(cake_size), to_decimal(10)),
+#         ],
+#     ]
+#
+#     result = alex_aviad(preferences, int(cake_size), EPSILON, tolerance=TOLERANCE)[
+#         "solution"
+#     ]
+#     assert len(result) == 4, "The result should have exactly four segments."
+#
+#     sum_of_first_values = sum(slice.values[0] for slice in result)
+#
+#     expected_sum_of_first_values = get_double_prime_for_interval(
+#         preferences[0],
+#         EPSILON,
+#         to_decimal(0),
+#         to_decimal(cake_size),
+#         cake_size=cake_size,
+#     )
+#     logging.info(expected_sum_of_first_values)
+#
+#     assert sum_of_first_values == pytest.approx(
+#         de_norm(expected_sum_of_first_values, to_decimal(10)), abs=TOLERANCE
+#     )
+#     logging.info(f"{result=}")
+#     assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
 
 
 def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
@@ -273,9 +321,9 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
         end=to_decimal(cake_size),
         cake_size=cake_size,
     )
-    print(f"{total_v=}")
+    logging.info(f"{total_v=}")
     segment_value = total_v / 4
-    print(f"{segment_value=}")
+    logging.info(f"{segment_value=}")
 
     first_cut = _binary_search_left_to_right(
         preference=preferences[0],
@@ -286,7 +334,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
         target=segment_value,
         tolerance=TOLERANCE,
     )
-    print(f"find l cut: {first_cut}")
+    logging.info(f"find l cut: {first_cut}")
 
     v_1 = get_double_prime_for_interval(
         segments=preferences[0],
@@ -306,7 +354,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
         target=segment_value,
         tolerance=TOLERANCE,
     )
-    print(f"find m cut: {second_cut}")
+    logging.info(f"find m cut: {second_cut}")
     v_2 = get_double_prime_for_interval(
         segments=preferences[0],
         epsilon=EPSILON,
@@ -325,7 +373,7 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
         target=segment_value,
         tolerance=TOLERANCE,
     )
-    print(f"find r cut: {third_cut}")
+    logging.info(f"find r cut: {third_cut}")
     v_3 = get_double_prime_for_interval(
         segments=preferences[0],
         epsilon=EPSILON,
@@ -347,19 +395,19 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
     # cuts = equipartition(
     #     preferences[0], cake_size, EPSILON, to_decimal(0), cake_size, TOLERANCE
     # )
-    # print(cuts)
+    # logging.info(cuts)
     #
     # values = get_values_for_cuts(preferences[0], cuts, cake_size, EPSILON)
-    # print(values)
+    # logging.info(values)
 
-    # print(1)
+    # logging.info(1)
     # result = alex_aviad(preferences, int(cake_size), EPSILON, tolerance=TOLERANCE)[
     #     "solution"
     # ]
     # assert len(result) == 4, "The result should have exactly four segments."
-    # print(f"{result=}")
+    # logging.info(f"{result=}")
     #
-    # print(2)
+    # logging.info(2)
     # sum_of_first_values = sum(slice.values[0] for slice in result)
     #
     # expected_sum_of_first_values = get_double_prime_for_interval(
@@ -369,13 +417,13 @@ def test_alex_aviad_same_evaluations_case_slope_graph_two_segs():
     #     to_decimal(cake_size),
     #     cake_size=cake_size,
     # )
-    # print(f"{result=}")
+    # logging.info(f"{result=}")
     # assert sum_of_first_values == pytest.approx(
     #     expected_sum_of_first_values, abs=TOLERANCE * 10
     # )
     #
-    # print(f"{result=}")
-    # print(4)
+    # logging.info(f"{result=}")
+    # logging.info(4)
     #
     # assert check_if_envy_free(4, result), "Yield none-envy-free allocation"
 
@@ -396,7 +444,7 @@ def test_alex_aviad_generic_case_one_seg():
     ]
 
     result = alex_aviad(preferences, cake_size, epsilon)["solution"]
-    print(f"{result=}")
+    logging.info(f"{result=}")
     assert len(result) == 4, "The result should have exactly four segments."
 
     l, m, r = equipartition(
