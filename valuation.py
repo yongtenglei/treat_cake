@@ -199,12 +199,12 @@ def _v_double_prime(
     raise ValueError("Should not reach here")
 
 
-def overline(x, delta, epsilon=Decimal("1e-10")) -> Decimal:
+def overline(x, delta, tolerance=Decimal("1e-10")) -> Decimal:
     assert 0 <= x <= 1, f"got {x}, expect it between [0, 1]"
 
     x = to_decimal(x)
     delta = to_decimal(delta)
-    epsilon = delta
+    tolerance = delta
 
     if x < delta or x == 0:
         return delta
@@ -216,18 +216,18 @@ def overline(x, delta, epsilon=Decimal("1e-10")) -> Decimal:
 
     # If x is exactly a multiple of delta, step up to the next multiple
     # considering floating point precision issues
-    if abs(x % delta) < epsilon or abs(delta - (x % delta)) < epsilon:
+    if abs(x % delta) < tolerance or abs(delta - (x % delta)) < tolerance:
         v += delta
 
     return min(v, to_decimal(1))
 
 
-def underline(x, delta, epsilon=Decimal("1e-10")) -> Decimal:
+def underline(x, delta, tolerance=Decimal("1e-10")) -> Decimal:
     assert 0 <= x <= 1, f"got {x}, expect it between [0, 1]"
 
     x = to_decimal(x)
     delta = to_decimal(delta)
-    epsilon = delta
+    tolerance = delta
 
     if x < delta or x == 0:
         return to_decimal(0)
@@ -237,7 +237,7 @@ def underline(x, delta, epsilon=Decimal("1e-10")) -> Decimal:
 
     # Check if x is an exact multiple of delta,
     # considering floating point precision issues
-    if abs(x % delta) < epsilon or abs(delta - (x % delta)) < epsilon:
+    if abs(x % delta) < tolerance or abs(delta - (x % delta)) < tolerance:
         v = (x / delta - 1).to_integral_value(rounding="ROUND_FLOOR") * delta
     else:
         v = (x / delta).to_integral_value(rounding="ROUND_FLOOR") * delta

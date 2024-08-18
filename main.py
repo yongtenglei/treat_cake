@@ -69,8 +69,8 @@ def handle_alex_aviad():
     )
 
     logging.info(f"{result=}")
-    logging.info("preferences", preferences)
-    logging.info("cake_size", cake_size)
+    logging.info(f"{preferences=}")
+    logging.info(f"{cake_size=}")
     logging.info(f"{response=}")
 
     return jsonify(response)

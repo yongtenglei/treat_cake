@@ -18,13 +18,14 @@ from ..algorithm_test_utils import find_envy_free_allocation
 def check_condition_a(
     alpha: Decimal,
     preferences: Preferences,
-    cake_size: int,
+    cake_size: Decimal,
     epsilon: Decimal,
     tolerance: Decimal,
 ) -> Tuple[bool, Dict[str, Any]]:
     alpha = to_decimal(alpha)
     epsilon = to_decimal(epsilon)
     tolerance = to_decimal(tolerance)
+    cake_size = to_decimal(cake_size)
 
     preference_a = preferences[0]
 

@@ -27,13 +27,14 @@ POSSIBLE_PIECE_NUMBER = [0, 1, 2, 3]
 def check_condition_b(
     alpha: Decimal,
     preferences: Preferences,
-    cake_size: int,
+    cake_size: Decimal,
     epsilon: Decimal,
     tolerance: Decimal,
 ) -> Tuple[bool, Dict[str, Any]]:
     alpha = to_decimal(alpha)
     epsilon = to_decimal(epsilon)
     tolerance = to_decimal(tolerance)
+    cake_size = to_decimal(cake_size)
 
     preference_1 = preferences[0]
 

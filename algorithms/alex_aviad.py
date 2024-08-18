@@ -91,7 +91,7 @@ def alex_aviad(
             meet_a, condition_a_info = check_condition_a(
                 alpha=alpha,
                 preferences=preferences,
-                cake_size=cake_size,
+                cake_size=to_decimal(cake_size),
                 epsilon=epsilon,
                 tolerance=tolerance,
             )
@@ -108,7 +108,7 @@ def alex_aviad(
             meet_b, condition_b_info = check_condition_b(
                 alpha=alpha,
                 preferences=preferences,
-                cake_size=cake_size,
+                cake_size=to_decimal(cake_size),
                 epsilon=epsilon,
                 tolerance=tolerance,
             )
