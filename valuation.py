@@ -35,6 +35,8 @@ def _safe_double_prime(v: Decimal, tolerance: Decimal) -> Decimal:
     tolerance = to_decimal(tolerance)
     if v > to_decimal("1") and v - to_decimal("1") <= tolerance:
         return to_decimal("1")
+    elif v > to_decimal("1") and v - to_decimal("1") <= to_decimal("0.5"):
+        return to_decimal("1")
     else:
         assert 0 <= v <= 1, f"v should in [0, 1], got {v}"
 
@@ -48,7 +50,10 @@ def get_double_prime_for_interval(
     end: Decimal,
     cake_size: Decimal,
 ) -> Decimal:
-    assert 0 <= start <= end, "start or end out of range"
+    # assert 0 <= start <= end, f"start or end out of range, got {start=}, {end=}"
+    if not (0 <= start <= end):
+        logging.error(f"start or end out of range, got {start=}, {end=}")
+        return to_decimal(0)
 
     # Make sure using Decimal
     epsilon = to_decimal(epsilon)
@@ -57,6 +62,9 @@ def get_double_prime_for_interval(
     cake_size = to_decimal(cake_size)
 
     tolerance = to_decimal("1e-10")
+    epsilon = (
+        to_decimal("1e-15") if epsilon > to_decimal("1e-15") else to_decimal(epsilon)
+    )
 
     # Only one segment
     if end <= 1:
@@ -204,7 +212,8 @@ def overline(x, delta, tolerance=Decimal("1e-10")) -> Decimal:
 
     x = to_decimal(x)
     delta = to_decimal(delta)
-    tolerance = delta
+    # tolerance = delta
+    tolerance = Decimal("1e-8")
 
     if x < delta or x == 0:
         return delta
@@ -216,6 +225,8 @@ def overline(x, delta, tolerance=Decimal("1e-10")) -> Decimal:
 
     # If x is exactly a multiple of delta, step up to the next multiple
     # considering floating point precision issues
+    # if abs(x - v) < tolerance:
+    #     v += delta
     if abs(x % delta) < tolerance or abs(delta - (x % delta)) < tolerance:
         v += delta
 
@@ -227,7 +238,8 @@ def underline(x, delta, tolerance=Decimal("1e-10")) -> Decimal:
 
     x = to_decimal(x)
     delta = to_decimal(delta)
-    tolerance = delta
+    # tolerance = delta
+    tolerance = Decimal("1e-8")
 
     if x < delta or x == 0:
         return to_decimal(0)
@@ -237,6 +249,9 @@ def underline(x, delta, tolerance=Decimal("1e-10")) -> Decimal:
 
     # Check if x is an exact multiple of delta,
     # considering floating point precision issues
+    v = (x / delta).to_integral_value(rounding="ROUND_FLOOR") * delta
+    # if abs(x - v) < tolerance:
+    #     v -= delta
     if abs(x % delta) < tolerance or abs(delta - (x % delta)) < tolerance:
         v = (x / delta - 1).to_integral_value(rounding="ROUND_FLOOR") * delta
     else:

@@ -1,10 +1,13 @@
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from typing import Any, Dict
 
 from cut import cut_slice_origin
 from utils import make_percentage
 from values import find_cut_line_by_percent, get_total_value
+
 from .algorithm_types import make_step
+
+getcontext().prec = 15
 
 
 def cut_and_choose(preferences, cake_size: int) -> Dict[str, Any]:

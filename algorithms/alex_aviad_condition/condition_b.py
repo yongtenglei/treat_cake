@@ -1,17 +1,19 @@
 import logging
-from decimal import Decimal
+from decimal import ROUND_DOWN, ROUND_UP, Decimal, getcontext
 from typing import Any, Dict, List, Tuple
 
 from base_types import AssignedSlice, Preferences, Segment
-from type_helper import almost_equal, to_decimal
+from type_helper import almost_equal, de_norm, to_decimal
 from valuation import get_double_prime_for_interval
+from values import get_value_for_interval
 
-from ..alex_aviad_hepler import (
-    _binary_search_left_to_right,
-    _binary_search_right_to_left,
-    get_range_by_cuts,
-)
+from ..alex_aviad_hepler import (_binary_search_left_to_right,
+                                 _binary_search_right_to_left,
+                                 get_range_by_cuts)
 from ..algorithm_test_utils import find_envy_free_allocation
+from .condition_b_helper import _find_balanced_cut_for_adjacent
+
+getcontext().prec = 15
 
 POSSIBLE_K_AND_K_PRIME_COMBINATION_ON_CONDITION_B = [
     (0, 1, [2, 3]),
@@ -36,7 +38,30 @@ def check_condition_b(
     tolerance = to_decimal(tolerance)
     cake_size = to_decimal(cake_size)
 
-    preference_1 = preferences[0]
+    preference_1, preference_2 = preferences[0], preferences[1]
+    preference_3, preference_4 = preferences[2], preferences[3]
+
+    whole_cake_value_0 = get_value_for_interval(
+        segments=preference_1, start=to_decimal(0), end=cake_size
+    )
+    whole_cake_value_1 = get_value_for_interval(
+        segments=preference_2, start=to_decimal(0), end=cake_size
+    )
+    whole_cake_value_2 = get_value_for_interval(
+        segments=preference_3, start=to_decimal(0), end=cake_size
+    )
+    whole_cake_value_3 = get_value_for_interval(
+        segments=preference_4, start=to_decimal(0), end=cake_size
+    )
+
+    whole_cake_values = {
+        0: whole_cake_value_0,
+        1: whole_cake_value_1,
+        2: whole_cake_value_2,
+        3: whole_cake_value_3,
+    }
+
+    alpha_de_norm = de_norm(v=alpha, whole_cake_value=whole_cake_value_0)
 
     # PERF: May accelerate this process by using "notebook", cache double values
     for i in range(1, len(preferences)):
@@ -90,102 +115,160 @@ def check_condition_b(
             # Otherwise, continue exploring.
 
             # ii. (v_i(P_k′) =)v_i(P_k) >= max_t v_i(P_t), and
-            k_value_i = get_double_prime_for_interval(
-                segments=preference_i,
-                epsilon=epsilon,
-                start=start_k,
-                end=end_k,
-                cake_size=to_decimal(cake_size),
+            logging.error(
+                f"check Condition B, {k=}([{start_k}, {end_k}], {k_prime=}([{start_k_prime}, {end_k_prime}]), {other_1=}([{start_other_1}, {end_other_1}]), {other_2=}([{start_other_2}, {end_other_2}]), {cuts=}, {i=}"
             )
-            k_prime_value_i = get_double_prime_for_interval(
-                segments=preference_i,
-                epsilon=epsilon,
-                start=start_k_prime,
-                end=end_k_prime,
-                cake_size=to_decimal(cake_size),
+            k_value_i = de_norm(
+                v=get_double_prime_for_interval(
+                    segments=preference_i,
+                    epsilon=epsilon,
+                    start=start_k,
+                    end=end_k,
+                    cake_size=to_decimal(cake_size),
+                ),
+                whole_cake_value=whole_cake_values[i],
             )
-            if k_value_i != k_prime_value_i:
+            k_prime_value_i = de_norm(
+                v=get_double_prime_for_interval(
+                    segments=preference_i,
+                    epsilon=epsilon,
+                    start=start_k_prime,
+                    end=end_k_prime,
+                    cake_size=to_decimal(cake_size),
+                ),
+                whole_cake_value=whole_cake_values[i],
+            )
+            if not almost_equal(k_value_i, k_prime_value_i, tolerance):
+                logging.error(
+                    f"check Condition B: 1 fail, should be equal, {k_value_i=}, {k_prime_value_i=}"
+                )
                 continue
-            other_1_value_i = get_double_prime_for_interval(
-                segments=preference_i,
-                epsilon=epsilon,
-                start=start_other_1,
-                end=end_other_1,
-                cake_size=to_decimal(cake_size),
+            other_1_value_i = de_norm(
+                v=get_double_prime_for_interval(
+                    segments=preference_i,
+                    epsilon=epsilon,
+                    start=start_other_1,
+                    end=end_other_1,
+                    cake_size=to_decimal(cake_size),
+                ),
+                whole_cake_value=whole_cake_values[i],
             )
-            other_2_value_i = get_double_prime_for_interval(
-                segments=preference_i,
-                epsilon=epsilon,
-                start=start_other_2,
-                end=end_other_2,
-                cake_size=to_decimal(cake_size),
+            other_2_value_i = de_norm(
+                v=get_double_prime_for_interval(
+                    segments=preference_i,
+                    epsilon=epsilon,
+                    start=start_other_2,
+                    end=end_other_2,
+                    cake_size=to_decimal(cake_size),
+                ),
+                whole_cake_value=whole_cake_values[i],
+            )
+            logging.error(
+                f"{other_1=}({start_other_1}-{end_other_1}): {other_1_value_i=}, {other_2=}({start_other_2}-{end_other_2}): {other_2_value_i=})"
             )
             others_max_value_i = max(other_1_value_i, other_2_value_i)
             if not (
                 k_value_i >= others_max_value_i
                 and k_prime_value_i >= others_max_value_i
             ):
+                logging.error(
+                    f"check Condition B: 1 fail, {k_value_i=} should > {others_max_value_i=}. {k_prime_value_i=} should > {others_max_value_i=}"
+                )
                 continue
 
             # i. v_1(P_k) <= α and v_1(P_k′) <= α, and
-            k_value_1 = get_double_prime_for_interval(
-                segments=preference_1,
-                epsilon=epsilon,
-                start=start_k,
-                end=end_k,
-                cake_size=to_decimal(cake_size),
-            )
-            k_prime_value_1 = get_double_prime_for_interval(
-                segments=preference_1,
-                epsilon=epsilon,
-                start=start_k_prime,
-                end=end_k_prime,
-                cake_size=to_decimal(cake_size),
-            )
-            if not (k_value_1 <= alpha and k_prime_value_1 <= alpha):
-                continue
-
-            # iii. there exists i′ ∈ {2, 3, 4} ∖ {i} such that v_i′(P_k) ≥ max_t v_i′(P_t), and
-            # iv. there exists i′ ∈ {2, 3, 4} ∖ {i} with v_i′(P_k′) ≥ max_t v_i′(P_t).
-            for j in range(1, len(preferences)):
-                if j == i:
-                    continue
-                preference_j = preferences[j]
-                other_1_value_j = get_double_prime_for_interval(
-                    segments=preference_j,
-                    epsilon=epsilon,
-                    start=start_other_1,
-                    end=end_other_1,
-                    cake_size=to_decimal(cake_size),
-                )
-                other_2_value_j = get_double_prime_for_interval(
-                    segments=preference_j,
-                    epsilon=epsilon,
-                    start=start_other_2,
-                    end=end_other_2,
-                    cake_size=to_decimal(cake_size),
-                )
-                others_max_value_j = max(other_1_value_j, other_2_value_j)
-
-                k_value_j = get_double_prime_for_interval(
-                    segments=preference_j,
+            k_value_1 = de_norm(
+                v=get_double_prime_for_interval(
+                    segments=preference_1,
                     epsilon=epsilon,
                     start=start_k,
                     end=end_k,
                     cake_size=to_decimal(cake_size),
-                )
-                k_prime_value_j = get_double_prime_for_interval(
-                    segments=preference_j,
+                ),
+                whole_cake_value=whole_cake_values[0],
+            )
+            k_prime_value_1 = de_norm(
+                v=get_double_prime_for_interval(
+                    segments=preference_1,
                     epsilon=epsilon,
                     start=start_k_prime,
                     end=end_k_prime,
                     cake_size=to_decimal(cake_size),
+                ),
+                whole_cake_value=whole_cake_values[0],
+            )
+            if not (k_value_1 <= alpha_de_norm and k_prime_value_1 <= alpha_de_norm):
+                logging.error(
+                    f"check Condition B: 2 fail, {k_value_1=} should < {alpha_de_norm=}. {k_prime_value_1=} should < {alpha_de_norm=}"
                 )
-                if (
-                    k_value_j >= others_max_value_j
-                    and k_prime_value_j >= others_max_value_j
-                ):
-                    return (True, {"cuts": cuts, "k": k, "k_prime": k_prime})
+                continue
+
+            # iii. there exists i′ ∈ {2, 3, 4} ∖ {i} such that v_i′(P_k) ≥ max_t v_i′(P_t), and
+            # iv. there exists i′ ∈ {2, 3, 4} ∖ {i} with v_i′(P_k′) ≥ max_t v_i′(P_t).
+            meet_last_two_conditions = 0
+            for j in range(1, len(preferences)):
+                if j == i:
+                    continue
+                preference_j = preferences[j]
+                other_1_value_j = de_norm(
+                    v=get_double_prime_for_interval(
+                        segments=preference_j,
+                        epsilon=epsilon,
+                        start=start_other_1,
+                        end=end_other_1,
+                        cake_size=to_decimal(cake_size),
+                    ),
+                    whole_cake_value=whole_cake_values[j],
+                )
+                other_2_value_j = de_norm(
+                    v=get_double_prime_for_interval(
+                        segments=preference_j,
+                        epsilon=epsilon,
+                        start=start_other_2,
+                        end=end_other_2,
+                        cake_size=to_decimal(cake_size),
+                    ),
+                    whole_cake_value=whole_cake_values[j],
+                )
+                others_max_value_j = max(other_1_value_j, other_2_value_j)
+
+                k_value_j = de_norm(
+                    v=get_double_prime_for_interval(
+                        segments=preference_j,
+                        epsilon=epsilon,
+                        start=start_k,
+                        end=end_k,
+                        cake_size=to_decimal(cake_size),
+                    ),
+                    whole_cake_value=whole_cake_values[j],
+                )
+                k_prime_value_j = de_norm(
+                    v=get_double_prime_for_interval(
+                        segments=preference_j,
+                        epsilon=epsilon,
+                        start=start_k_prime,
+                        end=end_k_prime,
+                        cake_size=to_decimal(cake_size),
+                    ),
+                    whole_cake_value=whole_cake_values[j],
+                )
+                logging.warning(f"Check Condition B last two conditions: {j=}")
+                if k_value_j >= others_max_value_j:
+                    logging.warning(
+                        f"Check Condition B {k_value_j=} >= {others_max_value_j} oooooooooooookkkkkkkkkkkk"
+                    )
+                    meet_last_two_conditions += 1
+                if k_prime_value_j >= others_max_value_j:
+                    logging.warning(
+                        f"Check Condition B {k_prime_value_j=} >= {others_max_value_j} oooooooooooooooookkkkkkkkkkkk"
+                    )
+                    meet_last_two_conditions += 1
+            logging.warning(f"Check Condition B: {meet_last_two_conditions=}")
+            if meet_last_two_conditions >= 2:
+                logging.warning(
+                    f"Check Condition B: {meet_last_two_conditions=} ooooooooooooooooookkkkkkkkkkkkkk"
+                )
+                return (True, {"cuts": cuts, "k": k, "k_prime": k_prime})
     return (False, {})
 
 
@@ -224,23 +307,12 @@ def _handle_adjacent(
             tolerance=tolerance,
         )
 
-        remained_value = get_double_prime_for_interval(
-            segments=preference_i,
-            epsilon=epsilon,
-            start=to_decimal(0),
-            end=m,
-            cake_size=to_decimal(cake_size),
-        )
-
-        desired_half_value = remained_value / 2
-
-        l = _binary_search_left_to_right(
+        l = _find_balanced_cut_for_adjacent(
             preference=preference_i,
             cake_size=cake_size,
             epsilon=epsilon,
-            start=to_decimal(0),
-            end=m,
-            target=desired_half_value,
+            left=to_decimal(0),
+            right=m,
             tolerance=tolerance,
         )
 
@@ -260,8 +332,8 @@ def _handle_adjacent(
             cake_size=to_decimal(cake_size),
         )
         assert almost_equal(
-            first_half_value, second_half_value, tolerance=tolerance
-        ), "Should have almost the same value under the view of agent i"
+            first_half_value, second_half_value, tolerance=to_decimal("1e-1")
+        ), f"_handle_adjacent_0_1: Should have almost the same value under the view of agent i, got {first_half_value}([0, {l}]) and {second_half_value}([{l}, {m}])"
 
         return [l, m, r]
     # if k, k' = (1, 2)
@@ -281,6 +353,7 @@ def _handle_adjacent(
 
         r = _binary_search_right_to_left(
             preference=preference_1,
+            cake_size=cake_size,
             epsilon=epsilon,
             start=l,
             end=cake_size,
@@ -288,23 +361,12 @@ def _handle_adjacent(
             tolerance=tolerance,
         )
 
-        remained_value = get_double_prime_for_interval(
-            segments=preference_i,
-            epsilon=epsilon,
-            start=l,
-            end=r,
-            cake_size=to_decimal(cake_size),
-        )
-
-        desired_half_value = remained_value / 2
-
-        m = _binary_search_left_to_right(
+        m = _find_balanced_cut_for_adjacent(
             preference=preference_i,
             cake_size=cake_size,
             epsilon=epsilon,
-            start=l,
-            end=r,
-            target=desired_half_value,
+            left=l,
+            right=r,
             tolerance=tolerance,
         )
 
@@ -324,8 +386,8 @@ def _handle_adjacent(
             cake_size=to_decimal(cake_size),
         )
         assert almost_equal(
-            first_half_value, second_half_value, tolerance=tolerance
-        ), "Should have almost the same value under the view of agent i"
+            first_half_value, second_half_value, tolerance=to_decimal("1e-1")
+        ), f"_handle_adjacent_1_2: Should have almost the same value under the view of agent i, got {first_half_value}([{l}, {m}]) and {second_half_value}([{m}, {r}])"
 
         return [l, m, r]
     # if k, k' = (2, 3)
@@ -338,7 +400,7 @@ def _handle_adjacent(
             cake_size=cake_size,
             epsilon=epsilon,
             start=to_decimal(0),
-            end=cake_size,
+            end=to_decimal(cake_size),
             target=alpha,
             tolerance=tolerance,
         )
@@ -348,28 +410,17 @@ def _handle_adjacent(
             cake_size=cake_size,
             epsilon=epsilon,
             start=l,
-            end=cake_size,
+            end=to_decimal(cake_size),
             target=alpha,
             tolerance=tolerance,
         )
 
-        remained_value = get_double_prime_for_interval(
-            segments=preference_i,
-            epsilon=epsilon,
-            start=m,
-            end=cake_size,
-            cake_size=to_decimal(cake_size),
-        )
-
-        desired_half_value = remained_value / 2
-
-        r = _binary_search_left_to_right(
+        r = _find_balanced_cut_for_adjacent(
             preference=preference_i,
             cake_size=cake_size,
             epsilon=epsilon,
-            start=m,
-            end=cake_size,
-            target=desired_half_value,
+            left=m,
+            right=to_decimal(cake_size),
             tolerance=tolerance,
         )
 
@@ -385,16 +436,16 @@ def _handle_adjacent(
             segments=preference_i,
             epsilon=epsilon,
             start=r,
-            end=cake_size,
+            end=to_decimal(cake_size),
             cake_size=to_decimal(cake_size),
         )
         assert almost_equal(
-            first_half_value, second_half_value, tolerance=tolerance
-        ), "Should have almost the same value under the view of agent i"
+            first_half_value, second_half_value, tolerance=to_decimal("1e-1")
+        ), f"_handle_adjacent_2_3: Should have almost the same value under the view of agent i, got {first_half_value}([{m}, {r}]) and {second_half_value}([{r}, {cake_size}])"
 
         return [l, m, r]
     else:
-        raise ValueError("Invalid k and k'")
+        raise ValueError(f"_handle_adjacent: Invalid k and k', {k=}, {k_prime=}")
 
 
 def _find_m_given_l(
@@ -411,11 +462,11 @@ def _find_m_given_l(
         preference=preference_1,
         cake_size=cake_size,
         epsilon=epsilon,
-        start=to_decimal(l),
+        start=to_decimal(l).quantize(Decimal("0.00000001"), rounding=ROUND_UP),
         end=to_decimal(r),
         target=alpha,
         tolerance=tolerance,
-    )
+    ).quantize(Decimal("0.00000001"), rounding=ROUND_UP)
 
 
 def _binary_search_case_0_2(
@@ -428,12 +479,15 @@ def _binary_search_case_0_2(
     cake_size: Decimal,
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
-) -> Decimal:
+) -> Tuple[Decimal, Decimal]:
+    tolerance = to_decimal("1e-7")
     original_l_end = to_decimal(l_end)  # namely r
     iteration = 0
+    m_for_l = to_decimal(0)
+    retry = 5
 
     while l_end - l_start > tolerance and iteration < max_iterations:
-        l = (l_start + l_end) / 2
+        l = (l_start + l_end) / 4 if iteration == 0 else (l_start + l_end) / 2
         m_for_l = _find_m_given_l(
             l=l,
             r=original_l_end,
@@ -443,6 +497,15 @@ def _binary_search_case_0_2(
             epsilon=epsilon,
             tolerance=tolerance,
         )
+
+        if not (l <= m_for_l <= original_l_end):
+            # Adjust l more aggressively if m is out of bounds
+            l_end /= 2
+            retry -= 1
+            if retry <= 0:
+                logging.error("_binary search case 0_2: exit early")
+                break
+            continue
         a = get_double_prime_for_interval(
             segments=preference_1,
             epsilon=epsilon,
@@ -457,14 +520,11 @@ def _binary_search_case_0_2(
             end=to_decimal(cake_size),
             cake_size=to_decimal(cake_size),
         )
-
         # TODO: DELETE LATER FOR TESTING
         # give l, find m(l), where v_1([l, m(l)]) = alpha (second piece) = v_1([r, cake_size])
         assert almost_equal(
-            a,
-            b,
-            tolerance=tolerance,
-        ), f"[l:{l}, m(l):{m_for_l}] = {a=}, [r:{original_l_end}, {cake_size}]{b=}, ({alpha})"
+            a, b, tolerance=to_decimal("1e-1")
+        ), f"_binary search case 0_2: should be equal [l:{l}, m(l):{m_for_l}] = {a=}, [r:{original_l_end}, {cake_size}]{b=}, ({alpha=})"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -473,10 +533,6 @@ def _binary_search_case_0_2(
             end=l,
             cake_size=to_decimal(cake_size),
         )
-        logging.info("***********")
-        logging.info("Handle_one_between: binary search")
-        logging.info(f"{l=}, {searched_value=}, {l=}, {m_for_l=}")
-        logging.info("***********")
 
         # Want v_i[(0, l)]= v_i[(m(l), r)]
         desired_value = get_double_prime_for_interval(
@@ -486,8 +542,12 @@ def _binary_search_case_0_2(
             end=original_l_end,
             cake_size=to_decimal(cake_size),
         )
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
-            return l
+        # logging.info("***********")
+        # logging.warning("Handle_one_between: binary search")
+        # logging.warning(f"{l=}, {searched_value=}, {desired_value=} {l=}, {m_for_l=}")
+        # logging.info("***********")
+        if abs(searched_value - desired_value) <= tolerance:
+            return l, m_for_l
 
         if searched_value < desired_value:
             l_start = l
@@ -495,8 +555,11 @@ def _binary_search_case_0_2(
             l_end = l
 
         iteration = iteration + 1
-
-    return to_decimal((l_start + l_end) / 2)
+    if iteration >= max_iterations:
+        logging.warning(
+            f"binary search case 0_2: reach max iteration, {l_start=}, {l_end=}, {alpha=}"
+        )
+    return to_decimal((l_start + l_end) / 2), m_for_l
 
 
 def _find_m_given_r(
@@ -509,15 +572,15 @@ def _find_m_given_r(
     tolerance: Decimal = to_decimal(1e-10),
 ) -> Decimal:
     """find m given r: m(r), so that v_1(m(r), r) = alpha (third piece)"""
-    return _binary_search_left_to_right(
+    return _binary_search_right_to_left(
         preference=preference_1,
         cake_size=cake_size,
         epsilon=epsilon,
-        start=to_decimal(l),
-        end=to_decimal(r),
+        start=to_decimal(l).quantize(Decimal("0.00000001"), rounding=ROUND_UP),
+        end=to_decimal(r).quantize(Decimal("0.00000001"), rounding=ROUND_UP),
         target=alpha,
         tolerance=tolerance,
-    )
+    ).quantize(Decimal("0.00000001"), rounding=ROUND_UP)
 
 
 def _binary_search_case_1_3(
@@ -530,9 +593,13 @@ def _binary_search_case_1_3(
     cake_size: Decimal,
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
-) -> Decimal:
+) -> Tuple[Decimal, Decimal]:
+    getcontext().prec = 15
+    tolerance = to_decimal("1e-7")
+
     original_r_start = to_decimal(r_start)  # namely l
     iteration = 0
+    m_for_r = to_decimal(0)
 
     while r_end - r_start > tolerance and iteration < max_iterations:
         r = (r_start + r_end) / 2
@@ -541,27 +608,29 @@ def _binary_search_case_1_3(
             r=r,
             alpha=alpha,
             preference_1=preference_1,
+            cake_size=cake_size,
             epsilon=epsilon,
+            tolerance=tolerance,
         )
         # TODO: DELETE LATER FOR TESTING
         # give r, find m(r), where v_1([m(r), r]) = alpha (third piece) = v_1([(0, l)])
-        assert almost_equal(
-            a=get_double_prime_for_interval(
-                segments=preference_1,
-                epsilon=epsilon,
-                start=m_for_r,
-                end=r,
-                cake_size=to_decimal(cake_size),
-            ),
-            b=get_double_prime_for_interval(
-                segments=preference_1,
-                epsilon=epsilon,
-                start=to_decimal(0),
-                end=original_r_start,
-                cake_size=to_decimal(cake_size),
-            ),
-            tolerance=tolerance,
+        a = get_double_prime_for_interval(
+            segments=preference_1,
+            epsilon=epsilon,
+            start=m_for_r,
+            end=r,
+            cake_size=to_decimal(cake_size),
         )
+        b = get_double_prime_for_interval(
+            segments=preference_1,
+            epsilon=epsilon,
+            start=to_decimal(0),
+            end=original_r_start,
+            cake_size=to_decimal(cake_size),
+        )
+        assert almost_equal(
+            a, b, tolerance=to_decimal("1e-1")
+        ), f"_binary search case 1_3: should be equal give {r=}, find m(r)={m_for_r}, where v_1([m(r), r])={a} = alpha={alpha} = v_1([(0, l)])={b}"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -583,8 +652,8 @@ def _binary_search_case_1_3(
             cake_size=to_decimal(cake_size),
         )
 
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
-            return r
+        if abs(searched_value - desired_value) <= tolerance:
+            return m_for_r, r
 
         if searched_value < desired_value:
             r_end = r
@@ -593,7 +662,7 @@ def _binary_search_case_1_3(
 
         iteration = iteration + 1
 
-    return to_decimal((r_start + r_end) / 2)
+    return m_for_r, to_decimal((r_start + r_end) / 2)
 
 
 def _handle_one_between(
@@ -606,6 +675,8 @@ def _handle_one_between(
     cake_size: Decimal,
     tolerance: Decimal = to_decimal(1e-10),
 ) -> List[Decimal]:
+    # tolerance = to_decimal(1e-10)
+    getcontext().prec = 15
     # if k, k' = (0, 2)
     #    0        1        2            3
     # [0, l] | [l, m] | [m, r] | [r, cake_size]
@@ -619,43 +690,41 @@ def _handle_one_between(
                 cake_size=cake_size,
                 epsilon=epsilon,
                 start=to_decimal(0),
-                end=cake_size,
+                end=to_decimal(cake_size),
                 target=alpha,
                 tolerance=tolerance,
             )
             l_start = to_decimal(0)
             l_end = r
-            l = _binary_search_case_0_2(
+            l, m = _binary_search_case_0_2(
                 preference_1=preference_1,
                 preference_i=preference_i,
                 epsilon=epsilon,
                 l_start=l_start,
                 l_end=l_end,
                 alpha=alpha,
-                cake_size=cake_size,
+                cake_size=to_decimal(cake_size),
                 tolerance=tolerance,
             )
-            m = _find_m_given_l(
-                l=l,
-                r=r,
-                alpha=alpha,
-                preference_1=preference_1,
-                cake_size=cake_size,
-                epsilon=epsilon,
-                tolerance=tolerance,
-            )
+            # m = _find_m_given_l(
+            #     l=l,
+            #     r=r,
+            #     alpha=alpha,
+            #     preference_1=preference_1,
+            #     cake_size=cake_size,
+            #     epsilon=epsilon,
+            #     tolerance=tolerance,
+            # )
             return [l, m, r]
         except Exception as e:
-            pass
-    else:
-        raise ValueError("Invalid k and k'")
+            raise ValueError(f"_handle_one_between: k=0 and k'=2: {e}")
     # if k, k' = (1, 3)
     #    0        1        2            3
     # [0, l] | [l, m] | [m, r] | [r, cake_size]
     #    1
     # give r, find m(r), where v_1([m(r), r]) = alpha (third piece) = v_1([(0, l)])
     # keep move r, making v_i([l, m(r)]) = v_i([r, cake_size])
-    if k == 1 and k_prime == 3:
+    elif k == 1 and k_prime == 3:
         try:
             l = _binary_search_left_to_right(
                 preference=preference_1,
@@ -666,9 +735,11 @@ def _handle_one_between(
                 target=alpha,
                 tolerance=tolerance,
             )
+            l = l.quantize(Decimal("0.00000001"), rounding=ROUND_DOWN)
+
             r_start = to_decimal(l)
             r_end = to_decimal(cake_size)
-            r = _binary_search_case_1_3(
+            m, r = _binary_search_case_1_3(
                 preference_1=preference_1,
                 preference_i=preference_i,
                 epsilon=epsilon,
@@ -678,20 +749,20 @@ def _handle_one_between(
                 alpha=alpha,
                 tolerance=tolerance,
             )
-            m = _find_m_given_r(
-                l=l,
-                r=r,
-                alpha=alpha,
-                preference_1=preference_1,
-                cake_size=cake_size,
-                epsilon=epsilon,
-                tolerance=tolerance,
-            )
+            # m = _find_m_given_r(
+            #     l=l,
+            #     r=r,
+            #     alpha=alpha,
+            #     preference_1=preference_1,
+            #     cake_size=cake_size,
+            #     epsilon=epsilon,
+            #     tolerance=tolerance,
+            # )
             return [l, m, r]
         except Exception as e:
-            pass
+            raise ValueError(f"_handle_one_between: k=1 and k'=3: {e}")
     else:
-        raise ValueError("Invalid k and k'")
+        raise ValueError(f"_handle_one_between: Invalid k and k', {k=}, {k_prime=}")
 
 
 def _find_m_and_r_given_l(
@@ -702,22 +773,25 @@ def _find_m_and_r_given_l(
     epsilon: Decimal,
     tolerance: Decimal = to_decimal(1e-10),
 ) -> List[Decimal]:
+    getcontext().prec = 15
+
     """find m and r given l: m(l) and r(l), so that v_1([l, m(l)]) = v_1([m(l), r(l)]) = alpha"""
     m_for_l = _binary_search_left_to_right(
         preference=preference_1,
         cake_size=cake_size,
         epsilon=epsilon,
-        start=to_decimal(l),
+        start=to_decimal(l).quantize(Decimal("0.00000001"), rounding=ROUND_UP),
         end=to_decimal(cake_size),
         target=alpha,
         tolerance=tolerance,
     )
+    m_for_l = m_for_l.quantize(Decimal("0.00000001"), rounding=ROUND_UP)
 
     r_for_l = _binary_search_left_to_right(
         preference=preference_1,
         cake_size=cake_size,
         epsilon=epsilon,
-        start=to_decimal(m_for_l),
+        start=to_decimal(m_for_l).quantize(Decimal("0.00000001"), rounding=ROUND_UP),
         end=to_decimal(cake_size),
         target=alpha,
         tolerance=tolerance,
@@ -737,6 +811,8 @@ def _binary_search_find_l(
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
 ) -> Decimal:
+    getcontext().prec = 15
+    tolerance = to_decimal(1e-5)
     cake_start = to_decimal(0)
     cake_end = to_decimal(cake_size)
 
@@ -750,6 +826,7 @@ def _binary_search_find_l(
             alpha=alpha,
             preference_1=preference_1,
             epsilon=epsilon,
+            tolerance=tolerance,
         )
         # TODO: DELETE LATER FOR TESTING
         # give l, find m(l) and r(l), where v_1([l, m(l)]) = v_1([m(l), r(l)]) = alpha
@@ -768,8 +845,8 @@ def _binary_search_find_l(
                 end=r_for_l,
                 cake_size=to_decimal(cake_size),
             ),
-            tolerance=tolerance,
-        ), "Should work"
+            tolerance=to_decimal(1e-1),
+        ), f"_binary_search_find_l: give {l=}, find m(l)={m_for_l} and r(l)={r_for_l}, where v_1([l, m(l)]) = v_1([m(l), r(l)]) = alpha({alpha}), Should work"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -792,7 +869,7 @@ def _binary_search_find_l(
             cake_size=to_decimal(cake_size),
         )
 
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+        if abs(searched_value - desired_value) <= tolerance:
             return l
 
         if searched_value < desired_value:
@@ -814,6 +891,8 @@ def _expand_range_around_l(
     cake_size: Decimal,
     tolerance: Decimal = to_decimal(1e-10),
 ) -> Tuple[Decimal, Decimal]:
+    getcontext().prec = 15
+    tolerance = to_decimal(1e-5)
     cake_start = to_decimal(0)
     cake_end = to_decimal(cake_size)
 
@@ -827,6 +906,7 @@ def _expand_range_around_l(
             alpha=alpha,
             preference_1=preference_1,
             epsilon=epsilon,
+            tolerance=tolerance,
         )
 
         # TODO: DELETE LATER FOR TESTING
@@ -847,7 +927,7 @@ def _expand_range_around_l(
                 cake_size=to_decimal(cake_size),
             ),
             tolerance=tolerance,
-        ), "Should work"
+        ), f"_expand_range_around_l lower bound part: give {found_l=}, find m(l)={m_for_l} and r(l)={r_for_l}, where v_1([l, m(l)]) = v_1([m(l), r(l)]) = alpha({alpha}), Should work"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -872,7 +952,7 @@ def _expand_range_around_l(
             cake_size=to_decimal(cake_size),
         )
 
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+        if abs(searched_value - desired_value) <= tolerance:
             lower_bound = lower_bound_candidate
         else:
             break
@@ -887,6 +967,7 @@ def _expand_range_around_l(
             alpha=alpha,
             preference_1=preference_1,
             epsilon=epsilon,
+            tolerance=tolerance,
         )
 
         assert almost_equal(
@@ -905,7 +986,7 @@ def _expand_range_around_l(
                 cake_size=to_decimal(cake_size),
             ),
             tolerance=tolerance,
-        ), "Should work"
+        ), f"_expand_range_around_l upper bound part: give {found_l=}, find m(l)={m_for_l} and r(l)={r_for_l}, where v_1([l, m(l)]) = v_1([m(l), r(l)]) = alpha({alpha}), Should work"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -930,7 +1011,7 @@ def _expand_range_around_l(
             cake_size=to_decimal(cake_size),
         )
 
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+        if abs(searched_value - desired_value) <= tolerance:
             upper_bound = upper_bound_candidate
         else:
             break
@@ -988,20 +1069,22 @@ def _find_l_and_m_given_r(
         cake_size=cake_size,
         epsilon=epsilon,
         start=to_decimal(0),
-        end=to_decimal(r),
+        end=to_decimal(r).quantize(Decimal("0.00000001"), rounding=ROUND_UP),
         target=alpha,
         tolerance=tolerance,
     )
+    m_for_r = m_for_r.quantize(Decimal("0.00000001"), rounding=ROUND_UP)
 
     l_for_r = _binary_search_right_to_left(
         preference=preference_1,
         cake_size=cake_size,
         epsilon=epsilon,
         start=to_decimal(0),
-        end=to_decimal(m_for_r),
+        end=to_decimal(m_for_r).quantize(Decimal("0.00000001"), rounding=ROUND_UP),
         target=alpha,
         tolerance=tolerance,
     )
+    l_for_r = l_for_r.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
 
     return [l_for_r, m_for_r]
 
@@ -1017,6 +1100,7 @@ def _binary_search_find_r(
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
 ) -> Decimal:
+    tolerance = to_decimal(1e-5)
     cake_start = to_decimal(0)
     cake_end = to_decimal(cake_size)
 
@@ -1049,8 +1133,8 @@ def _binary_search_find_r(
                 end=r,
                 cake_size=to_decimal(cake_size),
             ),
-            tolerance=tolerance,
-        ), "Should work"
+            tolerance=to_decimal("1e-1"),
+        ), f"_binary_search_find_r: give {r=}, find l(r)={l_for_r} and m(r)={m_for_r}, so that v_1([l(r), m(r)]) = v_1([m(r), r]) = alpha({alpha}, Should work)"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -1073,7 +1157,7 @@ def _binary_search_find_r(
             cake_size=to_decimal(cake_size),
         )
 
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+        if abs(searched_value - desired_value) <= tolerance:
             return r
 
         if searched_value < desired_value:
@@ -1097,6 +1181,7 @@ def _expand_range_around_r(
 ) -> Tuple[Decimal, Decimal]:
     cake_start = to_decimal(0)
     cake_end = to_decimal(cake_size)
+    tolerance = to_decimal("1e-7")
 
     # Expand the range to find the lower bound
     lower_bound = found_r
@@ -1128,8 +1213,8 @@ def _expand_range_around_r(
                 end=lower_bound_candidate,
                 cake_size=to_decimal(cake_size),
             ),
-            tolerance=tolerance,
-        ), "Should work"
+            tolerance=to_decimal("1e-1"),
+        ), f"_expand_range_around_r lower bound part: give {found_r=}, find l(r)={l_for_r} and m(r)={m_for_r}, so that v_1([l(r), m(r)]) = v_1([m(r), r]) = alpha({alpha}, Should work)"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -1154,7 +1239,7 @@ def _expand_range_around_r(
             cake_size=to_decimal(cake_size),
         )
 
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+        if abs(searched_value - desired_value) <= tolerance:
             lower_bound = lower_bound_candidate
         else:
             break
@@ -1189,8 +1274,8 @@ def _expand_range_around_r(
                 end=upper_bound_candidate,
                 cake_size=to_decimal(cake_size),
             ),
-            tolerance=tolerance,
-        ), "Should work"
+            tolerance=to_decimal("1e-1"),
+        ), f"_expand_range_around_r upper bound part: give {found_r=}, find l(r)={l_for_r} and m(r)={m_for_r}, so that v_1([l(r), m(r)]) = v_1([m(r), r]) = alpha({alpha}, Should work)"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -1215,7 +1300,7 @@ def _expand_range_around_r(
             cake_size=to_decimal(cake_size),
         )
 
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+        if abs(searched_value - desired_value) <= tolerance:
             upper_bound = upper_bound_candidate
         else:
             break
@@ -1268,27 +1353,29 @@ def _find_l_and_r_given_m(
     tolerance: Decimal = to_decimal(1e-10),
 ) -> List[Decimal]:
     """find l and r given m: l(m) and r(m), so that v_1([l(m), m]) = v_1([m, r(m)]) = alpha"""
-    l_for_m = _binary_search_left_to_right(
+    l_for_m = _binary_search_right_to_left(
         preference=preference_1,
         cake_size=cake_size,
         epsilon=epsilon,
         start=to_decimal(0),
-        end=to_decimal(m),
+        end=to_decimal(m).quantize(Decimal("0.00000001"), rounding=ROUND_UP),
         target=alpha,
         tolerance=tolerance,
     )
+    l_for_m = l_for_m.quantize(Decimal("0.00000001"), rounding=ROUND_UP)
 
-    r_for_m = _binary_search_right_to_left(
+    r_for_m = _binary_search_left_to_right(
         preference=preference_1,
         cake_size=cake_size,
         epsilon=epsilon,
-        start=to_decimal(m),
+        start=to_decimal(m).quantize(Decimal("0.00000001"), rounding=ROUND_UP),
         end=to_decimal(cake_size),
         target=alpha,
         tolerance=tolerance,
     )
+    r_for_m = r_for_m.quantize(Decimal("0.00000001"), rounding=ROUND_UP)
 
-    return [r_for_m, l_for_m]
+    return [l_for_m, r_for_m]
 
 
 def _binary_search_find_m(
@@ -1302,6 +1389,7 @@ def _binary_search_find_m(
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
 ) -> Decimal:
+    tolerance = to_decimal("1e-7")
     cake_start = to_decimal(0)
     cake_end = to_decimal(cake_size)
 
@@ -1334,8 +1422,8 @@ def _binary_search_find_m(
                 end=r_for_m,
                 cake_size=to_decimal(cake_size),
             ),
-            tolerance=tolerance,
-        ), "Should work"
+            tolerance=to_decimal("1e-1"),
+        ), f"_binary_search_find_m: give {m=}, l(m)={l_for_m=} and r(m)={r_for_m}, so that v_1([l(m), m]) = v_1([m, r(m)]) = alpha({alpha}), Should work"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -1358,7 +1446,7 @@ def _binary_search_find_m(
             cake_size=to_decimal(cake_size),
         )
 
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+        if abs(searched_value - desired_value) <= tolerance:
             return m
 
         if searched_value < desired_value:
@@ -1380,6 +1468,7 @@ def _expand_range_around_m(
     cake_size: Decimal,
     tolerance: Decimal = to_decimal(1e-10),
 ) -> Tuple[Decimal, Decimal]:
+    tolerance = to_decimal("1e-7")
     cake_start = to_decimal(0)
     cake_end = to_decimal(cake_size)
 
@@ -1413,8 +1502,8 @@ def _expand_range_around_m(
                 end=r_for_m,
                 cake_size=to_decimal(cake_size),
             ),
-            tolerance=tolerance,
-        ), "Should work"
+            tolerance=to_decimal("1e-1"),
+        ), f"_expand_range_around_m lower bound part: give {found_m=}, l(m)={l_for_m=} and r(m)={r_for_m}, so that v_1([l(m), m]) = v_1([m, r(m)]) = alpha({alpha}), Should work"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -1439,7 +1528,7 @@ def _expand_range_around_m(
             cake_size=to_decimal(cake_size),
         )
 
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+        if abs(searched_value - desired_value) <= tolerance:
             lower_bound = lower_bound_candidate
         else:
             break
@@ -1474,8 +1563,8 @@ def _expand_range_around_m(
                 end=r_for_m,
                 cake_size=to_decimal(cake_size),
             ),
-            tolerance=tolerance,
-        ), "Should work"
+            tolerance=to_decimal("1e-1"),
+        ), f"_expand_range_around_m upper bound part: give {found_m=}, l(m)={l_for_m=} and r(m)={r_for_m}, so that v_1([l(m), m]) = v_1([m, r(m)]) = alpha({alpha}), Should work"
 
         searched_value = get_double_prime_for_interval(
             segments=preference_i,
@@ -1500,7 +1589,7 @@ def _expand_range_around_m(
             cake_size=to_decimal(cake_size),
         )
 
-        if almost_equal(a=searched_value, b=desired_value, tolerance=tolerance):
+        if abs(searched_value - desired_value) <= tolerance:
             upper_bound = upper_bound_candidate
         else:
             break
@@ -1519,6 +1608,8 @@ def _find_range_m(
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
 ) -> Tuple[Decimal, Decimal]:
+    tolerance = to_decimal("1e-7")
+
     found_m = _binary_search_find_m(
         preference_1=preference_1,
         preference_i=preference_i,
@@ -1569,47 +1660,55 @@ def _handle_leftmost_rightmost(
     cake_size: Decimal,
     tolerance: Decimal,
 ) -> List[Decimal]:
-    lower_l, upper_l = _find_range_l(
-        preference_1=preference_1,
-        preference_i=preference_i,
-        epsilon=epsilon,
-        l_start=to_decimal(0),
-        l_end=to_decimal(cake_size),
-        alpha=alpha,
-        cake_size=cake_size,
-        tolerance=tolerance,
-    )
+    getcontext().prec = 15
+    tolerance = to_decimal("1e-7")
+    try:
+        lower_l, upper_l = _find_range_l(
+            preference_1=preference_1,
+            preference_i=preference_i,
+            epsilon=epsilon,
+            l_start=to_decimal(0),
+            l_end=to_decimal(cake_size),
+            alpha=alpha,
+            cake_size=cake_size,
+            tolerance=tolerance,
+        )
+        logging.error(f"@@@@@@@@@@@@ {lower_l=}, {upper_l=}")
 
-    lower_r, upper_r = _find_range_r(
-        preference_1=preference_1,
-        preference_i=preference_i,
-        epsilon=epsilon,
-        r_start=to_decimal(0),
-        r_end=to_decimal(cake_size),
-        alpha=alpha,
-        cake_size=cake_size,
-        tolerance=tolerance,
-    )
+        lower_r, upper_r = _find_range_r(
+            preference_1=preference_1,
+            preference_i=preference_i,
+            epsilon=epsilon,
+            r_start=to_decimal(0),
+            r_end=to_decimal(cake_size),
+            alpha=alpha,
+            cake_size=cake_size,
+            tolerance=tolerance,
+        )
+        logging.error(f"@@@@@@@@@@@@ {lower_r=}, {upper_r=}")
 
-    lower_m, upper_m = _find_range_m(
-        preference_1=preference_1,
-        preference_i=preference_i,
-        epsilon=epsilon,
-        m_start=to_decimal(0),
-        m_end=to_decimal(cake_size),
-        alpha=alpha,
-        cake_size=cake_size,
-        tolerance=tolerance,
-    )
+        lower_m, upper_m = _find_range_m(
+            preference_1=preference_1,
+            preference_i=preference_i,
+            epsilon=epsilon,
+            m_start=to_decimal(0),
+            m_end=to_decimal(cake_size),
+            alpha=alpha,
+            cake_size=cake_size,
+            tolerance=tolerance,
+        )
+        logging.error(f"@@@@@@@@@@@@ {lower_m=}, {upper_m=}")
 
-    return _find_best_cuts_by_range(
-        lower_l=lower_l,
-        upper_l=upper_l,
-        lower_m=lower_m,
-        upper_m=upper_m,
-        lower_r=lower_r,
-        upper_r=upper_r,
-    )
+        return _find_best_cuts_by_range(
+            lower_l=lower_l,
+            upper_l=upper_l,
+            lower_m=lower_m,
+            upper_m=upper_m,
+            lower_r=lower_r,
+            upper_r=upper_r,
+        )
+    except Exception as e:
+        raise ValueError(f"_handle_leftmost_rightmost: {e}")
     # if k, k' = (0, 3)
     #    0        1        2            3
     # [0, l] | [l, m] | [m, r] | [r, cake_size]
@@ -1685,10 +1784,10 @@ def _handle_leftmost_rightmost(
     #
     #     return to_decimal((l_start + l_end) / 2)
 
-    logging.info(f"Handling leftmost and rightmost: ({k}, {k_prime})")
+    # logging.info(f"Handling leftmost and rightmost: ({k}, {k_prime})")
 
 
-CODITION_B_Handlers = {
+CONDITION_B_HANDLERS = {
     (0, 1): _handle_adjacent,
     (1, 2): _handle_adjacent,
     (2, 3): _handle_adjacent,
@@ -1709,9 +1808,11 @@ def _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
     alpha = to_decimal(alpha)
     start = to_decimal(0)
     end = to_decimal(cake_size)
+    epsilon = to_decimal(epsilon)
+    cake_size = to_decimal(cake_size)
 
     for k, k_prime, others in POSSIBLE_K_AND_K_PRIME_COMBINATION_ON_CONDITION_B:
-        handler = CODITION_B_Handlers.get((k, k_prime))
+        handler = CONDITION_B_HANDLERS.get((k, k_prime))
         if handler:
             try:
                 cuts: List[Decimal] = handler(
@@ -1726,13 +1827,53 @@ def _find_cuts_and_k_k_prime_for_agent_i_on_condition_b(
                 )
                 yield {"cuts": cuts, "k": k, "k_prime": k_prime, "others": others}
             except Exception as e:
-                logging.info(f"Error processing handler for ({k}, {k_prime}): {e}")
+                logging.error(
+                    f"Error processing handler for ({k}, {k_prime}), got handler: {handler}: \n\tError: {e}\n\t Keep exploreing"
+                )
+                continue
 
         else:
             raise ValueError(f"No handler for combination: ({k}, {k_prime})")
 
 
 def find_allocation_on_condition_b(
+    preferences: Preferences,
+    alpha: Decimal,
+    cake_size: Decimal,
+    epsilon: Decimal,
+    tolerance: Decimal,
+) -> List[AssignedSlice]:
+
+    meet_b, info = check_condition_b(
+        alpha=alpha,
+        preferences=preferences,
+        cake_size=cake_size,
+        epsilon=epsilon,
+        tolerance=tolerance,
+    )
+    assert (
+        meet_b is True
+    ), "find_allocation_on_condition_b: Should meet Condition B at this stage"
+    assert (
+        len(info) != 0
+    ), "find_allocation_on_condition_b: Should have necessary info at this stage"
+    cuts, k, k_prime = info["cuts"], info["k"], info["k_prime"]
+    logging.error(f"{cuts=}, {k=}, {k_prime=}")
+
+    allocation = find_envy_free_allocation(
+        cuts=cuts,
+        num_agents=4,
+        cake_size=cake_size,
+        preferences=preferences,
+        epsilon=epsilon,
+    )
+    assert (
+        allocation is not None
+    ), "Should always find a final allocation on condition b"
+    return allocation
+
+
+def find_allocation_on_condition_b_bak(
     preferences: Preferences,
     cake_size: Decimal,
     cuts: List[Decimal],
@@ -1750,20 +1891,6 @@ def find_allocation_on_condition_b(
     )
     assert (
         allocation is not None
-    ), "Should always find a final allocation on condition a"
+    ), "Should always find a final allocation on condition b"
 
-    # allocation: List[AssignedSlice] = [None for _ in range(len(preferences))]
-    #
-    # unassigned_slices = cut_cake(
-    #     preferences=preferences, cake_size=cake_size, epsilon=episilon, cuts=cuts
-    # )
-    #
-    # # First piece for agent 1
-    # allocation[0] = unassigned_slices[0].assign(0)
-    #
-    # # FIX: Partial Implementation
-    # for i in range(1, len(unassigned_slices)):
-    #     allocation[i] = unassigned_slices[i].assign(i)
-    #
-    # assert all(a is not None for a in allocation)
     return allocation

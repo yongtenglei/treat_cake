@@ -472,7 +472,7 @@ def test_underline():
 
     assert underline(0.775, 0.025) == pytest.approx(to_decimal(0.75), abs=TOLERANCE)
 
-    assert underline(0.9999999, 0.002) == pytest.approx(to_decimal(0.996), TOLERANCE)
+    assert underline(0.9999999, 0.002) == pytest.approx(to_decimal(0.998), TOLERANCE)
 
     assert underline(0.333, 0.333) >= 0
     assert underline(0.333, 0.333) == pytest.approx(0, TOLERANCE)

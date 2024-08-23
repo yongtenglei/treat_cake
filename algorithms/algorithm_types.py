@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List
 
-from base_types import FrozenUnassignedSlice, Portion, Slice
+from base_types import AssignedSlice, FrozenUnassignedSlice, Portion, Slice
 
 
 # Enumerating the algorithm names in Python, similar to TypeScript's enum but using class attributes
@@ -25,7 +25,8 @@ class Step:
     # The form of a step is [agent number (0-indexed), action taken]
     actor: int
     action: str
-    pieces: List[Slice]
+    # pieces: List[Slice]
+    pieces: List[AssignedSlice]
     assign: bool
 
 
@@ -38,7 +39,8 @@ class Result:
 def make_step(
     actor: int,
     action: str,
-    pieces: List[FrozenUnassignedSlice] = [],
+    # pieces: List[FrozenUnassignedSlice] = [],
+    pieces: List[AssignedSlice] = [],
     assign: bool = False,
 ) -> Step:
     return Step(actor, action, pieces, assign)

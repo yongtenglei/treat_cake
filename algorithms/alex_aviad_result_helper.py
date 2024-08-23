@@ -1,13 +1,12 @@
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from typing import List
 
-from algorithms.algorithm_types import Result, Step
+from algorithms.algorithm_types import Result
 from base_types import Portion, Preferences
 from type_helper import to_decimal
-from valuation import get_double_prime_for_interval
 from values import get_value_for_interval
 
-from .algorithm_types import make_step
+getcontext().prec = 15
 
 
 def build_solution(

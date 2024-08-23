@@ -1,9 +1,11 @@
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from typing import List, Optional
 
 from base_types import Segment
 from type_helper import to_decimal
+
+getcontext().prec = 15
 
 
 @dataclass

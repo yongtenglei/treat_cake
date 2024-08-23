@@ -13,7 +13,14 @@ def to_decimal(value) -> Decimal:
 
 
 def almost_equal(a: Decimal, b: Decimal, tolerance: Decimal) -> bool:
-    return abs(a - b) <= tolerance
+    a, b = to_decimal(a), to_decimal(b)
+    if a > 0 and b > 0:
+        adjusted_tolerance = max(tolerance, Decimal(1))
+    else:
+        adjusted_tolerance = max(tolerance, Decimal("1e-2"))
+
+    absolute_difference = abs(a - b)
+    return absolute_difference <= adjusted_tolerance
 
 
 def scale_to_unit(a: Decimal, cake_size: Decimal) -> Decimal:

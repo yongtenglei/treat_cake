@@ -1,3 +1,4 @@
+import logging
 import random
 from decimal import Decimal
 from itertools import permutations
@@ -5,11 +6,16 @@ from typing import List
 
 from base_types import AssignedSlice, Preferences, Segment
 from cut import cut_slice
-from type_helper import to_decimal
+from type_helper import de_norm, to_decimal
+from values import get_value_for_interval
 
 halfway_point_of_triangle_area = 70.710678
 
 id_counter = 0
+
+from decimal import getcontext
+
+getcontext().prec = 15
 
 
 def gen_flat_seg(start: Decimal, end: Decimal, value: Decimal) -> Segment:
@@ -106,31 +112,33 @@ def generate_all_possible_allocations(cuts: List[Decimal], num_agents: int):
         yield allocation
 
 
-def check_if_envy_free(num_agents: int, allocation: List[AssignedSlice]) -> bool:
+def check_if_envy_free(
+    num_agents: int,
+    allocation: List[AssignedSlice],
+    epsilon: Decimal,
+    preferences: List[List[Segment]],
+) -> bool:
     """O(m * n): m: number of Assigned Slice, n: number of agents"""
-    fudge_factor = to_decimal("1e-12")
-
+    fudge_factor = to_decimal(epsilon)
+    logging.error(f"{allocation=}")
     for slice in allocation:
         owner_value = slice.values[slice.owner]
+        owner_whole_cake_value = get_value_for_interval(
+            segments=preferences[slice.owner], start=slice.start, end=slice.end
+        )
+        owner_fudge_value = de_norm(
+            v=fudge_factor, whole_cake_value=owner_whole_cake_value
+        )
+        logging.error(
+            f"check_if_envy_free: fudge_factor = {owner_fudge_value}, {epsilon=}"
+        )
 
         # Check if the owner envies any other agent's value of the slice
         for i in range(num_agents):
-            if i != slice.owner and slice.values[i] > owner_value + fudge_factor:
+            if i != slice.owner and slice.values[i] > owner_value + owner_fudge_value:
                 return False
 
     return True
-
-    # total_values = [to_decimal(0)] * num_agents
-    # for slice in allocation:
-    #     for agent_id in range(num_agents):
-    #         total_values[agent_id] += slice.values[agent_id]
-    #
-    # for a in range(num_agents):
-    #     obtained_value = total_values[a]
-    #     for value in total_values:
-    #         if value - fudge_factor > obtained_value:
-    #             return False
-    # return True
 
 
 def find_envy_free_allocation(
@@ -141,7 +149,6 @@ def find_envy_free_allocation(
     epsilon: Decimal,
 ) -> List[AssignedSlice]:
     cake_size = to_decimal(cake_size)
-
     for allocation in generate_all_possible_allocations(cuts, num_agents):
         envy_free_allocation = []
         for agent_id, slices in enumerate(allocation):
@@ -165,6 +172,11 @@ def find_envy_free_allocation(
                     note=None,
                 )
                 envy_free_allocation.append(unassigned_slice.assign(agent_id))
-        if check_if_envy_free(num_agents, envy_free_allocation):
+        if check_if_envy_free(
+            num_agents,
+            envy_free_allocation,
+            epsilon=epsilon,
+            preferences=preferences,
+        ):
             return envy_free_allocation
     return None

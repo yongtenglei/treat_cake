@@ -50,8 +50,8 @@ def handle_alex_aviad():
         preferences and cake_size
     ), "main: should get preferences and cake_size from front end successfully"
 
-    epsilon = to_decimal("1e-15")
-    tolerance = to_decimal("1e-6")
+    epsilon = to_decimal("1e-5")
+    tolerance = to_decimal("1e-5")
 
     result = alex_aviad(
         preferences=preferences,

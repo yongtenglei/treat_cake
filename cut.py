@@ -1,10 +1,12 @@
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from typing import List
 
 from base_types import FrozenUnassignedSlice, Preferences, Slice
 from type_helper import de_norm, to_decimal
 from valuation import get_double_prime_for_interval
 from values import get_value_for_interval
+
+getcontext().prec = 15
 
 
 def cut_slice_origin(

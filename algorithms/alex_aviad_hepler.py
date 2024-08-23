@@ -3,8 +3,9 @@ from decimal import Decimal, getcontext
 from typing import List, Tuple
 
 from base_types import Segment
-from type_helper import to_decimal
+from type_helper import de_norm, to_decimal
 from valuation import get_double_prime_for_interval
+from values import get_value_for_interval
 
 getcontext().prec = 15
 
@@ -19,6 +20,15 @@ def _binary_search_left_to_right(
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
 ) -> Decimal:
+    cake_size = to_decimal(cake_size)
+    epsilon = to_decimal(epsilon)
+    start = to_decimal(start)
+    end = to_decimal(end)
+    target = to_decimal(target)
+    # getcontext().prec = 15
+    tolerance = to_decimal("1e-10") if tolerance < to_decimal("1e-10") else tolerance
+    epsilon = to_decimal("1e-15") if epsilon < to_decimal("1e-15") else epsilon
+
     full_cake = get_double_prime_for_interval(
         segments=preference,
         epsilon=epsilon,
@@ -27,12 +37,10 @@ def _binary_search_left_to_right(
         cake_size=cake_size,
     )
     if full_cake < target:
+        # logging.warning(
+        #     f"binary search left to right: {start=}, {end=}, {target=}, but {cake_size=}, {full_cake=}, returned {end=}"
+        # )
         return end
-
-    # assert full_cake >= target, (
-    #     f"No such a cut point can be found in interval [{start}, {end}] "
-    #     f"with cake size: {cake_size}, target: {target} but with full cake value: {full_cake}"
-    # )
 
     original_start = start
     iteration = 0
@@ -59,6 +67,7 @@ def _binary_search_left_to_right(
             end = mid
 
         iteration = iteration + 1
+
     return to_decimal((start + end) / 2)
 
 
@@ -72,6 +81,15 @@ def _binary_search_right_to_left(
     tolerance: Decimal = to_decimal(1e-10),
     max_iterations: int = 1000,
 ) -> Decimal:
+    cake_size = to_decimal(cake_size)
+    epsilon = to_decimal(epsilon)
+    start = to_decimal(start)
+    end = to_decimal(end)
+    target = to_decimal(target)
+    getcontext().prec = 15
+    # tolerance = to_decimal("1e-10") if tolerance < to_decimal("1e-10") else tolerance
+    epsilon = to_decimal("1e-15")
+
     full_cake = get_double_prime_for_interval(
         segments=preference,
         epsilon=epsilon,
@@ -80,16 +98,17 @@ def _binary_search_right_to_left(
         cake_size=cake_size,
     )
     if full_cake < target:
-        return end
-    # assert full_cake >= target, (
-    #     f"No such a cut point can be found in interval [{start}, {end}] "
-    #     f"with cake size: {cake_size}, target: {target} but with full cake value: {full_cake}"
-    # )
+        # logging.warning(
+        #     f"binary search right to left: {start=}, {end=}, {target=}, but {cake_size=}, {full_cake=}, returned {start=}"
+        # )
+        return start
+
     original_end = end
     iteration = 0
 
     while end - start > tolerance and iteration < max_iterations:
         mid = to_decimal((start + end) / 2)
+
         searched_value = get_double_prime_for_interval(
             segments=preference,
             epsilon=epsilon,
@@ -110,6 +129,7 @@ def _binary_search_right_to_left(
             start = mid
 
         iteration = iteration + 1
+
     return to_decimal((start + end) / 2)
 
 
@@ -121,7 +141,9 @@ def equipartition(
     end: Decimal,
     tolerance: Decimal = to_decimal(1e-10),
 ) -> List[Decimal]:
+    # tolerance = to_decimal("1e-10")
     epsilon = Decimal(epsilon)
+    epsilon = to_decimal("1e-15")
     start = Decimal(start)
     end = Decimal(end)
 
@@ -141,6 +163,7 @@ def equipartition(
         tolerance=tolerance,
     )
     logging.info(f"find l cut: {first_cut}")
+    logging.error(f"find l cut: {first_cut}")
 
     second_cut = _binary_search_left_to_right(
         preference=preference,
@@ -152,6 +175,7 @@ def equipartition(
         tolerance=tolerance,
     )
     logging.info(f"find m cut: {second_cut}")
+    logging.error(f"find m cut: {second_cut}")
 
     third_cut = _binary_search_left_to_right(
         preference=preference,
@@ -163,6 +187,7 @@ def equipartition(
         tolerance=tolerance,
     )
     logging.info(f"find r cut: {third_cut}")
+    logging.error(f"find r cut: {third_cut}")
 
     return [first_cut, second_cut, third_cut]
 
@@ -203,10 +228,18 @@ def _check_if_weakly_prefer_piece_k(
     end: Decimal,
     alpha: Decimal,
 ) -> bool:
-    return alpha <= get_double_prime_for_interval(
-        segments=preference,
-        epsilon=epsilon,
-        start=start,
-        end=end,
-        cake_size=to_decimal(cake_size),
+    whole_cake_value = get_value_for_interval(
+        segments=preference, start=to_decimal(0), end=to_decimal(end)
     )
+    v = de_norm(
+        v=get_double_prime_for_interval(
+            segments=preference,
+            epsilon=epsilon,
+            start=start,
+            end=end,
+            cake_size=to_decimal(cake_size),
+        ),
+        whole_cake_value=whole_cake_value,
+    )
+    logging.error(f"_check_if_weakly_prefer_piece_k: ({start}-{end}), {alpha=}, {v=}")
+    return alpha <= v

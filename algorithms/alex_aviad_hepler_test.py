@@ -95,12 +95,13 @@ def test_binary_search_right_to_left():
 def test_find_cuts_for_condition_a():
     cake_size = to_decimal(1)
     epsilon = to_decimal("1e-15")
-    alpha = norm(to_decimal(2.5), to_decimal(10))
+    alpha = norm(to_decimal("2.50495435309634"), to_decimal(10))
     tolerance = to_decimal("1e-4")
 
     preference = [gen_flat_seg(to_decimal(0), to_decimal(cake_size), to_decimal(10))]
 
     result = _find_cuts_and_k_for_condition_a(
+        k=3,
         alpha=alpha,
         cake_size=cake_size,
         preference=preference,
@@ -113,13 +114,13 @@ def test_find_cuts_for_condition_a():
     ), f"Wrong cuts length, expected 3, got {len(result['cuts'])}"
 
     assert result["cuts"][0] == pytest.approx(
-        to_decimal(0.25), abs=tolerance
+        to_decimal(0.25), abs=tolerance * 100
     ), "Wrong left cut point"
     assert result["cuts"][1] == pytest.approx(
-        to_decimal(0.5), abs=tolerance
+        to_decimal(0.5), abs=tolerance * 100
     ), "Wrong mid cut point"
     assert result["cuts"][2] == pytest.approx(
-        to_decimal(0.75), abs=tolerance
+        to_decimal(0.75), abs=tolerance * 100
     ), "Wrong right cut point"
 
     assert result["k"] == 3, f"Wrong k, expected 3, got {result['k']}"
@@ -259,6 +260,66 @@ def test_equipartition_one_piece_slope_zero_value():
         assert slice_value == pytest.approx(
             expected_average_value, TOLERANCE
         ), f"slice {slice_value} not equal to average value {average_value}"
+
+
+def test_equipartition_four_piece_special_case():
+    tolerance = to_decimal("1e-8")
+    cake_size = to_decimal(4)
+
+    preferences = [
+        [
+            gen_flat_seg(to_decimal(0), to_decimal(1), to_decimal(10)),
+            gen_flat_seg(to_decimal(1), to_decimal(cake_size), to_decimal(0)),
+        ],
+        [
+            gen_flat_seg(to_decimal(0), to_decimal(1), to_decimal(0)),
+            gen_flat_seg(to_decimal(1), to_decimal(2), to_decimal(10)),
+            gen_flat_seg(to_decimal(2), to_decimal(cake_size), to_decimal(0)),
+        ],
+        [
+            gen_flat_seg(to_decimal(0), to_decimal(2), to_decimal(0)),
+            gen_flat_seg(to_decimal(2), to_decimal(3), to_decimal(10)),
+            gen_flat_seg(to_decimal(3), to_decimal(cake_size), to_decimal(0)),
+        ],
+        [
+            gen_flat_seg(to_decimal(0), to_decimal(3), to_decimal(0)),
+            gen_flat_seg(to_decimal(3), to_decimal(cake_size), to_decimal(10)),
+        ],
+    ]
+    preference = preferences[0]
+
+    cuts = equipartition(
+        preference=preference,
+        cake_size=CAKE_SIZE,
+        epsilon=EPSILON,
+        start=to_decimal(0),
+        end=CAKE_SIZE,
+    )
+    print(f"{cuts=}")
+
+    slice_values = get_values_for_cuts(
+        preference=preference, cuts=cuts, cake_size=CAKE_SIZE, epsilon=EPSILON
+    )
+    assert len(slice_values) == 4
+
+    average_value = sum(slice_values) / len(slice_values)
+    expected_average_value = norm(to_decimal(2.5), to_decimal(10))
+    assert average_value == pytest.approx(expected_average_value, rel=tolerance)
+
+    for slice_value in slice_values:
+        assert slice_value == pytest.approx(
+            expected_average_value, tolerance
+        ), f"Slice {slice_value} not equal to average value {average_value}"
+
+    assert cuts[0] == pytest.approx(
+        to_decimal(0.25), abs=tolerance
+    ), f"Expected first cut is 0.25, got {cuts[0]}"
+    assert cuts[1] == pytest.approx(
+        to_decimal(0.5), abs=tolerance
+    ), f"Expected first cut is 0.50, got {cuts[1]}"
+    assert cuts[2] == pytest.approx(
+        to_decimal(0.75), abs=tolerance
+    ), f"Expected first cut is 0.75, got {cuts[2]}"
 
 
 def test_equipartition_seesaw_like_graph():

@@ -16,7 +16,7 @@ from .alex_aviad_condition.condition_b import (
 )
 from .alex_aviad_hepler import equipartition
 from .algorithm_test_utils import find_envy_free_allocation
-from .algorithm_types import Step
+from .algorithm_types import Step, make_step
 
 getcontext().prec = 15
 
@@ -49,6 +49,45 @@ def alex_aviad(
         epsilon=epsilon,
     )
     if solution is not None:
+        steps.append(
+            make_step(
+                0,
+                f"Find equipartition by Agent 1, yieding an ε-envy-free allocation, where ε={epsilon}",
+                pieces=solution,
+            )
+        )
+        steps.append(
+            make_step(
+                0,
+                f"Piece {solution[0].id} was assigned to Agent 1",
+                pieces=[solution[0]],
+                assign=True,
+            )
+        )
+        steps.append(
+            make_step(
+                1,
+                f"Piece {solution[1].id} was assigned to Agent 2",
+                pieces=[solution[1]],
+                assign=True,
+            )
+        )
+        steps.append(
+            make_step(
+                2,
+                f"Piece {solution[2].id} was assigned to Agent 3",
+                pieces=[solution[2]],
+                assign=True,
+            )
+        )
+        steps.append(
+            make_step(
+                3,
+                f"Piece {solution[3].id} was assigned to Agent 4",
+                pieces=[solution[3]],
+                assign=True,
+            )
+        )
         return {"solution": solution, "steps": steps}
 
     alpha_underline = get_double_prime_for_interval(
@@ -75,8 +114,8 @@ def alex_aviad(
     info = []
     alpha = -1
     condition_info = {
-        "A": {"cuts": [], "k": -1},
-        "B": {"cuts": [], "k": -1, "k_prime": -1},
+        "A": {"cuts": [], "k": -1, "alpha_underline": -1},
+        "B": {"cuts": [], "k": -1, "k_prime": -1, "alpha_underline": -1},
     }
     meet_condition = ""
     logging.info(
@@ -85,80 +124,103 @@ def alex_aviad(
     counter = 0
     try:
         while (
-            abs(alpha_overline - alpha_underline) > (epsilon**4 / 12) or counter <= 100
+            abs(alpha_overline - alpha_underline) > (epsilon**4 / 12) and counter <= 12
         ):
             alpha = (alpha_underline + alpha_overline) / 2
-            meet_a, condition_a_info = check_condition_a(
-                alpha=alpha,
-                preferences=preferences,
-                cake_size=to_decimal(cake_size),
-                epsilon=epsilon,
-                tolerance=tolerance,
+            logging.error(
+                f"Iteration {counter}: alpha_overline = {alpha_overline}, alpha_underline = {alpha_underline}, {epsilon**4 / 12}, {alpha=}"
             )
-            if meet_a:
-                # assert "OHHHHH" == "", "GOODDDDD, meet conditon A"
-                meet_condition = "A"
-                alpha_underline = alpha
-                condition_info["A"] = condition_a_info
-                info.append(
-                    f"meet A, alpha_underline:{alpha_underline} = {alpha}\n\t{condition_info=}"
-                )
-                continue
 
-            meet_b, condition_b_info = check_condition_b(
-                alpha=alpha,
-                preferences=preferences,
-                cake_size=to_decimal(cake_size),
-                epsilon=epsilon,
-                tolerance=tolerance,
-            )
-            if meet_b:
-                # assert "OHHHHH" == "", "GOODDDDD, meet conditon B"
-                meet_condition = "B"
-                alpha_underline = alpha
-                condition_info["B"] = condition_b_info
-                info.append(
-                    f"meet B, alpha_underline:{alpha_underline} = {alpha}\n\t{condition_info=}"
+            logging.warning(f"alpha = {alpha}, {alpha_overline=}, {alpha_underline=}")
+            if to_decimal(0.25) <= alpha < Decimal("1") / Decimal("3"):
+                logging.warning(
+                    "**********************************************************"
                 )
-                continue
+                logging.warning("Check Condition A")
+                logging.warning(
+                    "**********************************************************"
+                )
+                meet_a, condition_a_info = check_condition_a(
+                    alpha=alpha,
+                    preferences=preferences,
+                    cake_size=to_decimal(cake_size),
+                    epsilon=epsilon,
+                    tolerance=tolerance,
+                )
+                if meet_a:
+                    # assert "OHHHHH" == "", "GOODDDDD, meet conditon A"
+                    meet_condition = "A"
+                    condition_info["A"] = condition_a_info
+                    condition_info["A"]["alpha_underline"] = alpha_underline
+                    alpha_underline = alpha
+                    info.append(
+                        f"meet A, alpha_underline:{alpha_underline} = {alpha}\n\t{condition_info=}"
+                    )
+                    counter += 1
+                    logging.warning("Meet Condition A")
+                    continue
+
+            if to_decimal(0.25) <= alpha < to_decimal(0.5):
+                meet_b, condition_b_info = check_condition_b(
+                    alpha=alpha,
+                    preferences=preferences,
+                    cake_size=to_decimal(cake_size),
+                    epsilon=epsilon,
+                    tolerance=tolerance,
+                )
+                if meet_b:
+                    # assert "OHHHHH" == "", "GOODDDDD, meet conditon B"
+                    meet_condition = "B"
+                    condition_info["B"] = condition_b_info
+                    condition_info["B"]["alpha_underline"] = alpha_underline
+                    alpha_underline = alpha
+                    info.append(
+                        f"meet B, alpha_underline:{alpha_underline} = {alpha}\n\t{condition_info=}"
+                    )
+                    logging.warning("Meet Condition B")
+                    counter += 1
+                    continue
 
             alpha_overline = alpha
             info.append(
                 f"Missed conditions, alpha_overline:{alpha_overline} = {alpha}\n\t{condition_info=}"
             )
             counter += 1
+            logging.warning(f"Counter: {counter}")
 
+        logging.warning("exit the main loop")
         allocation = None
         assert (
-            meet_condition != ""
+            len(meet_condition) != 0
         ), "At least one condition should be met when exit the loop"
+        logging.warning(f"Finding Allocation on Condition {meet_condition}")
         if meet_condition == "A":
             assert (
                 condition_info["A"]["cuts"] and condition_info["A"]["k"]
             ), "Should have necessary information of condition A to yied a final allocation"
             allocation = find_allocation_on_condition_a(
                 preferences=preferences,
+                alpha=condition_info["A"]["alpha_underline"],
                 cake_size=to_decimal(cake_size),
-                cuts=condition_info["A"]["cuts"],
-                episilon=epsilon,
-                k=condition_info["A"]["k"],
+                epsilon=epsilon,
+                tolerance=tolerance,
             )
         elif meet_condition == "B":
             assert (
                 condition_info["B"]["cuts"]
                 and condition_info["B"]["k"]
                 and condition_info["B"]["k_prime"]
-            ), "Should have necessary information of condition A to yied a final allocation"
+            ), "Should have necessary information of condition B to yied a final allocation"
             allocation = find_allocation_on_condition_b(
-                cuts=condition_info["B"]["cuts"],
+                alpha=condition_info["B"]["alpha_underline"],
                 cake_size=to_decimal(cake_size),
-                episilon=epsilon,
-                k=condition_info["B"]["k"],
-                k_prime=condition_info["B"]["k_prime"],
+                epsilon=epsilon,
                 preferences=preferences,
+                tolerance=tolerance,
             )
         for i in info:
-            logging.info(f"info: {i}")
+            logging.error(f"info: {i}")
         return {"solution": allocation, "steps": steps}
     except Exception as e:
-        logging.info(e)
+        logging.error(f"error from algorithm: {e}")
+        logging.error("exit")
